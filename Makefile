@@ -11,14 +11,14 @@ KERNEL_BIN := $(BIN_DIR)/keios.bin
 ISO_IMAGE  := keios.iso
 
 ASFLAGS := -f elf32
-CFLAGS  := -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions
+CFLAGS  := -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23
 LDFLAGS := -m elf_i386 -static -T $(LDSCRIPT)
 
 KERNEL_SRCS := $(wildcard $(SRC_DIR)/kernel/*.c)
 KERNEL_OBJS := $(patsubst $(SRC_DIR)/kernel/%.c, $(BIN_DIR)/kernel/%.o, $(KERNEL_SRCS))
 
-BOOT_SRC := $(SRC_DIR)/bootloader/boot.asm
-BOOT_OBJ := $(BIN_DIR)/bootloader/boot.o
+BOOT_SRC := $(SRC_DIR)/boot/boot.asm
+BOOT_OBJ := $(BIN_DIR)/boot/boot.o
 
 OBJS := $(BOOT_OBJ) $(KERNEL_OBJS)
 
@@ -42,7 +42,7 @@ $(BIN_DIR)/kernel/%.o: $(SRC_DIR)/kernel/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BIN_DIR)/bootloader/%.o: $(SRC_DIR)/bootloader/%.asm
+$(BIN_DIR)/boot/%.o: $(SRC_DIR)/boot/%.asm
 	@echo ">>> Assembling: $<"
 	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) $< -o $@
