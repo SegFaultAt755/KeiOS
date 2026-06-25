@@ -1,14 +1,52 @@
-build:
-	mkdir -p bin
-	mkdir -p bin/bootloader
-	mkdir -p bin/kernel
-	nasm -f elf32 ./src/bootloader/boot.asm -o ./bin/bootloader/boot.o
-	gcc -c ./src/kernel/kernel.c -o ./bin/kernel/kernel.o -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -m32 -march=i686
-	gcc -c ./src/kernel/terminal.c -o ./bin/kernel/terminal.o -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -m32 -march=i686
-	ld -m elf_i386 -static -T ./src/linker.ld -o bin/keios.bin ./bin/bootloader/boot.o ./bin/kernel/kernel.o ./bin/kernel/terminal.o
-	mkdir -p isodir
-	mkdir -p isodir/boot
-	mkdir -p isodir/boot/grub
-	cp grub.cfg isodir/boot/grub
-	cp bin/keios.bin isodir/boot
-	grub-mkrescue -o keios.iso isodir
+AS := nasm
+CC := gcc
+LD := ld
+
+SRC_DIR := src
+BIN_DIR := bin
+ISO_DIR := isodir
+
+LDSCRIPT   := $(SRC_DIR)/linker.ld
+KERNEL_BIN := $(BIN_DIR)/keios.bin
+ISO_IMAGE  := keios.iso
+
+ASFLAGS := -f elf32
+CFLAGS  := -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions
+LDFLAGS := -m elf_i386 -static -T $(LDSCRIPT)
+
+KERNEL_SRCS := $(wildcard $(SRC_DIR)/kernel/*.c)
+KERNEL_OBJS := $(patsubst $(SRC_DIR)/kernel/%.c, $(BIN_DIR)/kernel/%.o, $(KERNEL_SRCS))
+
+BOOT_SRC := $(SRC_DIR)/bootloader/boot.asm
+BOOT_OBJ := $(BIN_DIR)/bootloader/boot.o
+
+OBJS := $(BOOT_OBJ) $(KERNEL_OBJS)
+
+.PHONY: all clean
+all: $(ISO_IMAGE)
+
+$(ISO_IMAGE): $(KERNEL_BIN) grub.cfg
+	@echo ">>> Building ISO: $@"
+	@mkdir -p $(ISO_DIR)/boot/grub
+	@cp grub.cfg $(ISO_DIR)/boot/grub/
+	@cp $(KERNEL_BIN) $(ISO_DIR)/boot/
+	@grub-mkrescue -o $@ $(ISO_DIR) 2>/dev/null
+
+$(KERNEL_BIN): $(OBJS) $(LDSCRIPT)
+	@echo ">>> Linking kernel: $@"
+	@mkdir -p $(dir $@)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+
+$(BIN_DIR)/kernel/%.o: $(SRC_DIR)/kernel/%.c
+	@echo ">>> Compiling: $<"
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BIN_DIR)/bootloader/%.o: $(SRC_DIR)/bootloader/%.asm
+	@echo ">>> Assembling: $<"
+	@mkdir -p $(dir $@)
+	$(AS) $(ASFLAGS) $< -o $@
+
+clean:
+	@echo ">>> Cleaning up build files"
+	rm -rf $(BIN_DIR) $(ISO_DIR) $(ISO_IMAGE)
