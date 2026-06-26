@@ -1,4 +1,10 @@
+# Binaries
 /bin
-/isodir
+/keios
 /keios.iso
 /**/*.o
+
+# Documents
+/.obsidian
+/TODO.md
+/FIXME.md

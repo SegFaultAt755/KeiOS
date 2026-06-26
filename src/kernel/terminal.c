@@ -1,4 +1,4 @@
-#include "terminal.h"
+#include "kernel/terminal.h"
 
 uint16_t terminal_row;
 uint16_t terminal_column;
@@ -28,6 +28,12 @@ void terminal_put_entry(char c, uint8_t color, uint16_t x, uint16_t y) {
 }
 
 void terminal_put_char(char c) {
+    if (c == '\n') {
+        terminal_column = 0;
+        terminal_row++;
+        return;
+    }
+
     terminal_put_entry(c, terminal_color, terminal_column, terminal_row);
 
     if (++terminal_column >= VGA_WIDTH) {

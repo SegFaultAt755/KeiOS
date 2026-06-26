@@ -1,8 +1,8 @@
 #ifndef __TERMINAL_H__
 #define __TERMINAL_H__
 
-#include "stdint.h"
-#include "vga.h"
+#include "libc/stdint.h"
+#include "drivers/vga.h"
 
 void terminal_initialize(void);
 void terminal_set_color(uint8_t color);
