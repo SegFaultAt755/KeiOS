@@ -1,5 +1,5 @@
 @echo off
-mkdir bin\boot bin\cpu bin\kernel bin\libkern
+if not exist .\bin (mkdir bin\boot bin\cpu bin\kernel bin\libkern)
 i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\kernel\kernel.c -o bin\kernel\kernel.o
 i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\kernel\terminal.c -o bin\kernel\terminal.o
 i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\kernel\panic.c -o bin\kernel\panic.o
