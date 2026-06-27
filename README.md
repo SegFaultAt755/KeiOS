@@ -69,40 +69,45 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso
 5. **Crucial:** Make sure to check the box to **Add QEMU to your system's environment variables (PATH)** during the installation wizard.
 
 #### Option 3: Manual Addition - Final Resort
-Only use this option if yoou can't get any of the above running.
 
-1. download the following and Extract/Install : 
+> Only use this option if yoou can't get any of the above running.
+1. Download packages from the following and after extract and install: 
 - https://www.nasm.us/pub/nasm/releasebuilds/
 - https://github.com/lordmilko/i686-elf-tools
-- *currently not working : https://ftp.gnu.org/gnu/grub/
-- for QEMU : https://qemu.weilnetz.de/w64/
-2. Add them to you PATH
-3. That's it.
+- *currently not working: https://ftp.gnu.org/gnu/grub/
+- https://qemu.weilnetz.de/w64/
+2. Add them to you PATH (global variable)
+3. That's it
 
 ---
 
 ## 🏃 Build and Run
 
 ### 1. Compile the OS
-
 Build the kernel and generate the bootable `.iso` image using the provided Makefile
+
 On **Linux** / **WSL**:
+
 ```bash
 make
 ```
+
 On **Native Windows** (**MSYS2 MINGW32**):
+
 ```bash
 mingw32-make
 ```
-For **Manual Addition(Windows)** You need to run these in steps : 
+
+For **Manual Addition(Windows)** You need to run these in steps:
+
 ```bash
-1. mkdo.bat //making the bin folder
-2. muke.bat //compiling and run automatically
+mkdo.bat # Making the bin folder
+muke.bat # Compiling and run automatically
 ```
+
 ### 2. Launch in Emulator
 You can boot KeiOS using one of two methods depending on your setup:
 #### Method A: Direct Kernel Boot (No GRUB / No ISO Required) — ⚡ Fastest for Windows/MSYS2
-
 If you want to skip building an ISO entirely (or if you are on native Windows where `grub-mkrescue` isn't available), you can instruct QEMU to act as a Multiboot bootloader and load your kernel binary directly:
 
 ```bash
