@@ -35,10 +35,10 @@ void kprint_int(int val) {
 
 void kprintf(LogLevel level, const char *fmt, ...) {
     switch (level) {
-        case LOG_INFO:  terminal_writestring("[INFO]  "); break;
-        case LOG_WARN:  terminal_writestring("[WARN]  "); break;
-        case LOG_ERR:   terminal_writestring("[ERROR] "); break;
-        case LOG_DEBUG: terminal_writestring("[DEBUG] "); break;
+        case LOG_INFO:  terminal_writestring("[INFO]: "); break;
+        case LOG_WARN:  terminal_writestring("[WARN]: "); break;
+        case LOG_ERR:   terminal_writestring("[ERROR]: "); break;
+        case LOG_DEBUG: terminal_writestring("[DEBUG]: "); break;
         default: break;
     }
 
