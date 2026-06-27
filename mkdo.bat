@@ -1,1 +1,0 @@
-mkdir bin\boot bin\cpu bin\kernel bin\libkern
