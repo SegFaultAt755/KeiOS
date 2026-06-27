@@ -94,7 +94,7 @@ On **Native Windows** (**MSYS2 MINGW32**):
 ```bash
 mingw32-make
 ```
-For **Manual Addition** You need to run these in steps : 
+For **Manual Addition(Windows)** You need to run these in steps : 
 ```bash
 1. mkdo.bat //making the bin folder
 2. muke.bat //compiling and run automatically
