@@ -98,12 +98,7 @@ On **Native Windows** (**MSYS2 MINGW32**):
 mingw32-make
 ```
 
-For **Manual Addition(Windows)** You need to run these in steps:
-
-```bash
-mkdo.bat # Making the bin folder
-muke.bat # Compiling and run automatically
-```
+For **Manual Addition(Windows)** You just need to run **muke.bat**
 
 ### 2. Launch in Emulator
 You can boot KeiOS using one of two methods depending on your setup:
