@@ -1,3 +1,4 @@
+#include "libkern/stdio.h"
 #include "kernel/terminal.h"
 
 void kernel_entry(void) {
@@ -5,13 +6,15 @@ void kernel_entry(void) {
     terminal_initialize();
 
     /* Show welcome message */
-    terminal_write("Welcome to KeiOS.\n", 18);
+    kprintf(LOG_EMPTY, "Welcome to KeiOS <3\n");
 
     /* Initialize GDT */
-    terminal_write("Initializing GDT...\n", 20);
-    /* gdt_initialize(); */
+    /*
+    terminal_writestring("Initializing GDT...\n");
+    gdt_initialize();
+    */
 
-    /* infinite loop to prevent CPU fault */
+    /* Infinite loop to prevent CPU fault */
     for (;;) {
 
     }

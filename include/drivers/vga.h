@@ -1,7 +1,7 @@
 #ifndef __VGA_H__
 #define __VGA_H__
 
-#include "libc/stdint.h"
+#include <stdint.h>
 
 #define VGA_WIDTH  80
 #define VGA_HEIGHT 25

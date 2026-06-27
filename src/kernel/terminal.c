@@ -1,4 +1,5 @@
 #include "kernel/terminal.h"
+#include "libkern/string.h"
 
 uint16_t terminal_row;
 uint16_t terminal_column;
@@ -8,7 +9,7 @@ uint16_t* terminal_buffer = (uint16_t*) VGA_MEMORY;
 void terminal_initialize(void) {
     terminal_row = 0;
     terminal_column = 0;
-    terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+    terminal_color = vga_entry_color(TERMINAL_DEFAULT_FOREGROUND_COLOR, TERMINAL_DEFAULT_BACKGROUND_COLOR);
 
     for (uint16_t y = 0; y < VGA_HEIGHT; y++) {
         for (uint16_t x = 0; x < VGA_WIDTH; x++) {
@@ -29,8 +30,7 @@ void terminal_put_entry(char c, uint8_t color, uint16_t x, uint16_t y) {
 
 void terminal_put_char(char c) {
     if (c == '\n') {
-        terminal_column = 0;
-        terminal_row++;
+        terminal_blankline();
         return;
     }
 
@@ -43,7 +43,27 @@ void terminal_put_char(char c) {
     }
 }
 
-void terminal_write(const char *str, uint16_t size) {
-    for (uint16_t i = 0; i < size; i++)
+void terminal_write(const char *str, size_t size) {
+    for (size_t i = 0; i < size; i++)
         terminal_put_char(str[i]);
+}
+
+void terminal_writestring(const char *str) {
+    for (size_t i = 0; str[i] != '\0'; i++)
+        terminal_put_char(str[i]);
+}
+
+void terminal_blankline() {
+    terminal_column = 0;
+    terminal_row++;
+    if (terminal_row >= VGA_HEIGHT)
+        terminal_scroll();
+}
+
+void terminal_scroll() {
+    for(uint16_t i = 0; i < VGA_HEIGHT; i++){
+        for (uint16_t m = 0; m < VGA_WIDTH; m++){
+            terminal_buffer[i * VGA_WIDTH + m] = terminal_buffer[(i + 1) * VGA_WIDTH + m];
+        }
+    }
 }
