@@ -38,7 +38,7 @@ Install the required development tools, ISO utilities, and the emulator via your
 
 ```bash
 sudo apt update
-sudo apt install build-essential nasm xorriso mtools qemu-system-x86
+sudo apt install build-essential nasm xorriso mtools qemu-system-x86 grub-common
 ```
 
 *(Note: `mtools` and `xorriso` are heavily used by dependency tools like `grub-mkrescue` and `grub-common` to build actual ISO files).*
@@ -68,6 +68,17 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso
 4. Download and install [QEMU for Windows](https://www.google.com/search?q=https://www.qemu.org/download/%23windows&authuser=1).
 5. **Crucial:** Make sure to check the box to **Add QEMU to your system's environment variables (PATH)** during the installation wizard.
 
+#### Option 3: Manual Addition - Final Resort
+Only use this option if yoou can't get any of the above running.
+
+1. download the following and Extract/Install : 
+- https://www.nasm.us/pub/nasm/releasebuilds/
+- https://github.com/lordmilko/i686-elf-tools
+- *currently not working : https://ftp.gnu.org/gnu/grub/
+- for QEMU : https://qemu.weilnetz.de/w64/
+2. Add them to you PATH
+3. That's it.
+
 ---
 
 ## 🏃 Build and Run
@@ -82,6 +93,11 @@ make
 On **Native Windows** (**MSYS2 MINGW32**):
 ```bash
 mingw32-make
+```
+For **Manual Addition(Windows)** You need to run these in steps : 
+```bash
+1. mkdo.bat //making the bin folder
+2. muke.bat //compiling and run automatically
 ```
 ### 2. Launch in Emulator
 You can boot KeiOS using one of two methods depending on your setup:
