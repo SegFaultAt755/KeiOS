@@ -2,7 +2,7 @@
 
 > A 32-bit (`i386`) lab operating system built to experiment with cross-platform executable support via dual syscall tables.
 
-*⚠️ Note: KeiOS is currently in active development. (Current focus: Implementing the Global Descriptor Table / GDT).*
+*⚠️ Note: KeiOS is currently in active development. (Current focus: Implement IRQ).*
 
 ---
 
