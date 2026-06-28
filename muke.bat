@@ -1,18 +1,24 @@
 @echo off
-if not exist .\bin (mkdir bin\boot bin\cpu bin\kernel bin\libkern)
-
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\kernel\kernel.c -o bin\kernel\kernel.o
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\kernel\terminal.c -o bin\kernel\terminal.o
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\kernel\panic.c -o bin\kernel\panic.o
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\cpu\gdt.c -o bin\cpu\gdt.o
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\libkern\memory.c -o bin\libkern\memory.o
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\libkern\stdio.c -o bin\libkern\stdio.o
-i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c src\libkern\string.c -o bin\libkern\string.o
-
-nasm -f elf32 src\boot\boot.asm -o bin\boot\boot.o
-nasm -f elf32 src\cpu\gdt_flush.asm -o bin\cpu\gdt_flush.o
-
-i686-elf-ld -m elf_i386 -static -T src\linker.ld -o bin\keios.bin bin\boot\boot.o bin\kernel\kernel.o bin\kernel\terminal.o bin\kernel\panic.o bin\cpu\gdt.o bin\libkern\memory.o bin\libkern\stdio.o bin\libkern\string.o bin\cpu\gdt_flush.o
-
+setlocal enabledelayedexpansion
+set "namu="
+for /F "usebackq delims=" %%A in (`DIR /B /A:d ".\src"`) do (
+	if not exist .\bin\%%A (mkdir bin\%%A)
+	echo(
+    echo Folder : %%A
+	for %%o in (.\src\%%A\*) do (
+		if not "%%~no" == "organize" (
+			if "%%~xo" == ".c" (
+				i686-elf-gcc -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra -fno-exceptions -std=c23 -I include -MMD -MP -c "src\%%A\%%~nxo" -o "bin\%%A\%%~no.o" 
+				echo %%~nxo
+			)
+			if "%%~xo" == ".asm" (
+				nasm -f elf32 src\%%A\%%~nxo -o bin\%%A\%%~no.o 
+				echo %%~nxo
+			)
+			set "namu=!namu! bin\%%A\%%~no.o "
+		)
+	)
+)
+i686-elf-ld -m elf_i386 -static -T src\linker.ld -o bin\keios.bin %namu%
 qemu-system-i386 -kernel bin\keios.bin
 pause
