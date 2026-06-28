@@ -65,12 +65,13 @@ If you choose to compile individual binaries natively:
 ```bash
 pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso
 ```
+
 4. Download and install [QEMU for Windows](https://www.google.com/search?q=https://www.qemu.org/download/%23windows&authuser=1).
 5. **Crucial:** Make sure to check the box to **Add QEMU to your system's environment variables (PATH)** during the installation wizard.
 
 #### Option 3: Manual Addition - Final Resort
 
-> Only use this option if yoou can't get any of the above running.
+> Only use this option if you can't get any of the above running.
 1. Download packages from the following and after extract and install: 
 - https://www.nasm.us/pub/nasm/releasebuilds/
 - https://github.com/lordmilko/i686-elf-tools
@@ -98,16 +99,13 @@ On **Native Windows** (**MSYS2 MINGW32**):
 mingw32-make
 ```
 
-For **Manual Addition(Windows)** You need to run these in steps:
-
-```bash
-mkdo.bat # Making the bin folder
-muke.bat # Compiling and run automatically
-```
+For **Manual Addition(Windows)** You just need to run **muke.bat**
 
 ### 2. Launch in Emulator
 You can boot KeiOS using one of two methods depending on your setup:
+
 #### Method A: Direct Kernel Boot (No GRUB / No ISO Required) — ⚡ Fastest for Windows/MSYS2
+
 If you want to skip building an ISO entirely (or if you are on native Windows where `grub-mkrescue` isn't available), you can instruct QEMU to act as a Multiboot bootloader and load your kernel binary directly:
 
 ```bash
@@ -130,8 +128,8 @@ qemu-system-i386 keios.iso
 
 * [x] Initial project scaffolding and minimal build system
 * [x] Basic bootloader configuration
-* [ ] **In Progress:** Implementing the Global Descriptor Table (GDT)
-* [ ] Interrupt Descriptor Table (IDT) and ISRs
+* [x] Implementing the Global Descriptor Table (GDT)
+* [ ] **In Progress:** Interrupt Descriptor Table (IDT) and ISRs
 * [ ] Memory Management (Paging)
 * [ ] Linux Syscall Table implementation
 * [ ] Windows Syscall Table implementation
