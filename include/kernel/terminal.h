@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include "drivers/vga.h"
 
-#define TERMINAL_DEFAULT_FOREGROUND_COLOR VGA_COLOR_LIGHT_GREY
+#define TERMINAL_DEFAULT_FOREGROUND_COLOR VGA_COLOR_WHITE
 #define TERMINAL_DEFAULT_BACKGROUND_COLOR VGA_COLOR_BLACK
 
 void terminal_initialize(void);
