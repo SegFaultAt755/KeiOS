@@ -4,6 +4,7 @@
 
 void show_banner(void);
 
+[[noreturn]]
 void kernel_entry(void) {
     /* Initialize terminal */
     terminal_initialize();
@@ -20,13 +21,6 @@ void kernel_entry(void) {
     /* ================================= */
     kprintf(LOG_EMPTY, "Initializing Kernel...\n");
     gdt_initialize();
-    /* irq_initialze(); */
-    /* pmm_initialize(); */
-    /* vmm_initialize(); */
-    /* pit_initialize(); */
-    /* pcb_initialize(); */
-    /* scheduler_initialize(); */
-    /* ipc_initialize(); */
 
     /* Infinite loop to prevent CPU fault */
     for (;;) {
