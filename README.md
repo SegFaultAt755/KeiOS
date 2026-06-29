@@ -2,7 +2,7 @@
 
 > A 32-bit (`i386`) lab operating system built to experiment with cross-platform executable support via dual syscall tables.
 
-*⚠️ Note: KeiOS is currently in active development. (Current focus: Implement IDT & ISR).*
+*⚠️ Note: KeiOS is currently in active development. (Current focus: Implement user input).*
 
 ---
 
@@ -121,19 +121,6 @@ If you have successfully generated a full bootable CD image and want to test the
 ```bash
 qemu-system-i386 keios.iso
 ```
-
----
-
-## 🗺️ Roadmap
-
-* [x] Initial project scaffolding and minimal build system
-* [x] Basic bootloader configuration
-* [x] Implementing the Global Descriptor Table (GDT)
-* [ ] **In Progress:** Interrupt Descriptor Table (IDT) and ISRs
-* [ ] Memory Management (Paging)
-* [ ] Linux Syscall Table implementation
-* [ ] Windows Syscall Table implementation
-* [ ] Basic User Space Shell
 
 ---
 
