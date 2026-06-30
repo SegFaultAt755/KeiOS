@@ -2,10 +2,11 @@
 #define __STDIO_H__
 
 /*
-Note: Initialize terminal first to show clear output with kprintf
+    Note: Initialize terminal first to show clear output with kprintf
 */
 
 #include <stdarg.h>
+#include <stdint.h>
 
 typedef enum LogLevel {
     LOG_EMPTY,

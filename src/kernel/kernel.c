@@ -2,6 +2,7 @@
 #include "kernel/terminal.h"
 #include "cpu/idt.h"
 #include "cpu/gdt.h"
+#include "config.h"
 
 void show_banner(void);
 
@@ -11,7 +12,7 @@ void kernel_entry(void) {
     terminal_initialize();
 
     /* Show welcome message */
-    kprintf(LOG_EMPTY, "Welcome to KeiOS! ");
+    kprintf(LOG_EMPTY, "Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
         terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_RED, TERMINAL_DEFAULT_BACKGROUND_COLOR));
         kprintf(LOG_EMPTY, "<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FOREGROUND_COLOR, TERMINAL_DEFAULT_BACKGROUND_COLOR));
