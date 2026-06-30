@@ -1,12 +1,4 @@
-# default to booting the first entry
-default 0
-
-# boot immediately (present no UI)
-timeout 5
-
-# an OS entry
-title Keios
-  kernel /boot/keios.bin @echo off
+@echo off
 cd src
 set "StartPath=%cd%"
 cd ..
@@ -43,7 +35,6 @@ mkdir isomer isomer\boot isomer\boot\grub
 copy menu.lst isomer\boot\grub
 copy stage1 isomer\boot\grub
 copy stage2 isomer\boot\grub
-copy data_file isomer\boot
 i686-elf-ld -m elf_i386 -static -T src\linker.ld -o isomer/boot/keios.bin %namu% 
 
 REM making the iso
