@@ -9,7 +9,7 @@ REM searching for folders
 for /f "tokens=*" %%f in ('dir /b /ad /s "%StartPath%"') do ( 
     set "FullPath=%%f"
     set "RelativePath=!FullPath:%StartPath%\=!"
-	mkdir bin\!RelativePath!
+	if not exist .\bin\!RelativePath! (mkdir bin\!RelativePath!)
 	echo(
     echo !RelativePath!
 	for %%o in (.\src\!RelativePath!\*) do ( 
