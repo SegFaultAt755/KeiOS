@@ -130,6 +130,11 @@ If you have successfully generated a full bootable CD image and want to test the
 qemu-system-i386 keios.iso
 ```
 
+## Final words
+From SegFaultAt755:
+  If fighting is sure to result in victory, then you must fight!
+  Sun Tzu said that, and I'd say he knows a little more about fighting than you do, pal, because he invented it, and then he perfected it so that no living man could best him in the ring of honor!
+
 ---
 
 ## 📄 License
