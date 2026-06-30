@@ -130,6 +130,8 @@ If you have successfully generated a full bootable CD image and want to test the
 qemu-system-i386 keios.iso
 ```
 
+---
+
 ## Final words
 
 ### SegFaultAt755
