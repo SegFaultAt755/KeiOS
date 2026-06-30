@@ -38,10 +38,11 @@ Install the required development tools, ISO utilities, and the emulator via your
 
 ```bash
 sudo apt update
-sudo apt install build-essential nasm xorriso mtools qemu-system-x86 grub-common
+sudo apt install build-essential nasm xorriso mtools qemu-system-x86 grub-common grub2-common grub-pc-bin grub-efi-amd64-bin
 ```
 
 *(Note: `mtools` and `xorriso` are heavily used by dependency tools like `grub-mkrescue` and `grub-common` to build actual ISO files).*
+*(2nd Note: `grub2-common` is used if you can get newer grub installed, else use `grub-common`).*
 
 ### 🪟 Windows
 
