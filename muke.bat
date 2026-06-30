@@ -1,4 +1,12 @@
-@echo off
+# default to booting the first entry
+default 0
+
+# boot immediately (present no UI)
+timeout 5
+
+# an OS entry
+title Keios
+  kernel /boot/keios.bin @echo off
 cd src
 set "StartPath=%cd%"
 cd ..
