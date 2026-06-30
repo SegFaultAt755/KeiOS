@@ -77,6 +77,7 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso
 1. Download packages from the following and after extract and install: 
 - https://www.nasm.us/pub/nasm/releasebuilds/
 - https://github.com/lordmilko/i686-elf-tools
+- https://github.com/PeyTy/xorriso-exe-for-windows
 - https://qemu.weilnetz.de/w64/
 - https://alpha.gnu.org/gnu/grub/grub-0.97-i386-pc.tar.gz
 
