@@ -42,6 +42,7 @@ sudo apt install build-essential nasm xorriso mtools qemu-system-x86 grub-common
 ```
 
 *(Note: `mtools` and `xorriso` are heavily used by dependency tools like `grub-mkrescue` and `grub-common` to build actual ISO files).*
+
 *(2nd Note: `grub2-common` is used if you can get newer grub installed, else use `grub-common`).*
 
 ### 🪟 Windows
@@ -76,10 +77,15 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso
 1. Download packages from the following and after extract and install: 
 - https://www.nasm.us/pub/nasm/releasebuilds/
 - https://github.com/lordmilko/i686-elf-tools
-- *currently not working: https://ftp.gnu.org/gnu/grub/
 - https://qemu.weilnetz.de/w64/
+- https://alpha.gnu.org/gnu/grub/grub-0.97-i386-pc.tar.gz
+
+*(Note: use this version specifically.)*
+
 2. Add them to you PATH (global variable)
-3. That's it
+3. And for the GRUB, You need to copy **iso9660_stage1_5** and **stage2** to the root directory.
+4. Rename **iso9660_stage1_5** into **stage1**
+5. That's it.
 
 ---
 
