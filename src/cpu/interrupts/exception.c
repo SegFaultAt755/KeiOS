@@ -9,8 +9,4 @@ typedef struct Registers {
 
 void exception_handler(Registers *regs) {
     kprintf(LOG_INFO, "Received exception: %d\n", regs -> interrupt_number);
-    
-    while(true) {
-        __asm__ volatile("cli; hlt");
-    }
 }
