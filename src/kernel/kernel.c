@@ -26,7 +26,6 @@ void kernel_entry(void) {
     idt_initialize();
 
     __asm__ volatile ("int $0x3");
-    __asm__ volatile ("int $0x5");
 
     /* Infinite loop to prevent CPU fault */
     for (;;) {
