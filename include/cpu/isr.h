@@ -27,8 +27,9 @@ typedef struct Registers {
     uint32_t eip, cs, eflags, useresp, ss; /* Pushed by CPU */
 } Registers;
 
-
 typedef void (*Isr)(Registers);
+extern Isr interrupt_handlers[256];
+
 void register_interrupt_handler(uint8_t number, Isr handler); 
 void isr_handler(Registers regs);
 

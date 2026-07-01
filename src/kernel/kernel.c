@@ -1,7 +1,7 @@
 #include "libkern/stdio.h"
 #include "kernel/terminal.h"
-#include "cpu/idt.h"
 #include "cpu/gdt.h"
+#include "cpu/idt.h"
 #include "config.h"
 
 void show_banner(void);
@@ -20,12 +20,8 @@ void kernel_entry(void) {
     show_banner();
 
     /* Initialization */
-    /* ================================= */
-    kprintf(LOG_EMPTY, "Initializing Kernel...\n");
     gdt_initialize();
     idt_initialize();
-
-    __asm__ volatile ("int $0x3");
 
     /* Infinite loop to prevent CPU fault */
     for (;;) {
