@@ -7,5 +7,5 @@ void register_interrupt_handler(uint8_t number, Isr handler) {
 }
 
 void isr_handler(Registers regs) {
-    
+    /* Do nothing */
 }

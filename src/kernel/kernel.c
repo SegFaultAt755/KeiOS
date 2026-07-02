@@ -9,6 +9,7 @@
 
 volatile uint64_t tick = 0;
 void timer_callback(Registers *regs) {
+    /* Note: Don't try to output any messages from here, because the output will be messy */
     tick += 1;
 }
 
@@ -30,7 +31,7 @@ void kernel_entry(void) {
     /* Initialization */
     gdt_initialize();
     idt_initialize();
-    timer_initialize(100, timer_callback); /* Every 65,535 Hz passed - calling callback */
+    timer_initialize(100, timer_callback); /* Every 100 Hz passed - calling callback */
     enable_interrupts();
 
     /* Infinite loop to prevent CPU fault */

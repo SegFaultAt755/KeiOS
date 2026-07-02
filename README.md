@@ -2,8 +2,7 @@
 
 > A 32-bit (`i386`) lab operating system built to experiment with cross-platform executable support via dual syscall tables.
 
-*⚠️ Note: KeiOS is currently in active development. (Current focus: Implement user input).*
-*THE KERNEL IS CURRENTLY CORRUPTED*
+*⚠️ Note: KeiOS is currently in active development. (Current focus: Implement user input via polling and interrupts).*
 
 ---
 
@@ -138,8 +137,6 @@ qemu-system-i386 keios.iso
 ### SegFaultAt755
 **If fighting is sure to result in victory, then you must fight!**
 *Sun Tzu said that, and I'd say he knows a little more about fighting than you do, pal, because he invented it, and then he perfected it so that no living man could best him in the ring of honor!*
-
----
 
 ### Siterfis
 **With enough Desire, You can do Anything,**
