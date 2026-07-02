@@ -1,8 +1,16 @@
+#include "kernel/interrupt.h"
 #include "libkern/stdio.h"
-#include "kernel/terminal.h"
+#include "drivers/terminal.h"
+#include "drivers/timer.h"
 #include "cpu/gdt.h"
 #include "cpu/idt.h"
+#include "cpu/isr.h"
 #include "config.h"
+
+volatile uint64_t tick = 0;
+void timer_callback(Registers *regs) {
+    tick += 1;
+}
 
 void show_banner(void);
 
@@ -22,10 +30,13 @@ void kernel_entry(void) {
     /* Initialization */
     gdt_initialize();
     idt_initialize();
+    timer_initialize(100000, timer_callback); /* Every 65,535 Hz passed - calling callback */
+    enable_interrupts();
 
     /* Infinite loop to prevent CPU fault */
-    for (;;) {
-
+    while (true) {
+        kprintf(LOG_DEBUG, "Tick: %d\n", tick);
+        halt();
     }
 }
 

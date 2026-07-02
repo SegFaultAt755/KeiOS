@@ -1,4 +1,4 @@
-#include "kernel/terminal.h"
+#include "drivers/terminal.h"
 #include "libkern/string.h"
 
 uint16_t terminal_row;

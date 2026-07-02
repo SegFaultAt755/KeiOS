@@ -3,25 +3,6 @@
 
 #include <stdint.h>
 
-/* IRQ maps */
-#define IRQ0 0x8
-#define IRQ1 0x9
-#define IRQ2 0xA
-#define IRQ3 0xB
-#define IRQ4 0xC
-#define IRQ5 0xD
-#define IRQ6 0xE
-#define IRQ7 0xF
-
-#define IRQ8  0x70
-#define IRQ9  0x71
-#define IRQ10 0x72
-#define IRQ11 0x73
-#define IRQ12 0x74
-#define IRQ13 0x75
-#define IRQ14 0x76
-#define IRQ15 0x77
-
 typedef struct [[gnu::packed]] GateDescriptor {
     uint16_t offset_low;
     uint16_t segment_selector;

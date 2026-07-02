@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "kernel/terminal.h"
+#include "drivers/terminal.h"
 
 #define PANIC_PREFIX "Kei is very sad: "
 
@@ -14,9 +14,7 @@ void __attribute__((noreturn)) __stack_chk_fail(void) {
     terminal_writestring(PANIC_PREFIX "Kernel stack smashed!\n");
     terminal_writestring("Reboot or shutdown the PC!\n");
 
-    while (true) {
-        /* Halt CPU */
-    }
+    while (true) {}
 }
 
 void __attribute__((noreturn)) __stack_chk_fail_local(void) {

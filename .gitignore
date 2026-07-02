@@ -3,6 +3,7 @@
 /keios
 /keios.iso
 /**/*.o
+/qemu.log
 
 # Documents
 /.obsidian

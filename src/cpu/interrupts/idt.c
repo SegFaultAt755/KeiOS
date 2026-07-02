@@ -32,17 +32,18 @@ void remap_irq(void) {
     const size_t total_steps = sizeof(sequence) / sizeof(sequence[0]);
     for (size_t i = 0; i < total_steps; i++) {
         outb(sequence[i].port, sequence[i].value);
+        outb(0x80, 0);
     }
 }
 
 void setup_irq(void) {
-    static const int irq_handlers[] = {
-        IRQ0, IRQ1, IRQ2,  IRQ3, IRQ4, IRQ5, IRQ6, IRQ7,
-        IRQ8, IRQ9, IRQ10, IRQ11, IRQ12, IRQ13, IRQ14, IRQ15
+    static const void* irq_handlers[] = {
+        irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7,
+        irq8, irq9, irq10, irq11, irq12, irq13, irq14, irq15
     };
 
     for (int i = 0; i < 16; i++) {
-        idt_set_gate(32+i, irq_handlers[i], 0x8E);
+        idt_set_gate(i+32, (uint32_t) irq_handlers[i], 0x8E);
     }
 }
 

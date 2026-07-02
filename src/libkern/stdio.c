@@ -1,5 +1,5 @@
 #include "libkern/stdio.h"
-#include "kernel/terminal.h"
+#include "drivers/terminal.h"
 #include <stddef.h>
 
 void kprint_uint(unsigned int val, int base) {
