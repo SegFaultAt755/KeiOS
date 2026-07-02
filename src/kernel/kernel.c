@@ -30,13 +30,12 @@ void kernel_entry(void) {
     /* Initialization */
     gdt_initialize();
     idt_initialize();
-    timer_initialize(100000, timer_callback); /* Every 65,535 Hz passed - calling callback */
+    timer_initialize(100, timer_callback); /* Every 65,535 Hz passed - calling callback */
     enable_interrupts();
 
     /* Infinite loop to prevent CPU fault */
     while (true) {
-        kprintf(LOG_DEBUG, "Tick: %d\n", tick);
-        halt();
+        __asm__ volatile ("cli; hlt"); /* Disable interrupts and halt */
     }
 }
 
