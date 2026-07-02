@@ -4,6 +4,7 @@
 /keios.iso
 /**/*.o
 /qemu.log
+/*.qcow2
 
 # Documents
 /.obsidian
