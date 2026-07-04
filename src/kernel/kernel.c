@@ -1,10 +1,14 @@
 #include "kernel/interrupt.h"
 #include "libkern/stdio.h"
+
 #include "drivers/terminal.h"
 #include "drivers/timer.h"
+#include "drivers/vga.h"
+
 #include "cpu/gdt.h"
 #include "cpu/idt.h"
 #include "cpu/isr.h"
+
 #include "config.h"
 
 volatile uint64_t tick = 0;
@@ -25,7 +29,6 @@ void kernel_entry(void) {
         terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_RED, TERMINAL_DEFAULT_BACKGROUND_COLOR));
         kprintf(LOG_EMPTY, "<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FOREGROUND_COLOR, TERMINAL_DEFAULT_BACKGROUND_COLOR));
-
     show_banner();
 
     /* Initialization */
@@ -33,6 +36,12 @@ void kernel_entry(void) {
     idt_initialize();
     timer_initialize(100, timer_callback); /* Every 100 Hz passed - calling callback */
     enable_interrupts();
+
+    /* Note: Don't call these functions yet, no declaration were done
+    vga_set_video_mode();
+    vga_clear(VGA_BACKGROUND_COLOR);
+    vga_set_pixel(10, 10, vga_entry_color(VGA_COLOR_LIGHT_RED, VGA_BACKGROUND_COLOR));
+    */
 
     /* Infinite loop to prevent CPU fault */
     while (true) {
