@@ -1,11 +1,11 @@
-; declare constants
-MBALIGN  equ  1 << 0            ; align loaded modules on page boundaries
-MEMINFO  equ  1 << 1            ; provide memory map
-MBFLAGS  equ  MBALIGN | MEMINFO ; multiboot field
-MAGIC    equ  0x1BADB002        ; 'magic number'
+; Declare constants
+MBALIGN  equ  1 << 0
+MEMINFO  equ  1 << 1
+MBFLAGS  equ  MBALIGN | MEMINFO
+MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
 
-; declare multiboot header
+; Declare multiboot header
 section .multiboot
 align 4
 	dd MAGIC

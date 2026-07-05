@@ -1,5 +1,5 @@
 #include "kernel/interrupt.h"
-#include "libkern/stdio.h"
+#include "kernel/halt.h"
 
 #include "drivers/terminal.h"
 #include "drivers/timer.h"
@@ -9,10 +9,13 @@
 #include "cpu/idt.h"
 #include "cpu/isr.h"
 
+#include "memory/paging.h"
+
+#include "libkern/stdio.h"
 #include "config.h"
 
-volatile uint64_t tick = 0;
-void timer_callback(Registers *regs) {
+uint64_t tick = 0;
+void timer_callback(Registers*) {
     /* Note: Don't try to output any messages from here, because the output will be messy */
     tick += 1;
 }
@@ -34,7 +37,7 @@ void kernel_entry(void) {
     /* Initialization */
     gdt_initialize();
     idt_initialize();
-    timer_initialize(100, timer_callback); /* Every 100 Hz passed - calling callback */
+    timer_initialize(65535, timer_callback); /* Every 65,535 Hz passed - calling callback */
     enable_interrupts();
 
     /* Note: Don't call these functions yet, no declaration were done
@@ -44,9 +47,7 @@ void kernel_entry(void) {
     */
 
     /* Infinite loop to prevent CPU fault */
-    while (true) {
-        __asm__ volatile ("cli; hlt"); /* Disable interrupts and halt */
-    }
+    while (true) {}
 }
 
 void show_banner(void) {

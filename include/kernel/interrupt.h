@@ -5,8 +5,8 @@ inline void enable_interrupts() {
     __asm__ volatile ("sti");
 }
 
-inline void halt() {
-    __asm__ volatile ("hlt");
+inline void disable_interrupts() {
+    __asm__ volatile ("cli");
 }
 
 #endif
