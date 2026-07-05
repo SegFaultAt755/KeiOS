@@ -1,5 +1,6 @@
 #include "libkern/stdio.h"
 #include "drivers/terminal.h"
+#include "config.h"
 #include <stddef.h>
 
 void kprint_uint(unsigned int val, int base) {
@@ -38,7 +39,13 @@ void kprintf(LogLevel level, const char *fmt, ...) {
         case LOG_INFO:  terminal_writestring("[INFO]: "); break;
         case LOG_WARN:  terminal_writestring("[WARN]: "); break;
         case LOG_ERR:   terminal_writestring("[ERROR]: "); break;
-        case LOG_DEBUG: terminal_writestring("[DEBUG]: "); break;
+        case LOG_DEBUG:
+#if defined(DEBUG) && (DEBUG == true)
+            terminal_writestring("[DEBUG]: "); 
+            break;
+#else
+            return;
+#endif
         default: break;
     }
 

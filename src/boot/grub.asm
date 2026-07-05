@@ -1,7 +1,7 @@
 ; Declare constants
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
-MBUSEGFX equ  0
+MBUSEGFX equ  (1 << 0) | (1 << 1)
 MBFLAGS  equ  MBALIGN | MEMINFO | MBUSEGFX
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
@@ -47,6 +47,7 @@ section .text
 higher:
     mov esp, stack_top
     push ebx
+    push eax
     xor ebp, ebp
 
     extern kernel_entry

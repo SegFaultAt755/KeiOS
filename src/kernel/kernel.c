@@ -1,5 +1,7 @@
 #include "kernel/interrupt.h"
 #include "kernel/halt.h"
+#include "kernel/multiboot.h"
+#include "kernel/memory.h"
 
 #include "drivers/terminal.h"
 #include "drivers/timer.h"
@@ -22,8 +24,8 @@ void timer_callback(Registers*) {
 
 void show_banner(void);
 
-[[noreturn]]
-void kernel_entry(void) {
+[[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
+[[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info) {
     /* Initialize terminal */
     terminal_initialize();
 
@@ -39,6 +41,7 @@ void kernel_entry(void) {
     idt_initialize();
     timer_initialize(100, timer_callback); /* Passing frequency and callback function */
     enable_interrupts();
+    memory_initialize(boot_info);
 
     /* Note: Don't call these functions yet, no declaration were done
     vga_set_video_mode();
