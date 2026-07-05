@@ -1,7 +1,7 @@
 ; Declare constants
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
-MBUSEGFX equ  (1 << 0) | (1 << 1)
+MBUSEGFX equ  1 << 2
 MBFLAGS  equ  MBALIGN | MEMINFO | MBUSEGFX
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
@@ -14,11 +14,16 @@ align 4
 	dd CHECKSUM
     dd 0, 0, 0, 0, 0
 
-    ; Graphics
-    dd 0    ; Graphic mode
-    dd 1024 ; Width
-    dd 768  ; Height
-    dd 32   ; Depth
+; Video mode request fields
+dd 0
+dd 0
+dd 0
+dd 0
+dd 0
+dd 0
+dd 1024
+dd 768
+dd 32
 
 ; Align the stack
 section .bss

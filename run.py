@@ -54,7 +54,8 @@ def main() -> None:
         "-net", "nic,model=rtl8139", "-net", "user",
         "-device", "intel-hda", "-device", "hda-duplex",
         "-d", "int,cpu_reset", "-D", "qemu.log",
-        "-cdrom", str(iso_file)
+        "-cdrom", str(iso_file),
+        "-debugcon", "file:debug.log"
     ]
 
     print(">>> Starting QEMU...")

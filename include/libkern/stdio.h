@@ -11,7 +11,7 @@
 typedef enum LogLevel {
     LOG_EMPTY,
     LOG_INFO,
-    LOG_WARN,
+    LOG_WARNING,
     LOG_ERR,
     LOG_DEBUG
 } LogLevel;
@@ -22,7 +22,7 @@ void kprint_uint(unsigned int value, int base);
 void kprint_int(int value);
 void kvprintf(LogLevel level, const char *fmt, va_list args);
 void kprintf(LogLevel level, const char *fmt, ...);
-int  ksnprintf(char *str, size_t size, const char *fmt, ...);
+int  ksnprintf(char *str, size_t size, const char *fmt, va_list args);
 
 static inline void outb(uint16_t port, uint8_t value) {
     __asm__ volatile ("outb %0, %1" : : "a" (value), "Nd" (port));

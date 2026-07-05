@@ -3,6 +3,7 @@
 #include "kernel/halt.h"
 #include "kernel/multiboot.h"
 #include "kernel/memory.h"
+#include "kernel/qemu.h"
 
 #include "drivers/terminal.h"
 #include "drivers/timer.h"
@@ -27,16 +28,22 @@ void show_banner(void);
 
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
 [[noreturn]] void kernel_entry(uint32_t, MultibootInfo *boot_info) {
+    /* Initialize kernel */
+    gdt_initialize();
+    idt_initialize();
+    timer_initialize(100, timer_callback); /* Passing frequency and callback function */
+    memory_initialize(boot_info);
+
     /* Initialize graphics */
-    /* if (vga_init_graphics()) {
-        vga_clear_screen(VGA_COLOR_BLUE);
-        vga_set_pixel(160, 100, VGA_COLOR_WHITE);
+    if (vga_init_graphics(boot_info)) {
+        vga_clear_screen(0xFF0000FF);
+        vga_set_pixel(160, 100, 0xFFFFFFFF);
     } else {
         vga_init_text_mode();
         terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-    } */
+    }
 
-    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+    enable_interrupts();
 
     /* Show welcome message */
     kprintf(LOG_EMPTY, "Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
@@ -44,13 +51,6 @@ void show_banner(void);
         kprintf(LOG_EMPTY, "<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FOREGROUND_COLOR, TERMINAL_DEFAULT_BACKGROUND_COLOR));
     show_banner();
-
-    /* Initialization */
-    gdt_initialize();
-    idt_initialize();
-    timer_initialize(100, timer_callback); /* Passing frequency and callback function */
-    enable_interrupts();
-    memory_initialize(boot_info);
 
     /* Infinite loop to prevent CPU fault */
     while (true) {}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kernel/multiboot.h"
 #include <stdint.h>
 
 #define VGA_TEXT_WIDTH  80
@@ -37,9 +38,9 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
     return (uint16_t) uc | ((uint16_t) color << 8);
 }
 
-bool vga_init_graphics(void);
 void vga_init_text_mode(void);
+bool vga_init_graphics(MultibootInfo *boot_info);
 bool vga_is_graphics_supported(void);
 
-void vga_clear_screen(uint8_t color);
-void vga_set_pixel(uint16_t x, uint16_t y, uint8_t color);
+void vga_clear_screen(uint32_t color);
+void vga_set_pixel(uint32_t x, uint32_t y, uint32_t color);

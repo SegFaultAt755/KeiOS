@@ -1,13 +1,12 @@
 # Binaries
 /bin
 /keios
-/keios.iso
+/*.iso
 /**/*.o
-/qemu.log
 /*.qcow2
+/*.log
 
 # Documents
 /.obsidian
 /TODO.md
 /FIXME.md
-/docs_

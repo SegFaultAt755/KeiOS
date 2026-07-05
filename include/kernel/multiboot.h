@@ -8,14 +8,14 @@
 #define MULTIBOOT_MEMORY_NVS              4
 #define MULTIBOOT_MEMORY_BADRAM           5
 
-typedef struct MultibootAoutSymbolTable {
+typedef struct [[gnu::packed]] MultibootAoutSymbolTable {
     uint32_t tab_size;
     uint32_t str_size;
     uint32_t address;
     uint32_t reserved;
 } MultibootAoutSymbolTable;
 
-typedef struct MultibootElfSectionHeaderTable {
+typedef struct [[gnu::packed]] MultibootElfSectionHeaderTable {
     uint32_t number;
     uint32_t size;
     uint32_t address;
@@ -31,7 +31,7 @@ typedef struct [[gnu::packed]] MultibootMmapEntry {
     uint32_t type;
 } MultibootMmapEntry;
 
-typedef struct MultibootInfo {
+typedef struct [[gnu::packed]] MultibootInfo {
     uint32_t flags;
     uint32_t memory_lower;
     uint32_t memory_upper;
@@ -57,10 +57,35 @@ typedef struct MultibootInfo {
 
     uint32_t apm_table;
 
+    /* VBE fields */
     uint32_t vbe_control_info;
     uint32_t vbe_mode_info;
     uint16_t vbe_mode;
     uint16_t vbe_interface_segment;
     uint16_t vbe_interface_offset;
     uint16_t vbe_interface_length;
+
+    /* Direct linear framebuffer fields*/
+    uint64_t framebuffer_addr;
+    uint32_t framebuffer_pitch;
+    uint32_t framebuffer_width;
+    uint32_t framebuffer_height;
+    uint8_t  framebuffer_bpp;
+    uint8_t  framebuffer_type;
+    
+    /* Color layout info */
+    union {
+        struct {
+            uint32_t framebuffer_palette_addr;
+            uint16_t framebuffer_palette_num_colors;
+        };
+        struct {
+            uint8_t framebuffer_red_field_position;
+            uint8_t framebuffer_red_mask_size;
+            uint8_t framebuffer_green_field_position;
+            uint8_t framebuffer_green_mask_size;
+            uint8_t framebuffer_blue_field_position;
+            uint8_t framebuffer_blue_mask_size;
+        };
+    };
 } MultibootInfo;

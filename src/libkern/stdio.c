@@ -48,9 +48,9 @@ void kprint_int(int value) {
 
 void kvprintf(LogLevel level, const char *fmt, va_list args) {
     switch (level) {
-        case LOG_INFO:  terminal_writestring("[INFO]: "); break;
-        case LOG_WARN:  terminal_writestring("[WARN]: "); break;
-        case LOG_ERR:   terminal_writestring("[ERROR]: "); break;
+        case LOG_INFO:    terminal_writestring("[INFO]: "); break;
+        case LOG_WARNING: terminal_writestring("[WARN]: "); break;
+        case LOG_ERR:     terminal_writestring("[ERROR]: "); break;
         case LOG_DEBUG:
 #if defined(DEBUG) && (DEBUG == true)
             terminal_writestring("[DEBUG]: "); 
@@ -151,11 +151,8 @@ void kprintf(LogLevel level, const char *fmt, ...) {
 }
 
 /* Safe string formatting function */
-int ksnprintf(char *str, size_t size, const char *fmt, ...) {
+int ksnprintf(char *str, size_t size, const char *fmt, va_list args) {
     if (size == 0) return 0;
-
-    va_list args;
-    va_start(args, fmt);
 
     size_t str_idx = 0;
 
@@ -216,7 +213,5 @@ int ksnprintf(char *str, size_t size, const char *fmt, ...) {
     }
 
     str[str_idx] = '\0'; /* Ensure null-termination */
-    va_end(args);
-
     return (int) str_idx;
 }
