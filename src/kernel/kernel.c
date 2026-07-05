@@ -37,7 +37,7 @@ void kernel_entry(void) {
     /* Initialization */
     gdt_initialize();
     idt_initialize();
-    timer_initialize(65535, timer_callback); /* Every 65,535 Hz passed - calling callback */
+    timer_initialize(100, timer_callback); /* Passing frequency and callback function */
     enable_interrupts();
 
     /* Note: Don't call these functions yet, no declaration were done
