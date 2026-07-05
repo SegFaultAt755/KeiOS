@@ -1,11 +1,14 @@
-#ifndef __VGA_H__
-#define __VGA_H__
+#pragma once
 
 #include <stdint.h>
 
-#define VGA_WIDTH 320
-#define VGA_HEIGHT 200
-#define VGA_MEMORY 0xA0000
+#define VGA_TEXT_WIDTH  80
+#define VGA_TEXT_HEIGHT 25
+#define VGA_TEXT_MEMORY 0xB8000
+
+#define VGA_GFX_WIDTH  320
+#define VGA_GFX_HEIGHT 200
+#define VGA_GFX_MEMORY 0xA0000
 
 typedef enum VgaColors {
     VGA_COLOR_BLACK         = 0,
@@ -26,19 +29,17 @@ typedef enum VgaColors {
     VGA_COLOR_WHITE         = 15
 } VgaColors;
 
-#define VGA_BACKGROUND_COLOR VGA_COLOR_CYAN
-
 static inline uint8_t vga_entry_color(VgaColors fg, VgaColors bg) {
-    return fg | bg << 4;
+    return fg | (bg << 4);
 }
 
 static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
-    return (uint16_t) uc | (uint16_t) color << 8;
+    return (uint16_t) uc | ((uint16_t) color << 8);
 }
 
-void vga_set_video_mode(void);
-void vga_set_text_mode(void);
-void vga_clear(uint8_t color);
-void vga_set_pixel(uint16_t x, uint16_t y, uint8_t color);
+bool vga_init_graphics(void);
+void vga_init_text_mode(void);
+bool vga_is_graphics_supported(void);
 
-#endif
+void vga_clear_screen(uint8_t color);
+void vga_set_pixel(uint16_t x, uint16_t y, uint8_t color);

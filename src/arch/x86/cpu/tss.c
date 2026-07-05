@@ -1,5 +1,5 @@
-#include "cpu/tss.h"
-#include "cpu/gdt.h"
+#include "arch/x86/tss.h"
+#include "arch/x86/gdt.h"
 #include "libkern/memory.h"
 
 TssEntry tss_entry;

@@ -1,5 +1,4 @@
-#ifndef __PAGING_H__
-#define __PAGING_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -42,5 +41,3 @@ typedef struct [[gnu::aligned(4096)]] PageDirectory {
 void paging_load_directory(PageDirectory *dir);
 void paging_enable(void);
 void paging_flush_tlb(uint32_t addr);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __IDT_H__
-#define __IDT_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -36,5 +35,3 @@ typedef struct [[gnu::packed]] Idtr {
 
 void idt_set_gate(uint8_t vector, uint32_t isr, uint8_t attributes);
 void idt_initialize(void);
-
-#endif

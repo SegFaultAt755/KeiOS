@@ -1,5 +1,5 @@
-#include "cpu/gdt.h"
-#include "cpu/tss.h"
+#include "arch/x86/gdt.h"
+#include "arch/x86/tss.h"
 
 GdtEntry gdt_entries[6];
 GdtPointer gdt_ptr;

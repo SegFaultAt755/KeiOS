@@ -1,4 +1,4 @@
-#include "kernel/interrupt.h"
+#include "kernel/interrupts.h"
 #include "kernel/halt.h"
 #include "kernel/multiboot.h"
 #include "kernel/memory.h"
@@ -7,11 +7,11 @@
 #include "drivers/timer.h"
 #include "drivers/vga.h"
 
-#include "cpu/gdt.h"
-#include "cpu/idt.h"
-#include "cpu/isr.h"
+#include "arch/x86/gdt.h"
+#include "arch/x86/idt.h"
+#include "arch/x86/isr.h"
 
-#include "memory/paging.h"
+#include "arch/x86/paging.h"
 
 #include "libkern/stdio.h"
 #include "config.h"
@@ -26,8 +26,16 @@ void show_banner(void);
 
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info) {
-    /* Initialize terminal */
-    terminal_initialize();
+    /* Initialize graphics */
+    /* if (vga_init_graphics()) {
+        vga_clear_screen(VGA_COLOR_BLUE);
+        vga_set_pixel(160, 100, VGA_COLOR_WHITE);
+    } else {
+        vga_init_text_mode();
+        terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+    } */
+
+    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
     /* Show welcome message */
     kprintf(LOG_EMPTY, "Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
@@ -42,12 +50,6 @@ void show_banner(void);
     timer_initialize(100, timer_callback); /* Passing frequency and callback function */
     enable_interrupts();
     memory_initialize(boot_info);
-
-    /* Note: Don't call these functions yet, no declaration were done
-    vga_set_video_mode();
-    vga_clear(VGA_BACKGROUND_COLOR);
-    vga_set_pixel(10, 10, vga_entry_color(VGA_COLOR_LIGHT_RED, VGA_BACKGROUND_COLOR));
-    */
 
     /* Infinite loop to prevent CPU fault */
     while (true) {}

@@ -1,4 +1,4 @@
-#include "memory/paging.h"
+#include "arch/x86/paging.h"
 
 void paging_load_directory(PageDirectory *dir) {
     __asm__ volatile ("mov %0, %%cr3" : : "r" ((uint32_t) dir) : "memory");

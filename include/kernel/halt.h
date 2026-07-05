@@ -1,8 +1,5 @@
-#ifndef __HALT_H__
-#define __HALT_H__
+#pragma once
 
 inline void halt() {
     __asm__ volatile ("hlt");
 }
-
-#endif

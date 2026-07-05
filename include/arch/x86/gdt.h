@@ -1,5 +1,4 @@
-#ifndef __GDT_H__
-#define __GDT_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -19,5 +18,3 @@ typedef struct [[gnu::packed]] GdtPointer {
 
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
 void gdt_initialize(void);
-
-#endif

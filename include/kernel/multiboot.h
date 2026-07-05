@@ -1,5 +1,4 @@
-#ifndef __MULTIBOOT_H__
-#define __MULTIBOOT_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -65,5 +64,3 @@ typedef struct MultibootInfo {
     uint16_t vbe_interface_offset;
     uint16_t vbe_interface_length;
 } MultibootInfo;
-
-#endif

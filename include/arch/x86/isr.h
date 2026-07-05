@@ -1,5 +1,4 @@
-#ifndef __ISR_H__
-#define __ISR_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -32,5 +31,3 @@ extern Isr interrupt_handlers[256];
 
 void register_interrupt_handler(uint8_t number, Isr handler); 
 void isr_handler(Registers regs);
-
-#endif

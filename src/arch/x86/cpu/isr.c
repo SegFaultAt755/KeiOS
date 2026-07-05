@@ -1,4 +1,4 @@
-#include "cpu/isr.h"
+#include "arch/x86/isr.h"
 #include "libkern/stdio.h"
 
 Isr interrupt_handlers[256];

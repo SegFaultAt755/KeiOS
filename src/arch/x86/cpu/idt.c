@@ -1,4 +1,4 @@
-#include "cpu/idt.h"
+#include "arch/x86/idt.h"
 #include "libkern/stdio.h"
 #include "libkern/memory.h"
 #include <stddef.h>

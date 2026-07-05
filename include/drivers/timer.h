@@ -1,9 +1,6 @@
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#pragma once
 
 #include <stdint.h>
-#include "cpu/isr.h"
+#include "arch/x86/isr.h"
 
-void timer_initialize(uint32_t frequency, void (*callback)(Registers *regs)); /* The frequency is Hz */
-
-#endif
+void timer_initialize(uint32_t frequency, void (*callback)(Registers *regs));

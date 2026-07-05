@@ -10,7 +10,7 @@ INC_DIR := include
 SRC_DIR := src
 
 # Target files
-LDSCRIPT   := $(SRC_DIR)/linker.ld
+LDSCRIPT   := linker.ld
 KERNEL_BIN := $(BIN_DIR)/keios.bin
 ISO_IMAGE  := keios.iso
 

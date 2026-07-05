@@ -1,5 +1,4 @@
-#ifndef __STDIO_H__
-#define __STDIO_H__
+#pragma once
 
 /*
     Note: Initialize terminal first to show clear output with kprintf
@@ -29,5 +28,3 @@ static inline uint8_t inb(uint16_t port) {
     __asm__ volatile ("inb %1, %0" : "=a" (ret) : "Nd" (port));
     return ret;
 }
-
-#endif

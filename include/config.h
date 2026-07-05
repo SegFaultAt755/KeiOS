@@ -1,12 +1,9 @@
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#pragma once
 
 #define NAME "KeiOS"
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 7
-#define VERSION_PATCH 1
+#define VERSION_PATCH 2
 #define ARCHITECTURE "x86"
 
-#define DEBUG true
-
-#endif
+#define DEBUG false

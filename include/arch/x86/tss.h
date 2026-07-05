@@ -1,5 +1,4 @@
-#ifndef __TSS_H__
-#define __TSS_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -53,5 +52,3 @@ typedef struct [[gnu::packed]] TssEntry {
 } TssEntry;
 
 void write_tss(uint16_t ss0, uint32_t esp0);
-
-#endif
