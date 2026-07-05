@@ -1,5 +1,7 @@
 #include "kernel/qemu.h"
 #include "libkern/string.h"
+#include "libkern/bcd.h"
+#include "drivers/cmos.h"
 #include <stddef.h>
 
 static void qemu_print(const char *str) {
@@ -7,11 +9,20 @@ static void qemu_print(const char *str) {
         qemu_write_char(str[i]);
 }
 
+static void qemu_print_time(void) {
+    qemu_printf(QEMU_LOG_EMPTY, "[%d.%d:%d:%d]: ",
+        bcd_to_binary(read_cmos_register(CMOS_DAY)),
+        bcd_to_binary(read_cmos_register(CMOS_HOUR)),
+        bcd_to_binary(read_cmos_register(CMOS_MINUTE)),
+        bcd_to_binary(read_cmos_register(CMOS_SECOND))
+    );
+}
+
 void qemu_printf(QemuLogLevel level, const char *fmt, ...) {
     switch (level) {
-        case QEMU_LOG_INFO:    qemu_print("[QEMU INFO]: "); break;
-        case QEMU_LOG_WARNING: qemu_print("[QEMU WARN]: "); break;
-        case QEMU_LOG_ERROR:   qemu_print("[QEMU ERROR]: "); break;
+        case QEMU_LOG_INFO:    { qemu_print("[QEMU INFO]: "); qemu_print_time(); } break;
+        case QEMU_LOG_WARNING: { qemu_print("[QEMU WARNING]: "); qemu_print_time(); } break;
+        case QEMU_LOG_ERROR:   { qemu_print("[QEMU ERROR]: "); qemu_print_time(); } break;
         default: break;
     }
 

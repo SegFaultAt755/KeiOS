@@ -49,7 +49,7 @@ void kprint_int(int value) {
 void kvprintf(LogLevel level, const char *fmt, va_list args) {
     switch (level) {
         case LOG_INFO:    terminal_writestring("[INFO]: "); break;
-        case LOG_WARNING: terminal_writestring("[WARN]: "); break;
+        case LOG_WARNING: terminal_writestring("[WARNING]: "); break;
         case LOG_ERR:     terminal_writestring("[ERROR]: "); break;
         case LOG_DEBUG:
 #if defined(DEBUG) && (DEBUG == true)
