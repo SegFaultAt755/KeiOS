@@ -30,8 +30,8 @@ stack_top:
 section .boot
 global _start
 _start:
-    mov eax, (initial_page_directory - 0xC0000000)
-    mov cr3, eax
+    mov ecx, (initial_page_directory - 0xC0000000)
+    mov cr3, ecx
     
     mov ecx, cr4
     or ecx, 0x10
