@@ -1,25 +1,58 @@
-#include <stdint.h>
-#include "drivers/terminal.h"
+#include "kernel/panic.h"
 #include "kernel/interrupts.h"
 #include "kernel/halt.h"
+#include "drivers/terminal.h"
+#include "drivers/vga.h"
 
-#define PANIC_PREFIX "Kei is very sad: "
+#define CH(i) (__TIME__[i] ? (uintptr_t) __TIME__[i] : 0x7FU)
+#define CD(i) (__DATE__[i] ? (uintptr_t) __DATE__[i] : 0x31U)
 
-#if UINTPTR_MAX == UINT32_MAX
-    uintptr_t __stack_chk_guard = 0xe2dee396;
-#else
-    uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
-#endif
+#define COMPILE_TIME_SEED \
+    (CH(0) * 0x1F001511U + CH(1) * 0x0A3F1012U + CH(3) * 0x00A1F023U + \
+     CH(4) * 0x0002F101U + CH(6) * 0x00003F12U + CH(7) * 0x000001FAU ^ \
+     (CD(0) << 24 | CD(2) << 16 | CD(4) << 8 | CD(5)))
+
+uintptr_t __stack_chk_guard = (uintptr_t) COMPILE_TIME_SEED;
+
+[[noreturn]] void runtime_panic(const char *reason, const char *file, uint32_t line) {
+    disable_interrupts();
+    vga_init_text_mode();
+    
+    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+    terminal_set_color(vga_entry_color(VGA_COLOR_RED, VGA_COLOR_BLACK));
+    terminal_clear();
+
+    terminal_writestring("================================================================================\n");
+    terminal_writestring("                               KEI IS VERY SAD                                  \n");
+    terminal_writestring("================================================================================\n\n");
+
+    terminal_writestring("Reason: ");
+    terminal_writestring(reason);
+    terminal_writestring("\n");
+    
+    terminal_writestring("File: ");
+    terminal_writestring(file);
+    terminal_writestring("\n");
+    
+    terminal_writestring("Line: ");
+    if (line == 0) {
+        terminal_writestring("0");
+    } else {
+        char buffer[12];
+        int i = 10;
+        buffer[11] = '\0';
+        while (line > 0 && i >= 0) {
+            buffer[i--] = (line % 10) + '0';
+            line /= 10;
+        }
+        terminal_writestring(&buffer[i + 1]);
+    }
+
+    while (true) {halt();}
+}
 
 [[noreturn]] void __stack_chk_fail(void) {
-    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-    terminal_writestring(PANIC_PREFIX "Kernel stack smashed!\n");
-    terminal_writestring("Reboot or shutdown the PC!\n");
-
-    while (true) {
-        disable_interrupts();
-        halt();
-    }
+    runtime_panic("Kernel stack smashed! (buffer overflow detected)", __FILE__, __LINE__);
 }
 
 [[noreturn]] void __stack_chk_fail_local(void) {

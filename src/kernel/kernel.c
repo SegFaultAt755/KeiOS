@@ -1,3 +1,4 @@
+#include "kernel/panic.h"
 #include "kernel/interrupts.h"
 #include "kernel/halt.h"
 #include "kernel/multiboot.h"
