@@ -6,6 +6,6 @@ void register_interrupt_handler(uint8_t number, Isr handler) {
     interrupt_handlers[number] = handler;
 }
 
-void isr_handler(Registers regs) {
-    /* Do nothing */
+void isr_handler(Registers) {
+    /* Do nothing yet */
 }

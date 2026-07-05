@@ -26,7 +26,7 @@ void timer_callback(Registers*) {
 void show_banner(void);
 
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
-[[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info) {
+[[noreturn]] void kernel_entry(uint32_t, MultibootInfo *boot_info) {
     /* Initialize graphics */
     /* if (vga_init_graphics()) {
         vga_clear_screen(VGA_COLOR_BLUE);

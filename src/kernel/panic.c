@@ -8,9 +8,9 @@
 #define CD(i) (__DATE__[i] ? (uintptr_t) __DATE__[i] : 0x31U)
 
 #define COMPILE_TIME_SEED \
-    (CH(0) * 0x1F001511U + CH(1) * 0x0A3F1012U + CH(3) * 0x00A1F023U + \
-     CH(4) * 0x0002F101U + CH(6) * 0x00003F12U + CH(7) * 0x000001FAU ^ \
-     (CD(0) << 24 | CD(2) << 16 | CD(4) << 8 | CD(5)))
+    (((CH(0) * 0x1F001511U + CH(1) * 0x0A3F1012U + CH(3) * 0x00A1F023U)  + \
+      (CH(4) * 0x0002F101U + CH(6) * 0x00003F12U + CH(7) * 0x000001FAU)) ^ \
+      (CD(0) << 24 | CD(2) << 16 | CD(4) << 8 | CD(5)))
 
 uintptr_t __stack_chk_guard = (uintptr_t) COMPILE_TIME_SEED;
 
