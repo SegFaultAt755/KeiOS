@@ -7,6 +7,7 @@
 
 #include "drivers/terminal.h"
 #include "drivers/timer.h"
+#include "drivers/cmos.h"
 #include "drivers/vga.h"
 
 #include "arch/x86/gdt.h"
@@ -16,6 +17,7 @@
 #include "arch/x86/paging.h"
 
 #include "libkern/stdio.h"
+#include "libkern/bcd.h"
 #include "config.h"
 
 uint64_t tick = 0;
