@@ -56,9 +56,6 @@ uintptr_t __stack_chk_guard = (uintptr_t) COMPILE_TIME_SEED;
     while (true) {halt();}
 }
 
-#include <stdarg.h>
-// #include "your_string_or_stdio_header.h" // Include this if vsnprintf is defined here
-
 [[noreturn]] void runtime_panic_format(const char *reason, const char *desc, const char *file, uint32_t line, ...) {
     char formatted_desc[1024]; 
     
