@@ -46,7 +46,7 @@ def main() -> None:
     # Launch QEMU
     qemu_cmd = [
         "qemu-system-i386",
-        "-cpu", "n270", "-m", "1G",
+        "-cpu", "n270", "-m", "4G",
         "-machine", "pc",
         "-rtc", "base=localtime",
         "-vga", "std",

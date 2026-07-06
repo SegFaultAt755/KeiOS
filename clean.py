@@ -40,5 +40,21 @@ def main():
         print(f"Error removing file: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Remove logs
+    log_files = [Path("debug.log"), Path("qemu.log")]
+    print(f">>> Removing {log_files}...")
+    try:
+        for file in log_files:
+            file.unlink(missing_ok=False)
+    except FileNotFoundError:
+        print(f"Error: Cannot remove an element because it does not exist.", file=sys.stderr)
+        sys.exit(1)
+    except PermissionError:
+        print(f"Error: Cannot remove an element. The file is currently locked or open by another process.", file=sys.stderr)
+        sys.exit(1)
+    except OSError as e:
+        print(f"Error removing file: {e}", file=sys.stderr)
+        sys.exit(1)
+
 if __name__ == "__main__":
     main()

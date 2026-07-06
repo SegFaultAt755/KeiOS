@@ -1,13 +1,24 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdarg.h>
 
-[[noreturn]] void runtime_panic(const char *reason, const char *file, uint32_t line);
+[[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line);
+[[noreturn]] void runtime_panic_format(const char *reason, const char *desc, const char *file, uint32_t line, ...);
 
-#define KERNEL_PANIC(reason) runtime_panic(reason, __FILE__, __LINE__)
-#define KERNEL_ASSERT(condition, message) \
+#define KERNEL_PANIC(reason, desc) runtime_panic(reason, desc, __FILE__, __LINE__)
+#define KERNEL_ASSERT(condition, message, desc) \
     do { \
         if (!(condition)) { \
-            runtime_panic(message, __FILE__, __LINE__); \
+            runtime_panic(message, desc, __FILE__, __LINE__); \
         } \
-    } while (0)
+    } while (false)
+
+#define KERNEL_PANIC_FORMAT(reason, desc, ...) \
+    runtime_panic_format(reason, desc, __FILE__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
+#define KERNEL_ASSERT_FORMAT(condition, reason, desc, ...) \
+    do { \
+        if (!(condition)) { \
+            runtime_panic_format(reason, desc, __FILE__, __LINE__ __VA_OPT__(,) __VA_ARGS__); \
+        } \
+    } while (false)

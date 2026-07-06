@@ -1,10 +1,12 @@
 #include "arch/x86/tss.h"
 #include "arch/x86/gdt.h"
 #include "libkern/memory.h"
+#include "kernel/qemu.h"
 
 TssEntry tss_entry;
 
 void write_tss(uint16_t ss0, uint32_t esp0) {
+    qemu_printf(QEMU_LOG_INFO, "Writing TSS\n");
     uint32_t base = (uint32_t) &tss_entry;
     uint32_t limit = base + sizeof(TssEntry);
 

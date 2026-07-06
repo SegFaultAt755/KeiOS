@@ -1,6 +1,7 @@
 #include "arch/x86/idt.h"
 #include "libkern/stdio.h"
 #include "libkern/memory.h"
+#include "kernel/qemu.h"
 #include <stddef.h>
 
 GateDescriptor idt_entries[256];
@@ -16,6 +17,7 @@ void idt_set_gate(uint8_t vector, uint32_t isr, uint8_t attributes) {
 }
 
 void remap_irq(void) {
+    qemu_printf(QEMU_LOG_INFO, "Remapping IRQ\n");
     typedef struct Pic {
         uint16_t port;
         uint8_t value;
@@ -37,6 +39,8 @@ void remap_irq(void) {
 }
 
 void setup_irq(void) {
+    qemu_printf(QEMU_LOG_INFO, "Setting up IRQ\n");
+
     static const void* irq_handlers[] = {
         irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7,
         irq8, irq9, irq10, irq11, irq12, irq13, irq14, irq15
@@ -48,6 +52,8 @@ void setup_irq(void) {
 }
 
 void setup_idt() {
+    qemu_printf(QEMU_LOG_INFO, "Setting up IDT\n");
+
     static const void* isr_handlers[] = {
         isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7,
         isr8, isr9, isr10, isr11, isr12, isr13, isr14, isr15,
@@ -61,6 +67,8 @@ void setup_idt() {
 }
 
 void idt_initialize(void) {
+    qemu_printf(QEMU_LOG_INFO, "Initializing IDT\n");
+
     idtr.offset = (uint32_t) &idt_entries[0];
     idtr.size = (uint16_t) sizeof(GateDescriptor) * 256 - 1;
     memset(&idt_entries, 0, sizeof(GateDescriptor) * 256);

@@ -2,6 +2,7 @@
 #include "libkern/string.h"
 #include "libkern/bcd.h"
 #include "drivers/cmos.h"
+#include "config.h"
 #include <stddef.h>
 
 static void qemu_print(const char *str) {
@@ -23,6 +24,7 @@ void qemu_printf(QemuLogLevel level, const char *fmt, ...) {
         case QEMU_LOG_INFO:    { qemu_print("[QEMU INFO]: "); qemu_print_time(); } break;
         case QEMU_LOG_WARNING: { qemu_print("[QEMU WARNING]: "); qemu_print_time(); } break;
         case QEMU_LOG_ERROR:   { qemu_print("[QEMU ERROR]: "); qemu_print_time(); } break;
+        case QEMU_LOG_PANIC:   { qemu_print("[QEMU PANIC]: "); qemu_print_time(); } break;
         default: break;
     }
 

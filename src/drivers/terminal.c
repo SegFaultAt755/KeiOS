@@ -1,5 +1,6 @@
 #include "drivers/terminal.h"
 #include "libkern/string.h"
+#include "kernel/qemu.h"
 
 static uint16_t  terminal_row;
 static uint16_t  terminal_column;
@@ -10,6 +11,8 @@ static uint16_t terminal_width;
 static uint16_t terminal_height;
 
 void terminal_initialize(uint16_t *buffer, uint16_t width, uint16_t height) {
+    qemu_printf(QEMU_LOG_INFO, "Initializating terminal : {%x, %d, %d}\n", buffer, width, height);
+
     terminal_buffer = buffer;
     terminal_width  = width;
     terminal_height = height;

@@ -31,16 +31,20 @@ void show_banner(void);
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
 [[noreturn]] void kernel_entry(uint32_t, MultibootInfo *boot_info) {
     /* Initialize kernel */
+    qemu_printf(QEMU_LOG_INFO, "Initializing kernel\n");
     gdt_initialize();
     idt_initialize();
     timer_initialize(100, timer_callback); /* Passing frequency and callback function */
     memory_initialize(boot_info);
 
     /* Initialize graphics */
+    qemu_printf(QEMU_LOG_INFO, "Initializing graphics\n");
     if (vga_init_graphics(boot_info)) {
+        qemu_printf(QEMU_LOG_INFO, "Video mode is selected\n");
         vga_clear_screen(0xFF0000FF);
         vga_set_pixel(160, 100, 0xFFFFFFFF);
     } else {
+        qemu_printf(QEMU_LOG_INFO, "Text mode is selected\n");
         vga_init_text_mode();
         terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     }
@@ -48,6 +52,7 @@ void show_banner(void);
     enable_interrupts();
 
     /* Show welcome message */
+    qemu_printf(QEMU_LOG_INFO, "Show greeting messages\n");
     kprintf(LOG_EMPTY, "Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
         terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_RED, TERMINAL_DEFAULT_BACKGROUND_COLOR));
         kprintf(LOG_EMPTY, "<3\n");

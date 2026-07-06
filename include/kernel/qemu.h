@@ -9,7 +9,8 @@ typedef enum QemuLogLevel {
     QEMU_LOG_EMPTY,
     QEMU_LOG_INFO,
     QEMU_LOG_WARNING,
-    QEMU_LOG_ERROR
+    QEMU_LOG_ERROR,
+    QEMU_LOG_PANIC
 } QemuLogLevel;
 
 static inline void qemu_write_char(char c) {
