@@ -38,6 +38,7 @@ void show_banner(void);
     memory_initialize(boot_info);
 
     /* Initialize graphics */
+#if false
     qemu_printf(QEMU_LOG_INFO, "Initializing graphics\n");
     if (vga_init_graphics(boot_info)) {
         qemu_printf(QEMU_LOG_INFO, "Video mode is selected\n");
@@ -48,7 +49,10 @@ void show_banner(void);
         vga_init_text_mode();
         terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     }
+#endif
 
+    vga_init_text_mode();
+    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     enable_interrupts();
 
     /* Show welcome message */

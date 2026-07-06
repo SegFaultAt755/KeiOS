@@ -7,6 +7,42 @@ void register_interrupt_handler(uint8_t number, Isr handler) {
     interrupt_handlers[number] = handler;
 }
 
+void divide_by_zero_fault_handler(Registers *regs) {
+    uint32_t faulting_address;
+    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
+
+    KERNEL_PANIC_FORMAT("Division by zero", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
+        faulting_address, regs -> eip
+    );
+}
+
+void invalid_opcode_fault_handler(Registers *regs) {
+    uint32_t faulting_address;
+    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
+
+    KERNEL_PANIC_FORMAT("Invalid opcode", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
+        faulting_address, regs -> eip
+    );
+}
+
+void stack_segment_fault_handler(Registers *regs) {
+    uint32_t faulting_address;
+    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
+
+    KERNEL_PANIC_FORMAT("Stack segment", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
+        faulting_address, regs -> eip
+    );
+}
+
+void general_protection_fault_handler(Registers *regs) {
+    uint32_t faulting_address;
+    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
+
+    KERNEL_PANIC_FORMAT("General protection", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
+        faulting_address, regs -> eip
+    );
+}
+
 void double_fault_handler(Registers*) {
     KERNEL_PANIC("Double fault", 0);
 }
@@ -29,8 +65,20 @@ void page_fault_handler(Registers *regs) {
 
 void isr_handler(Registers regs) {
     switch (regs.interrupt_number) {
+        case 0:
+            divide_by_zero_fault_handler(&regs);
+            break;
+        case 6:
+            invalid_opcode_fault_handler(&regs);
+            break;
         case 8:
             double_fault_handler(&regs);
+            break;
+        case 12:
+            stack_segment_fault_handler(&regs);
+            break;
+        case 13:
+            general_protection_fault_handler(&regs);
             break;
         case 14:
             page_fault_handler(&regs);

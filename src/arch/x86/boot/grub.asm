@@ -1,7 +1,7 @@
 ; Declare constants
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
-MBUSEGFX equ  1 << 2
+MBUSEGFX equ  0
 MBFLAGS  equ  MBALIGN | MEMINFO | MBUSEGFX
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
