@@ -11,20 +11,22 @@ static void qemu_print(const char *str) {
 }
 
 static void qemu_print_time(void) {
-    qemu_printf(QEMU_LOG_EMPTY, "[%d.%d:%d:%d]: ",
-        bcd_to_binary(read_cmos_register(CMOS_DAY)),
+    char buffer[1024] = { 0 };
+    ksnprintf(buffer, sizeof(buffer), "[%d:%d %d]: ", 
         bcd_to_binary(read_cmos_register(CMOS_HOUR)),
         bcd_to_binary(read_cmos_register(CMOS_MINUTE)),
         bcd_to_binary(read_cmos_register(CMOS_SECOND))
     );
+
+    qemu_print(buffer);
 }
 
 void qemu_printf(QemuLogLevel level, const char *fmt, ...) {
     switch (level) {
-        case QEMU_LOG_INFO:    { qemu_print("[QEMU INFO]: "); qemu_print_time(); } break;
-        case QEMU_LOG_WARNING: { qemu_print("[QEMU WARNING]: "); qemu_print_time(); } break;
-        case QEMU_LOG_ERROR:   { qemu_print("[QEMU ERROR]: "); qemu_print_time(); } break;
-        case QEMU_LOG_PANIC:   { qemu_print("[QEMU PANIC]: "); qemu_print_time(); } break;
+        case QEMU_LOG_INFO:    { qemu_print("[INFO]: ");    qemu_print_time(); } break;
+        case QEMU_LOG_WARNING: { qemu_print("[WARNING]: "); qemu_print_time(); } break;
+        case QEMU_LOG_ERROR:   { qemu_print("[ERROR]: ");   qemu_print_time(); } break;
+        case QEMU_LOG_PANIC:   { qemu_print("[PANIC]: ");   qemu_print_time(); } break;
         default: break;
     }
 
@@ -32,8 +34,9 @@ void qemu_printf(QemuLogLevel level, const char *fmt, ...) {
     va_start(args, fmt);
 
     char buffer[1024] = { 0 };
-    ksnprintf(buffer, 1024, fmt, args);
+    ksnprintf(buffer, sizeof(buffer), fmt, args);
     qemu_print(buffer);
+    qemu_write_char('\n');
 
     va_end(args);
 }

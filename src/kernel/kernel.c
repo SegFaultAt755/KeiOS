@@ -32,37 +32,33 @@ void memory_initialize(MultibootInfo *boot_info);
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
 [[noreturn]] void kernel_entry(uint32_t, MultibootInfo *boot_info) {
     /* Initialize kernel */
-    qemu_printf(QEMU_LOG_INFO, "Initializing kernel\n");
+    qemu_printf(QEMU_LOG_INFO, "Initializing kernel");
     gdt_initialize();
     idt_initialize();
     timer_initialize(100, timer_callback); /* Passing frequency and callback function */
     memory_initialize(boot_info);
+    enable_interrupts();
 
+#if 0 /* Remove this code temporarily */
     /* Initialize graphics */
-#if 0
-    qemu_printf(QEMU_LOG_INFO, "Initializing graphics\n");
-    if (vga_init_graphics(boot_info)) {
-        qemu_printf(QEMU_LOG_INFO, "Video mode is selected\n");
-        vga_clear_screen(0xFF0000FF);
-        vga_set_pixel(160, 100, 0xFFFFFFFF);
+    qemu_printf(QEMU_LOG_INFO, "Initializing graphics");
+    if (vga_is_graphics_supported()) {
+        vga_init_graphics(boot_info);
+        qemu_printf(QEMU_LOG_INFO, "Video mode is selected");
     } else {
-        qemu_printf(QEMU_LOG_INFO, "Text mode is selected\n");
+        qemu_printf(QEMU_LOG_INFO, "Text mode is selected");
         vga_init_text_mode();
         terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     }
-#endif
-
-    vga_init_text_mode();
-    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-    enable_interrupts();
 
     /* Show welcome message */
-    qemu_printf(QEMU_LOG_INFO, "Show greeting messages\n");
+    qemu_printf(QEMU_LOG_INFO, "Show greeting messages");
     kprintf(LOG_EMPTY, "Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
         terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_RED, TERMINAL_DEFAULT_BACKGROUND_COLOR));
         kprintf(LOG_EMPTY, "<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FOREGROUND_COLOR, TERMINAL_DEFAULT_BACKGROUND_COLOR));
     show_banner();
+#endif
 
     /* Infinite loop to prevent CPU fault */
     while (true) {}
@@ -108,17 +104,17 @@ void show_banner(void) {
 }
 
 void memory_initialize(MultibootInfo *boot_info) {
-    qemu_printf(QEMU_LOG_INFO, "Initializing memory\n");
+    qemu_printf(QEMU_LOG_INFO, "Initializing memory");
 
     uint32_t mod_address = *(uint32_t*)(boot_info -> mods_address + 4);
     uint32_t physical_allocation_start = (mod_address + 0xFFF) & ~0xFFF;
-    qemu_printf(QEMU_LOG_INFO, "Physical allocation start point is from %x\n", physical_allocation_start);
+    qemu_printf(QEMU_LOG_INFO, "Physical allocation start point is from %x", physical_allocation_start);
 
     uint64_t memory_high_point = boot_info -> memory_upper * 1024;
     if (memory_high_point > MAX_PHYSICAL_BYTES)
         memory_high_point = MAX_PHYSICAL_BYTES;
 
-    qemu_printf(QEMU_LOG_INFO, "Memory high point is from %x\n", memory_high_point);
+    qemu_printf(QEMU_LOG_INFO, "Memory high point is from %x", memory_high_point);
 
     paging_initialize((uint32_t) memory_high_point, physical_allocation_start);
 }

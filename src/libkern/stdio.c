@@ -1,33 +1,6 @@
 #include "libkern/stdio.h"
 #include "drivers/terminal.h"
-
-int uvalue_to_str(char *buffer, unsigned int value, int base, int min_width, int zero_padding) {
-    int i = 0;
-    
-    if (value == 0) {
-        buffer[i++] = '0';
-    } else {
-        while (value > 0) {
-            int rem = value % base;
-            buffer[i++] = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
-            value /= base;
-        }
-    }
-
-    /* Apply zero padding */
-    while (i < min_width && i < 32 && zero_padding) {
-        buffer[i++] = '0';
-    }
-
-    /* Reverse the buffer */
-    for (int j = 0; j < i / 2; j++) {
-        char temp = buffer[j];
-        buffer[j] = buffer[i - 1 - j];
-        buffer[i - 1 - j] = temp;
-    }
-
-    return i; /* Returns length of the string */
-}
+#include "libkern/string.h"
 
 void kprint_uint(unsigned int value, int base) {
     char buffer[32];
@@ -151,7 +124,7 @@ void kprintf(LogLevel level, const char *fmt, ...) {
 }
 
 /* Safe string formatting function */
-int ksnprintf(char *str, size_t size, const char *fmt, va_list args) {
+int kvsnprintf(char *str, size_t size, const char *fmt, va_list args) {
     if (size == 0) return 0;
 
     size_t str_idx = 0;
@@ -214,4 +187,13 @@ int ksnprintf(char *str, size_t size, const char *fmt, va_list args) {
 
     str[str_idx] = '\0'; /* Ensure null-termination */
     return (int) str_idx;
+}
+
+int ksnprintf(char *str, size_t size, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int res = kvsnprintf(str, size, fmt, args);
+    va_end(args);
+
+    return res;
 }

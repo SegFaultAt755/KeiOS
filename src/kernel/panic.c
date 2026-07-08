@@ -17,7 +17,7 @@ uintptr_t __stack_chk_guard = (uintptr_t) COMPILE_TIME_SEED;
 
 [[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
     disable_interrupts();
-    qemu_printf(QEMU_LOG_PANIC, "(%s:%d) %s | %s\n", file, line, reason, desc);
+    qemu_printf(QEMU_LOG_PANIC, "(%s:%d) %s | %s", file, line, reason, desc);
 
     vga_init_text_mode();
     terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
@@ -67,7 +67,7 @@ uintptr_t __stack_chk_guard = (uintptr_t) COMPILE_TIME_SEED;
 
     disable_interrupts();
 
-    qemu_printf(QEMU_LOG_PANIC, "(%s:%d) %s | %s\n", file, line, reason, formatted_desc);
+    qemu_printf(QEMU_LOG_PANIC, "(%s:%d) %s | %s", file, line, reason, formatted_desc);
 
     vga_init_text_mode();
     terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);

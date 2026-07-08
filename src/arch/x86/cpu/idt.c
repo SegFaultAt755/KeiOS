@@ -17,7 +17,7 @@ void idt_set_gate(uint8_t vector, uint32_t isr, uint8_t attributes) {
 }
 
 void remap_irq(void) {
-    qemu_printf(QEMU_LOG_INFO, "Remapping IRQ\n");
+    qemu_printf(QEMU_LOG_INFO, "Remapping IRQ");
     typedef struct Pic {
         uint16_t port;
         uint8_t value;
@@ -39,7 +39,7 @@ void remap_irq(void) {
 }
 
 void setup_irq(void) {
-    qemu_printf(QEMU_LOG_INFO, "Setting up IRQ\n");
+    qemu_printf(QEMU_LOG_INFO, "Setting up IRQ");
 
     static const void* irq_handlers[] = {
         irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7,
@@ -52,7 +52,7 @@ void setup_irq(void) {
 }
 
 void setup_idt() {
-    qemu_printf(QEMU_LOG_INFO, "Setting up IDT\n");
+    qemu_printf(QEMU_LOG_INFO, "Setting up IDT");
 
     static const void* isr_handlers[] = {
         isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7,
@@ -67,7 +67,7 @@ void setup_idt() {
 }
 
 void idt_initialize(void) {
-    qemu_printf(QEMU_LOG_INFO, "Initializing IDT\n");
+    qemu_printf(QEMU_LOG_INFO, "Initializing IDT");
 
     idtr.offset = (uint32_t) &idt_entries[0];
     idtr.size = (uint16_t) sizeof(idt_entries) - 1;
