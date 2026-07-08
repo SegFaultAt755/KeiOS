@@ -1,7 +1,9 @@
 # Binaries
 /bin
 /keios
-/*.iso
+/**/*.iso
+/**/*.img
+/**/*.elf
 /**/*.o
 /*.qcow2
 /*.log

@@ -23,7 +23,7 @@ void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, ui
 void gdt_initialize() {
     qemu_printf(QEMU_LOG_INFO, "Initializing GDT\n");
 
-    gdt_ptr.limit = (sizeof(GdtEntry) * 6) - 1;
+    gdt_ptr.limit = sizeof(gdt_entries) - 1;
     gdt_ptr.base  = (uint32_t) &gdt_entries;
 
     disable_interrupts();

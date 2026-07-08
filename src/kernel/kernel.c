@@ -2,7 +2,6 @@
 #include "kernel/interrupts.h"
 #include "kernel/halt.h"
 #include "kernel/multiboot.h"
-#include "kernel/memory.h"
 #include "kernel/qemu.h"
 
 #include "drivers/terminal.h"
@@ -13,6 +12,7 @@
 #include "arch/x86/gdt.h"
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
+#include "arch/x86/paging.h"
 
 #include "arch/x86/paging.h"
 
@@ -27,6 +27,7 @@ void timer_callback(Registers*) {
 }
 
 void show_banner(void);
+void memory_initialize(MultibootInfo *boot_info);
 
 [[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
 [[noreturn]] void kernel_entry(uint32_t, MultibootInfo *boot_info) {
@@ -38,7 +39,7 @@ void show_banner(void);
     memory_initialize(boot_info);
 
     /* Initialize graphics */
-#if false
+#if 0
     qemu_printf(QEMU_LOG_INFO, "Initializing graphics\n");
     if (vga_init_graphics(boot_info)) {
         qemu_printf(QEMU_LOG_INFO, "Video mode is selected\n");
@@ -104,4 +105,20 @@ void show_banner(void) {
 
     for (uint8_t i = 0; i < 5; i++)
         terminal_blankline();
+}
+
+void memory_initialize(MultibootInfo *boot_info) {
+    qemu_printf(QEMU_LOG_INFO, "Initializing memory\n");
+
+    uint32_t mod_address = *(uint32_t*)(boot_info -> mods_address + 4);
+    uint32_t physical_allocation_start = (mod_address + 0xFFF) & ~0xFFF;
+    qemu_printf(QEMU_LOG_INFO, "Physical allocation start point is from %x\n", physical_allocation_start);
+
+    uint64_t memory_high_point = boot_info -> memory_upper * 1024;
+    if (memory_high_point > MAX_PHYSICAL_BYTES)
+        memory_high_point = MAX_PHYSICAL_BYTES;
+
+    qemu_printf(QEMU_LOG_INFO, "Memory high point is from %x\n", memory_high_point);
+
+    paging_initialize((uint32_t) memory_high_point, physical_allocation_start);
 }

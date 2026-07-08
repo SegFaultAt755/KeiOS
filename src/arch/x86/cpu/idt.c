@@ -70,7 +70,7 @@ void idt_initialize(void) {
     qemu_printf(QEMU_LOG_INFO, "Initializing IDT\n");
 
     idtr.offset = (uint32_t) &idt_entries[0];
-    idtr.size = (uint16_t) sizeof(GateDescriptor) * 256 - 1;
+    idtr.size = (uint16_t) sizeof(idt_entries) - 1;
     memset(&idt_entries, 0, sizeof(GateDescriptor) * 256);
 
     setup_idt();

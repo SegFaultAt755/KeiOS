@@ -27,8 +27,8 @@ To accurately reproduce the performance, bottlenecks, and hardware constraints o
 | Component     | Specification | Notes / Emulation Target                                        |
 | ------------- | ------------- | --------------------------------------------------------------- |
 | **CPU**       | 1 vCPU        | Mimics a single-core Intel Atom                                 |
-| **Memory**    | 1GB RAM       | Standard capacity for Windows XP                                |
-| **Boot mode** | BIOS          | Legacy boot environment                                         |
+| **Memory**    | 4GB RAM       | Standard capacity for Windows XP                                |
+| **Boot mode** | SeaBios BIOS  | Legacy boot environment                                         |
 | **Storage**   | 8GB HDD       | Replicates early low-capacity storage or slow mechanical drives |
 
 ---

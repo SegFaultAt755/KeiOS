@@ -46,7 +46,8 @@ _start:
     or ecx, 0x80000000
     mov cr0, ecx
 
-    jmp higher
+    mov ecx, higher
+    jmp ecx
 
 section .text
 higher:
@@ -65,12 +66,12 @@ halt:
 section .data
     align 4096
 global initial_page_directory
-initial_page_directory:
-    dd 0x83
+initial_page_directory: ; Create 1024 entries
+    dd 10000011b
     times 768-1 dd 0
 
-    dd (0 << 22) | 0x83
-    dd (1 << 22) | 0x83
-    dd (2 << 22) | 0x83
-    dd (3 << 22) | 0x83
+    dd (0 << 22) | 10000011b
+    dd (1 << 22) | 10000011b
+    dd (2 << 22) | 10000011b
+    dd (3 << 22) | 10000011b
     times 256-4 dd 0

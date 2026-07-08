@@ -5,11 +5,11 @@
 
 #define VGA_TEXT_WIDTH  80
 #define VGA_TEXT_HEIGHT 25
-#define VGA_TEXT_MEMORY 0xB8000
+#define VGA_TEXT_MEMORY 0xC00B8000
 
 #define VGA_GFX_WIDTH  320
 #define VGA_GFX_HEIGHT 200
-#define VGA_GFX_MEMORY 0xA0000
+#define VGA_GFX_MEMORY 0xC00A0000
 
 typedef enum VgaColors {
     VGA_COLOR_BLACK         = 0,
