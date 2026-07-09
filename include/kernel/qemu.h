@@ -13,7 +13,7 @@ enum qemu_log {
     QEMU_LOG_PANIC
 };
 
-static inline void qemu_write_char(char c) {
+static inline void qemu_putchar(char c) {
     outb(QEMU_PORT, c);
 }
 

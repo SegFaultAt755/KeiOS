@@ -3,7 +3,7 @@
 
 void irq_handler(struct registers *regs) {
     /* Send an EOI (end of interrupt) signal to the PIC */
-    if (regs -> interrupt_number >= 40) {
+    if (regs -> intr_num >= 40) {
         outb(0xA0, 0x20);
         outb(0x80, 0);
     }
@@ -12,8 +12,8 @@ void irq_handler(struct registers *regs) {
     outb(0x20, 0x20);
     outb(0x80, 0);
 
-    if (interrupt_handlers[regs -> interrupt_number] != 0) {
-        isr handler = interrupt_handlers[regs -> interrupt_number];
+    if (isr_intr_handler[regs -> intr_num] != 0) {
+        isr handler = isr_intr_handler[regs -> intr_num];
         handler(regs);
     }
 }

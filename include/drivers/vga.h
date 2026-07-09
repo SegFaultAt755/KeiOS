@@ -7,11 +7,11 @@
 #define VGA_TEXT_HEIGHT 25
 #define VGA_TEXT_MEMORY 0xC00B8000
 
-#define VGA_GFX_WIDTH  320
-#define VGA_GFX_HEIGHT 200
-#define VGA_GFX_MEMORY 0xC00A0000
+#define VGA_VIDEO_WIDTH  1024
+#define VGA_VIDEO_HEIGHT 768
+#define VGA_VIDEO_MEMORY 0xC00A0000
 
-enum vga_colors {
+enum vga_8b_colors {
     VGA_COLOR_BLACK         = 0,
     VGA_COLOR_BLUE          = 1,
     VGA_COLOR_GREEN         = 2,
@@ -30,7 +30,7 @@ enum vga_colors {
     VGA_COLOR_WHITE         = 15
 };
 
-static inline uint8_t vga_entry_color(enum vga_colors fg, enum vga_colors bg) {
+static inline uint8_t vga_entry_color(enum vga_8b_colors fg, enum vga_8b_colors bg) {
     return fg | (bg << 4);
 }
 
@@ -39,7 +39,7 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 }
 
 void vga_init_text_mode(void);
-bool vga_init_graphics(struct multiboot_info *boot_info);
+bool vga_init_graphics(struct multiboot_info *mbi);
 bool vga_is_graphics_supported(void);
 
 void vga_clear_screen(uint32_t color);

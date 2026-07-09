@@ -23,7 +23,7 @@ struct [[gnu::packed]] page_table_entry {
     uint32_t frame     : 20;
 };
 
-struct [[gnu::packed]] page_directory_entry {
+struct [[gnu::packed]] page_dir_entry {
     uint32_t present    : 1;
     uint32_t rw         : 1;
     uint32_t user       : 1;
@@ -41,8 +41,8 @@ struct [[gnu::aligned(PAGE_SIZE)]] page_table {
     struct page_table_entry entries[PAGE_TABLE_ENTRIES];
 };
 
-struct [[gnu::aligned(PAGE_SIZE)]] page_directory {
-    struct page_directory_entry entries[PAGE_TABLE_ENTRIES];
+struct [[gnu::aligned(PAGE_SIZE)]] page_dir {
+    struct page_dir_entry entries[PAGE_TABLE_ENTRIES];
 };
 
-void paging_initialize(uint32_t memory_high_point, uint32_t physical_allocation_start);
+void paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start);

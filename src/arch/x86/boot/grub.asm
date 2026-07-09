@@ -29,7 +29,7 @@ stack_top:
 section .boot
 global _start
 _start:
-    mov ecx, (initial_page_directory - 0xC0000000)
+    mov ecx, (initial_page_dir - 0xC0000000)
     mov cr3, ecx
     
     mov ecx, cr4
@@ -59,8 +59,8 @@ halt:
 
 section .data
     align 4096
-global initial_page_directory
-initial_page_directory: ; Create 1024 entries
+global initial_page_dir
+initial_page_dir: ; Create 1024 entries
     dd 10000011b
     times 768-1 dd 0
 

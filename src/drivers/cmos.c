@@ -1,6 +1,9 @@
 #include "drivers/cmos.h"
 
-uint8_t read_cmos_register(uint8_t reg) {
-    outb(CMOS_ADDRESS, reg);
+#define CMOS_ADDR 0x70
+#define CMOS_DATA 0x71
+
+uint8_t read_cmos_reg(uint8_t reg) {
+    outb(CMOS_ADDR, reg);
     return inb(CMOS_DATA);
 }

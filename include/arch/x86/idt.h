@@ -2,11 +2,11 @@
 
 #include <stdint.h>
 
-struct [[gnu::packed]] gate_descriptor {
+struct [[gnu::packed]] idt_gate {
     uint16_t offset_low;
-    uint16_t segment_selector;
+    uint16_t segment_sel;
     uint8_t  reserved;
-    uint8_t  attributes;
+    uint8_t  attribs;
     uint16_t offset_high;
 };
 
@@ -15,6 +15,7 @@ struct [[gnu::packed]] idt_pointer {
     uint32_t base;
 };
 
+/* Generate a list of functions declared in asm stubs */
 #define ISR_LIST \
     X(0)  X(1)  X(2)  X(3)  X(4)  X(5)  X(6)  X(7)  \
     X(8)  X(9)  X(10) X(11) X(12) X(13) X(14) X(15) \
@@ -33,5 +34,5 @@ struct [[gnu::packed]] idt_pointer {
     IRQ_LIST
 #undef X
 
-void idt_set_gate(uint8_t vector, uint32_t isr, uint8_t attributes);
+void idt_set_gate(uint8_t vec, uint32_t isr, uint8_t attribs);
 void idt_initialize(void);

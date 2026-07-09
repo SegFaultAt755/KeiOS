@@ -1,35 +1,33 @@
 #include "libkern/string.h"
 
-uint32_t strlen(const char *str) {
-    uint32_t step = 0;
-    for (; str[step] != '\0'; step++); 
-    
-    return step;
+uint32_t strlen(const char *s) {
+    uint32_t i = 0;
+    for (; s[i] != '\0'; i++);
+    return i;
 }
 
-int uvalue_to_str(char *buffer, unsigned int value, int base, int min_width, int zero_padding) {
+int uvalue_to_str(char *buf, unsigned int val, int base, int min_w, int zpad) {
     int i = 0;
     
-    if (value == 0) {
-        buffer[i++] = '0';
+    if (val == 0) {
+        buf[i++] = '0';
     } else {
-        while (value > 0) {
-            int rem = value % base;
-            buffer[i++] = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
-            value /= base;
+        while (val > 0) {
+            int rem = val % base;
+            buf[i++] = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
+            val /= base;
         }
     }
 
     /* Apply zero padding */
-    while (i < min_width && i < 32 && zero_padding) {
-        buffer[i++] = '0';
-    }
+    while (i < min_w && i < 32 && zpad)
+        buf[i++] = '0';
 
     /* Reverse the buffer */
     for (int j = 0; j < i / 2; j++) {
-        char temp = buffer[j];
-        buffer[j] = buffer[i - 1 - j];
-        buffer[i - 1 - j] = temp;
+        char tmp = buf[j];
+        buf[j] = buf[i - 1 - j];
+        buf[i - 1 - j] = tmp;
     }
 
     return i; /* Returns length of the string */

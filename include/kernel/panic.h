@@ -7,10 +7,10 @@
 [[noreturn]] void runtime_panic_format(const char *reason, const char *desc, const char *file, uint32_t line, ...);
 
 #define KERNEL_PANIC(reason, desc) runtime_panic(reason, desc, __FILE__, __LINE__)
-#define KERNEL_ASSERT(condition, message, desc) \
+#define KERNEL_ASSERT(condition, reason, desc) \
     do { \
         if (!(condition)) { \
-            runtime_panic(message, desc, __FILE__, __LINE__); \
+            runtime_panic(reason, desc, __FILE__, __LINE__); \
         } \
     } while (false)
 

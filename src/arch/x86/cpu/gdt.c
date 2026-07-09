@@ -3,41 +3,40 @@
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
 
-struct gdt_entry gdt_entries[6];
-struct gdt_pointer gdt_ptr;
+static struct gdt_entry entries[6];
+static struct gdt_pointer ptr;
 
 extern void gdt_flush(uint32_t);
 extern void tss_flush(void);
 
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran) {
-    gdt_entries[num].base_low = (base & 0xFFFF);
-    gdt_entries[num].base_middle = (base >> 16) & 0xFF;
-    gdt_entries[num].base_high = (base >> 24) & 0xFF;
+    entries[num].base_low = (base & 0xFFFF);
+    entries[num].base_middle = (base >> 16) & 0xFF;
+    entries[num].base_high = (base >> 24) & 0xFF;
 
-    gdt_entries[num].limit_low = (limit & 0xFFFF);
-    gdt_entries[num].granularity = (limit >> 16) & 0x0F;
-    gdt_entries[num].granularity |= gran & 0xF0;
-    gdt_entries[num].access = access;
+    entries[num].limit_low = (limit & 0xFFFF);
+    entries[num].gran = (limit >> 16) & 0x0F;
+    entries[num].gran |= gran & 0xF0;
+    entries[num].access = access;
 }
 
 void gdt_initialize() {
     qemu_printf(QEMU_LOG_INFO, "Initializing GDT");
 
-    gdt_ptr.base = (uint32_t) &gdt_entries;
-    gdt_ptr.limit = (uint16_t) sizeof(gdt_entries) - 1;
+    ptr.base = (uint32_t) &entries;
+    ptr.limit = (uint16_t) sizeof(entries) - 1;
 
     disable_interrupts();
 
     qemu_printf(QEMU_LOG_INFO, "Setting GDT gates");
-    gdt_set_gate(0, 0, 0, 0, 0); /* Null descriptor */
-
-    gdt_set_gate(1, 0, 0xFFFFF, 0x9A, 0xCF); /* Kernel code segment */
-    gdt_set_gate(2, 0, 0xFFFFF, 0x92, 0xCF); /* Kernel data segment */
-    gdt_set_gate(3, 0, 0xFFFFF, 0xFA, 0xCF); /* User code segment */
-    gdt_set_gate(4, 0, 0xFFFFF, 0xF2, 0xCF); /* User data segment */
-    write_tss(0x10, 0x0); /* Task state segment */
+    gdt_set_gate(0, 0, 0, 0, 0);
+    gdt_set_gate(1, 0, 0xFFFFF, 0x9A, 0xCF);
+    gdt_set_gate(2, 0, 0xFFFFF, 0x92, 0xCF);
+    gdt_set_gate(3, 0, 0xFFFFF, 0xFA, 0xCF);
+    gdt_set_gate(4, 0, 0xFFFFF, 0xF2, 0xCF);
+    write_tss(0x10, 0x0);
 
     qemu_printf(QEMU_LOG_INFO, "Flushing GDT & TSS");
-    gdt_flush((uint32_t) &gdt_ptr);
+    gdt_flush((uint32_t) &ptr);
     tss_flush();
 }

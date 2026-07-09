@@ -5,20 +5,20 @@
 #include "config.h"
 #include <stddef.h>
 
-static void qemu_print(const char *str) {
-    for (size_t i = 0; i < strlen(str); i++)
-        qemu_write_char(str[i]);
+static void qemu_print(const char *s) {
+    for (size_t i = 0; i < strlen(s); i++)
+        qemu_putchar(s[i]);
 }
 
 static void qemu_print_time(void) {
-    char buffer[1024] = { 0 };
-    ksnprintf(buffer, sizeof(buffer), "[%d:%d %d]: ", 
-        bcd_to_binary(read_cmos_register(CMOS_HOUR)),
-        bcd_to_binary(read_cmos_register(CMOS_MINUTE)),
-        bcd_to_binary(read_cmos_register(CMOS_SECOND))
+    char buf[1024] = { 0 };
+    ksnprintf(buf, sizeof(buf), "[%d-%d-%d]: ", 
+        bcd_to_binary(read_cmos_reg(CMOS_HOUR)),
+        bcd_to_binary(read_cmos_reg(CMOS_MIN)),
+        bcd_to_binary(read_cmos_reg(CMOS_SEC))
     );
 
-    qemu_print(buffer);
+    qemu_print(buf);
 }
 
 void qemu_printf(enum qemu_log level, const char *fmt, ...) {
@@ -33,10 +33,10 @@ void qemu_printf(enum qemu_log level, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    char buffer[1024] = { 0 };
-    ksnprintf(buffer, sizeof(buffer), fmt, args);
-    qemu_print(buffer);
-    qemu_write_char('\n');
+    char buf[1024] = { 0 };
+    ksnprintf(buf, sizeof(buf), fmt, args);
+    qemu_print(buf);
+    qemu_putchar('\n');
 
     va_end(args);
 }

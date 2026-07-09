@@ -1,8 +1,7 @@
 #include "libkern/memory.h"
 
-void *memset(void *dest, int value, size_t n) {
+void *memset(void *dest, int val, size_t n) {
     unsigned char *ptr = (unsigned char *) dest;
-    unsigned char val = (unsigned char) value;
     
     while (n--) {*ptr++ = val;}
     return dest;
