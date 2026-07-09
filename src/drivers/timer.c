@@ -2,7 +2,7 @@
 #include "libkern/stdio.h"
 #include "kernel/qemu.h"
 
-void timer_initialize(uint32_t frequency, void (*callback)(Registers *regs)) {
+void timer_initialize(uint32_t frequency, void (*callback)(struct registers *regs)) {
     qemu_printf(QEMU_LOG_INFO, "Initializing timer : %d", frequency);
     register_interrupt_handler(IRQ0, callback);
 

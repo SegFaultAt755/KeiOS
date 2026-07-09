@@ -19,15 +19,15 @@
 #define IRQ14 46
 #define IRQ15 47
 
-typedef struct Registers {
+struct registers {
     uint32_t ds;
     uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; /* Pushed by pusha */
-    uint32_t interrupt_number, error_code; /* Pushed by macros */
-    uint32_t eip, cs, eflags, useresp, ss; /* Pushed by CPU */
-} Registers;
+    uint32_t interrupt_number, error_code;           /* Pushed by macros */
+    uint32_t eip, cs, eflags, useresp, ss;           /* Pushed by CPU */
+};
 
-typedef void (*Isr)(Registers *);
-extern Isr interrupt_handlers[256];
+typedef void (*isr)(struct registers *);
+extern isr interrupt_handlers[256];
 
-void register_interrupt_handler(uint8_t number, Isr handler); 
-void isr_handler(Registers regs);
+void register_interrupt_handler(uint8_t number, isr handler); 
+void isr_handler(struct registers regs);

@@ -17,7 +17,7 @@ void vga_init_text_mode(void) {
     /* Switch to text mode */
 }
 
-bool vga_init_graphics(MultibootInfo *boot_info) {
+bool vga_init_graphics(struct multiboot_info *boot_info) {
     qemu_printf(QEMU_LOG_INFO, "Initializing VGA video mode", __FILE__, __LINE__);
     qemu_printf(QEMU_LOG_INFO, "Checking if bootloader loaded neccesary flags");
     if (!(boot_info -> flags & (1 << 12))) {

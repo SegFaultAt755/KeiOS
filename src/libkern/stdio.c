@@ -19,7 +19,7 @@ void kprint_int(int value) {
     kprint_uint(uvalue, 10);
 }
 
-void kvprintf(LogLevel level, const char *fmt, va_list args) {
+void kvprintf(enum log_level level, const char *fmt, va_list args) {
     switch (level) {
         case LOG_INFO:    terminal_writestring("[INFO]: "); break;
         case LOG_WARNING: terminal_writestring("[WARNING]: "); break;
@@ -116,7 +116,7 @@ void kvprintf(LogLevel level, const char *fmt, va_list args) {
     }
 }
 
-void kprintf(LogLevel level, const char *fmt, ...) {
+void kprintf(enum log_level level, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     kvprintf(level, fmt, args);

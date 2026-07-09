@@ -21,7 +21,7 @@ static void qemu_print_time(void) {
     qemu_print(buffer);
 }
 
-void qemu_printf(QemuLogLevel level, const char *fmt, ...) {
+void qemu_printf(enum qemu_log level, const char *fmt, ...) {
     switch (level) {
         case QEMU_LOG_INFO:    { qemu_print("[INFO]: ");    qemu_print_time(); } break;
         case QEMU_LOG_WARNING: { qemu_print("[WARNING]: "); qemu_print_time(); } break;

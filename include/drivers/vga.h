@@ -11,7 +11,7 @@
 #define VGA_GFX_HEIGHT 200
 #define VGA_GFX_MEMORY 0xC00A0000
 
-typedef enum VgaColors {
+enum vga_colors {
     VGA_COLOR_BLACK         = 0,
     VGA_COLOR_BLUE          = 1,
     VGA_COLOR_GREEN         = 2,
@@ -28,9 +28,9 @@ typedef enum VgaColors {
     VGA_COLOR_LIGHT_MAGENTA = 13,
     VGA_COLOR_LIGHT_BROWN   = 14,
     VGA_COLOR_WHITE         = 15
-} VgaColors;
+};
 
-static inline uint8_t vga_entry_color(VgaColors fg, VgaColors bg) {
+static inline uint8_t vga_entry_color(enum vga_colors fg, enum vga_colors bg) {
     return fg | (bg << 4);
 }
 
@@ -39,7 +39,7 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 }
 
 void vga_init_text_mode(void);
-bool vga_init_graphics(MultibootInfo *boot_info);
+bool vga_init_graphics(struct multiboot_info *boot_info);
 bool vga_is_graphics_supported(void);
 
 void vga_clear_screen(uint32_t color);

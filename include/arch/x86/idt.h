@@ -2,18 +2,18 @@
 
 #include <stdint.h>
 
-typedef struct [[gnu::packed]] GateDescriptor {
+struct [[gnu::packed]] gate_descriptor {
     uint16_t offset_low;
     uint16_t segment_selector;
     uint8_t  reserved;
     uint8_t  attributes;
     uint16_t offset_high;
-} GateDescriptor;
+};
 
-typedef struct [[gnu::packed]] Idtr {
-    uint16_t size;
-    uint32_t offset;
-} Idtr;
+struct [[gnu::packed]] idt_pointer {
+    uint16_t limit;
+    uint32_t base;
+};
 
 #define ISR_LIST \
     X(0)  X(1)  X(2)  X(3)  X(4)  X(5)  X(6)  X(7)  \

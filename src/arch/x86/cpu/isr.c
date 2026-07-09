@@ -2,12 +2,12 @@
 #include "kernel/panic.h"
 #include "libkern/stdio.h"
 
-Isr interrupt_handlers[256];
-void register_interrupt_handler(uint8_t number, Isr handler) {
+isr interrupt_handlers[256];
+void register_interrupt_handler(uint8_t number, isr handler) {
     interrupt_handlers[number] = handler;
 }
 
-void divide_by_zero_fault_handler(Registers *regs) {
+void divide_by_zero_fault_handler(struct registers *regs) {
     uint32_t faulting_address;
     __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
 
@@ -16,7 +16,7 @@ void divide_by_zero_fault_handler(Registers *regs) {
     );
 }
 
-void invalid_opcode_fault_handler(Registers *regs) {
+void invalid_opcode_fault_handler(struct registers *regs) {
     uint32_t faulting_address;
     __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
 
@@ -25,7 +25,7 @@ void invalid_opcode_fault_handler(Registers *regs) {
     );
 }
 
-void stack_segment_fault_handler(Registers *regs) {
+void stack_segment_fault_handler(struct registers *regs) {
     uint32_t faulting_address;
     __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
 
@@ -34,7 +34,7 @@ void stack_segment_fault_handler(Registers *regs) {
     );
 }
 
-void general_protection_fault_handler(Registers *regs) {
+void general_protection_fault_handler(struct registers *regs) {
     uint32_t faulting_address;
     __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
 
@@ -43,11 +43,11 @@ void general_protection_fault_handler(Registers *regs) {
     );
 }
 
-void double_fault_handler(Registers*) {
+void double_fault_handler(struct registers *) {
     KERNEL_PANIC("Double fault", 0);
 }
 
-void page_fault_handler(Registers *regs) {
+void page_fault_handler(struct registers *regs) {
     uint32_t faulting_address;
     __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_address));
 
@@ -63,7 +63,7 @@ void page_fault_handler(Registers *regs) {
     );
 }
 
-void isr_handler(Registers regs) {
+void isr_handler(struct registers regs) {
     switch (regs.interrupt_number) {
         case 0:
             divide_by_zero_fault_handler(&regs);

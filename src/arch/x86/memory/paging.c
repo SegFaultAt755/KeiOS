@@ -8,7 +8,7 @@ extern void *initial_page_directory;
 uint8_t physical_memory_bitmap[TOTAL_PAGES / 8]; 
 
 #define MAX_DIRECTORIES 256
-PageDirectory page_directories[MAX_DIRECTORIES];
+struct page_directory page_directories[MAX_DIRECTORIES];
 uint32_t page_directories_used[MAX_DIRECTORIES];
 
 static inline void invalidate(uint32_t address) {
@@ -28,8 +28,8 @@ void paging_set_physical_memory(uint32_t memory_high_point, uint32_t physical_al
 void paging_initialize(uint32_t memory_high_point, uint32_t physical_allocation_start) {
     qemu_printf(QEMU_LOG_INFO, "Resetting first point from initial page directories");
     
-    PageDirectory initial_page_directory_compiled = *(PageDirectory*) initial_page_directory;
-    memset(&initial_page_directory_compiled.entries[0], 0, sizeof(PageDirectoryEntry));
+    struct page_directory initial_page_directory_compiled = *(struct page_directory *) initial_page_directory;
+    memset(&initial_page_directory_compiled.entries[0], 0, sizeof(struct page_directory_entry));
     invalidate(0);
 
     /* Recursive mapping from the end */

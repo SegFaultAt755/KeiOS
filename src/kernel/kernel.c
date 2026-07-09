@@ -21,16 +21,15 @@
 #include "config.h"
 
 uint64_t tick = 0;
-void timer_callback(Registers*) {
+void timer_callback(struct registers *) {
     /* Note: Don't try to output any messages from here, because the output will be messy */
     tick += 1;
 }
 
 void show_banner(void);
-void memory_initialize(MultibootInfo *boot_info);
+void memory_initialize(struct multiboot_info *boot_info);
 
-[[noreturn]] void kernel_entry(uint32_t magic, MultibootInfo *boot_info);
-[[noreturn]] void kernel_entry(uint32_t, MultibootInfo *boot_info) {
+[[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *boot_info) {
     /* Initialize kernel */
     qemu_printf(QEMU_LOG_INFO, "Initializing kernel");
     gdt_initialize();
@@ -39,17 +38,9 @@ void memory_initialize(MultibootInfo *boot_info);
     memory_initialize(boot_info);
     enable_interrupts();
 
-#if 0 /* Remove this code temporarily */
     /* Initialize graphics */
-    qemu_printf(QEMU_LOG_INFO, "Initializing graphics");
-    if (vga_is_graphics_supported()) {
-        vga_init_graphics(boot_info);
-        qemu_printf(QEMU_LOG_INFO, "Video mode is selected");
-    } else {
-        qemu_printf(QEMU_LOG_INFO, "Text mode is selected");
-        vga_init_text_mode();
-        terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-    }
+    vga_init_text_mode();
+    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
     /* Show welcome message */
     qemu_printf(QEMU_LOG_INFO, "Show greeting messages");
@@ -58,7 +49,6 @@ void memory_initialize(MultibootInfo *boot_info);
         kprintf(LOG_EMPTY, "<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FOREGROUND_COLOR, TERMINAL_DEFAULT_BACKGROUND_COLOR));
     show_banner();
-#endif
 
     /* Infinite loop to prevent CPU fault */
     while (true) {}
@@ -73,7 +63,7 @@ void show_banner(void) {
         "|_|\\_\\ \\___| |_| \\___/ |____/"
     };
 
-    VgaColors rainbow[] = {
+    enum vga_colors rainbow[] = {
         VGA_COLOR_LIGHT_RED,
         VGA_COLOR_LIGHT_BROWN, /* VGA equivalent to orange/yellow */
         VGA_COLOR_LIGHT_GREEN,
@@ -103,7 +93,7 @@ void show_banner(void) {
         terminal_blankline();
 }
 
-void memory_initialize(MultibootInfo *boot_info) {
+void memory_initialize(struct multiboot_info *boot_info) {
     qemu_printf(QEMU_LOG_INFO, "Initializing memory");
 
     uint32_t mod_address = *(uint32_t*)(boot_info -> mods_address + 4);

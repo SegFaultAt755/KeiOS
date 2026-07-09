@@ -8,30 +8,30 @@
 #define MULTIBOOT_MEMORY_NVS              4
 #define MULTIBOOT_MEMORY_BADRAM           5
 
-typedef struct [[gnu::packed]] MultibootAoutSymbolTable {
+struct [[gnu::packed]] multiboot_aout_symbol_table {
     uint32_t tab_size;
     uint32_t str_size;
     uint32_t address;
     uint32_t reserved;
-} MultibootAoutSymbolTable;
+};
 
-typedef struct [[gnu::packed]] MultibootElfSectionHeaderTable {
+struct [[gnu::packed]] multiboot_elf_section_header_table {
     uint32_t number;
     uint32_t size;
     uint32_t address;
     uint32_t shndx;
-} MultibootElfSectionHeaderTable;
+};
 
-typedef struct [[gnu::packed]] MultibootMmapEntry {
+struct [[gnu::packed]] multiboot_mmap_entry {
     uint32_t size;
     uint32_t address_lower;
     uint32_t address_upper;
     uint32_t length_lower;
     uint32_t length_upper;
     uint32_t type;
-} MultibootMmapEntry;
+};
 
-typedef struct [[gnu::packed]] MultibootInfo {
+struct [[gnu::packed]] multiboot_info {
     uint32_t flags;
     uint32_t memory_lower;
     uint32_t memory_upper;
@@ -42,8 +42,8 @@ typedef struct [[gnu::packed]] MultibootInfo {
     uint32_t mods_address;
 
     union {
-        MultibootAoutSymbolTable aout_symbol;
-        MultibootElfSectionHeaderTable elf_section;
+        struct multiboot_aout_symbol_table aout_symbol;
+        struct multiboot_elf_section_header_table elf_section;
     } un;
 
     uint32_t mmap_length;
@@ -88,4 +88,4 @@ typedef struct [[gnu::packed]] MultibootInfo {
             uint8_t framebuffer_blue_mask_size;
         };
     };
-} MultibootInfo;
+};

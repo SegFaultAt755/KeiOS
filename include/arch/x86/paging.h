@@ -9,7 +9,7 @@
 #define PAGE_TABLE_ENTRIES 1024
 #define MAX_PHYSICAL_BYTES 0x100000000ULL /* 4GB */
 
-typedef struct [[gnu::packed]] PageTableEntry {
+struct [[gnu::packed]] page_table_entry {
     uint32_t present   : 1;
     uint32_t rw        : 1;
     uint32_t user      : 1;
@@ -21,9 +21,9 @@ typedef struct [[gnu::packed]] PageTableEntry {
     uint32_t global    : 1;
     uint32_t available : 3;
     uint32_t frame     : 20;
-} PageTableEntry;
+};
 
-typedef struct [[gnu::packed]] PageDirectoryEntry {
+struct [[gnu::packed]] page_directory_entry {
     uint32_t present    : 1;
     uint32_t rw         : 1;
     uint32_t user       : 1;
@@ -34,15 +34,15 @@ typedef struct [[gnu::packed]] PageDirectoryEntry {
     uint32_t page_size  : 1;
     uint32_t ignored2   : 4;
     uint32_t table_addr : 20;
-} PageDirectoryEntry;
+};
 
 /* Aligned tables architecture */
-typedef struct [[gnu::aligned(PAGE_SIZE)]] PageTable {
-    PageTableEntry entries[PAGE_TABLE_ENTRIES];
-} PageTable;
+struct [[gnu::aligned(PAGE_SIZE)]] page_table {
+    struct page_table_entry entries[PAGE_TABLE_ENTRIES];
+};
 
-typedef struct [[gnu::aligned(PAGE_SIZE)]] PageDirectory {
-    PageDirectoryEntry entries[PAGE_TABLE_ENTRIES];
-} PageDirectory;
+struct [[gnu::aligned(PAGE_SIZE)]] page_directory {
+    struct page_directory_entry entries[PAGE_TABLE_ENTRIES];
+};
 
 void paging_initialize(uint32_t memory_high_point, uint32_t physical_allocation_start);

@@ -4,8 +4,8 @@
 #include "kernel/qemu.h"
 #include <stddef.h>
 
-GateDescriptor idt_entries[256];
-Idtr idtr;
+struct gate_descriptor idt_entries[256];
+struct idt_pointer idt_ptr;
 
 void idt_set_gate(uint8_t vector, uint32_t isr, uint8_t attributes) {
     idt_entries[vector].offset_low = isr & 0xFFFF;
@@ -69,13 +69,13 @@ void setup_idt() {
 void idt_initialize(void) {
     qemu_printf(QEMU_LOG_INFO, "Initializing IDT");
 
-    idtr.offset = (uint32_t) &idt_entries[0];
-    idtr.size = (uint16_t) sizeof(idt_entries) - 1;
-    memset(&idt_entries, 0, sizeof(GateDescriptor) * 256);
+    idt_ptr.base = (uint32_t) &idt_entries[0];
+    idt_ptr.limit = (uint16_t) sizeof(idt_entries) - 1;
+    memset(&idt_entries, 0, sizeof(struct gate_descriptor) * 256);
 
     setup_idt();
     remap_irq();
     setup_irq();
 
-    __asm__ volatile ("lidt %0" : : "m" (idtr));
+    __asm__ volatile ("lidt %0" : : "m" (idt_ptr));
 }

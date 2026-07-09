@@ -2,19 +2,19 @@
 
 #include <stdint.h>
 
-typedef struct [[gnu::packed]] GdtEntry {
-    uint16_t limit_low;   /* The lower 16 bits of the limit */
-    uint16_t base_low;    /* The lower 16 bits of the base */
-    uint8_t  base_middle; /* The next 8 bits of the base */
-    uint8_t  access;      /* Access flags */
-    uint8_t  granularity; /* High 4 bits of limit + 4 bits of flags */
-    uint8_t  base_high;   /* The last 8 bits of the base */
-} GdtEntry;
+struct [[gnu::packed]] gdt_entry {
+    uint16_t limit_low;
+    uint16_t base_low;
+    uint8_t  base_middle;
+    uint8_t  access;
+    uint8_t  granularity;
+    uint8_t  base_high;
+};
 
-typedef struct [[gnu::packed]] GdtPointer {
-    uint16_t limit; /* Size of the GDT array minus 1 */
-    uint32_t base;  /* Linear address of the GDT array */
-} GdtPointer;
+struct [[gnu::packed]] gdt_pointer {
+    uint16_t limit;
+    uint32_t base;
+};
 
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
 void gdt_initialize(void);

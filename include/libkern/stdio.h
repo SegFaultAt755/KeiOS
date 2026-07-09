@@ -8,18 +8,18 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef enum LogLevel {
+enum log_level {
     LOG_EMPTY,
     LOG_INFO,
     LOG_WARNING,
     LOG_ERR,
     LOG_DEBUG
-} LogLevel;
+};
 
 void kprint_uint(unsigned int value, int base);
 void kprint_int(int value);
-void kvprintf(LogLevel level, const char *fmt, va_list args);
-void kprintf(LogLevel level, const char *fmt, ...);
+void kvprintf(enum log_level level, const char *fmt, va_list args);
+void kprintf(enum log_level level, const char *fmt, ...);
 int  kvsnprintf(char *str, size_t size, const char *fmt, va_list args);
 int  ksnprintf(char *str, size_t size, const char *fmt, ...);
 

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-typedef struct [[gnu::packed]] TssEntry {
+struct [[gnu::packed]] tss_entry {
     uint16_t link;
     uint16_t reserved_link;
 
@@ -49,6 +49,6 @@ typedef struct [[gnu::packed]] TssEntry {
     
     uint32_t trap;
     uint32_t iomap;
-} TssEntry;
+};
 
 void write_tss(uint16_t ss0, uint32_t esp0);
