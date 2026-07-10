@@ -11,7 +11,7 @@ static void qemu_print(const char *s) {
 }
 
 static void qemu_print_time(void) {
-    char buf[1024] = { 0 };
+    char buf[1024] = {};
     ksnprintf(buf, sizeof(buf), "[%d-%d-%d]: ", 
         bcd_to_binary(read_cmos_reg(CMOS_HOUR)),
         bcd_to_binary(read_cmos_reg(CMOS_MIN)),
@@ -33,7 +33,7 @@ void qemu_printf(enum qemu_log level, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    char buf[1024] = { 0 };
+    char buf[1024] = {};
     ksnprintf(buf, sizeof(buf), fmt, args);
     qemu_print(buf);
     qemu_putchar('\n');

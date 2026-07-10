@@ -4,7 +4,7 @@
 
 static inline uint32_t get_fault_addr(void) {
     uint32_t addr;
-    __asm__ volatile ("mov %%cr2, %0" : "=r" (addr));
+    __asm__ volatile ("mov %%cr2, %0" : "=r"(addr));
     return addr;
 }
 

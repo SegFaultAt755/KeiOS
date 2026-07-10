@@ -16,7 +16,7 @@ void terminal_set_color(uint8_t color);
 void terminal_put_entry(char c, uint8_t color, uint16_t x, uint16_t y);
 void terminal_putchar(char c);
 
-void terminal_write(const char *s, size_t len);
+void terminal_write(const char *s, size_t size);
 void terminal_writestring(const char *s);
 
 void terminal_blankline(void);

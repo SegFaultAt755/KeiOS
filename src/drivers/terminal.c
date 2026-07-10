@@ -11,7 +11,7 @@ static uint16_t term_width;
 static uint16_t term_height;
 
 void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height) {
-    qemu_printf(QEMU_INFO, "Initializating terminal : {%x, %d, %d}", mem, width, height);
+    qemu_printf(QEMU_INFO, "Initializating terminal");
 
     term_mem = mem;
     term_width = width;
@@ -78,8 +78,8 @@ void terminal_putchar(char c) {
     }
 }
 
-void terminal_write(const char *s, size_t len) {
-    for (size_t i = 0; i < len; i++)
+void terminal_write(const char *s, size_t size) {
+    for (size_t i = 0; i < size; i++)
         terminal_putchar(s[i]);
 }
 

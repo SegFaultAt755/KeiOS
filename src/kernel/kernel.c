@@ -20,9 +20,8 @@
 #include "libkern/bcd.h"
 #include "config.h"
 
-uint64_t tick = 0;
+volatile uint64_t tick = 0;
 void pit_callback(struct registers *) {
-    /* Note: Don't try to output any messages from here, because the output will be messy */
     tick += 1;
 }
 
@@ -31,7 +30,7 @@ void memory_initialize(struct multiboot_info *mbi);
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     /* Initialize kernel */
-    qemu_printf(QEMU_INFO, "Initializing kernel");
+    qemu_printf(QEMU_INFO, "Loading kernel");
     gdt_initialize();
     idt_initialize();
     pit_initialize(100, pit_callback);
@@ -98,13 +97,13 @@ void memory_initialize(struct multiboot_info *mbi) {
 
     uint32_t mod_addr = *(uint32_t*)(mbi->mods_addr + 4);
     uint32_t physical_alloc_start = (mod_addr + 0xFFF) & ~0xFFF;
-    qemu_printf(QEMU_INFO, "Physical allocation start point is from %x", physical_alloc_start);
+    qemu_printf(QEMU_INFO, "Physical allocation start point is from 0x%x", physical_alloc_start);
 
     uint64_t mem_high_point = mbi->mem_upper * 1024;
     if (mem_high_point > MAX_PHYSICAL_BYTES)
         mem_high_point = MAX_PHYSICAL_BYTES;
 
-    qemu_printf(QEMU_INFO, "Memory high point is from %x", mem_high_point);
+    qemu_printf(QEMU_INFO, "Memory high point is from 0x%x", mem_high_point);
 
     paging_initialize((uint32_t)mem_high_point, physical_alloc_start);
 }

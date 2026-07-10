@@ -74,5 +74,5 @@ void idt_initialize(void) {
     remap_irq();
     setup_irq();
 
-    __asm__ volatile ("lidt %0" : : "m" (ptr));
+    __asm__ volatile ("lidt %0" : : "m"(ptr));
 }
