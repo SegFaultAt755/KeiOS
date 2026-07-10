@@ -7,19 +7,6 @@
 *(⚠️ Note: KeiOS is currently in active development...)*
 
 ---
-## 📑 Table of Contents
-
-* [[#🎯 Project Vision]]
-* [[#🚀 Key Features]]
-* [[#📂 Project Structure]]
-* [[#🖥️ Emulating System Environment]]
-* [[#🛠️ Prerequisites]]
-* [[#🏃 Build and Run]]
-* [[#🔍 Troubleshooting & Common Pitfalls]]
-* [[#💬 Final Words]]
-* [[#📄 License]]
-
----
 ## 🎯 Project Vision
 
 The primary goal of KeiOS is to serve as an experimental lab environment. Its standout feature is the planned implementation of **two distinct syscall tables**, allowing the OS to natively handle and execute both **Windows** and **Linux** binaries within a minimal custom kernel and user space.
