@@ -53,16 +53,18 @@ KeiOS/
 │   ├── drivers/ # Physical/virtual hardware interface drivers
 │   ├── kernel/  # Main execution pipelines and dual-syscall routing routers
 │   └── libkern/ # Kernel support libraries and internal utility logic
-├── .gitignore # Build artifacts, and raw log filters
-├── clean.py   # Automation script to safely delete build folders and files
-├── grub.cfg   # GRUB setup template for the live ISO image
-├── LICENSE.md # Full legal text for the project's copyleft distribution license
-├── linker.ld  # Defining memory section offsets and physical loading bounds
-├── Makefile   # GNU Make multi-stage instruction script
-├── menu.lst   # Boot options template for direct GRUB configuration
-├── muke.bat   # Compilation script for manual Windows builds
-├── README.md  # Master repository documentation file
-└── run.py     # Master orchestration script handling builds, assets, and QEMU setups
+├── .clang-format   # Configuration of automatic C coding style format
+├── .gitignore      # Build artifacts, and raw log filters
+├── clean.py        # Automation script to safely delete build folders and files
+├── grub.cfg        # GRUB setup template for the live ISO image
+├── CONTRIBUTING.md # Guidelines for contributing and the contributor license agreement
+├── LICENSE.md      # Full legal text for the project's copyleft distribution license
+├── linker.ld       # Defining memory section offsets and physical loading bounds
+├── Makefile        # GNU Make multi-stage instruction script
+├── menu.lst        # Boot options template for direct GRUB configuration
+├── muke.bat        # Compilation script for manual Windows builds
+├── README.md       # Master repository documentation file
+└── run.py          # Master orchestration script handling builds, assets, and QEMU setups
 ```
 
 ---
