@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include "drivers/vga.h"
 
-#define TERMINAL_DEFAULT_FG VGA_COLOR_WHITE
-#define TERMINAL_DEFAULT_BG VGA_COLOR_BLACK
+#define TERMINAL_DEFAULT_FG VGA_8B_WHITE
+#define TERMINAL_DEFAULT_BG VGA_8B_BLACK
 #define TERMINAL_TAB_SIZE 4
 
 void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height);

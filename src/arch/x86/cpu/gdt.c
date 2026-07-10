@@ -21,14 +21,14 @@ void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, ui
 }
 
 void gdt_initialize() {
-    qemu_printf(QEMU_LOG_INFO, "Initializing GDT");
+    qemu_printf(QEMU_INFO, "Initializing GDT");
 
-    ptr.base = (uint32_t) &entries;
-    ptr.limit = (uint16_t) sizeof(entries) - 1;
+    ptr.base = (uint32_t)&entries;
+    ptr.limit = (uint16_t)sizeof(entries) - 1;
 
     disable_interrupts();
 
-    qemu_printf(QEMU_LOG_INFO, "Setting GDT gates");
+    qemu_printf(QEMU_INFO, "Setting GDT gates");
     gdt_set_gate(0, 0, 0, 0, 0);
     gdt_set_gate(1, 0, 0xFFFFF, 0x9A, 0xCF);
     gdt_set_gate(2, 0, 0xFFFFF, 0x92, 0xCF);
@@ -36,7 +36,7 @@ void gdt_initialize() {
     gdt_set_gate(4, 0, 0xFFFFF, 0xF2, 0xCF);
     write_tss(0x10, 0x0);
 
-    qemu_printf(QEMU_LOG_INFO, "Flushing GDT & TSS");
-    gdt_flush((uint32_t) &ptr);
+    qemu_printf(QEMU_INFO, "Flushing GDT & TSS");
+    gdt_flush((uint32_t)&ptr);
     tss_flush();
 }

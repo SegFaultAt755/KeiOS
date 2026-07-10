@@ -31,7 +31,7 @@ void memory_initialize(struct multiboot_info *mbi);
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     /* Initialize kernel */
-    qemu_printf(QEMU_LOG_INFO, "Initializing kernel");
+    qemu_printf(QEMU_INFO, "Initializing kernel");
     gdt_initialize();
     idt_initialize();
     pit_initialize(100, pit_callback);
@@ -39,14 +39,14 @@ void memory_initialize(struct multiboot_info *mbi);
     enable_interrupts();
 
     /* Initialize graphics */
-    vga_init_text_mode();
+    vga_init_text();
     terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
     /* Show welcome message */
-    qemu_printf(QEMU_LOG_INFO, "Show greeting messages");
-    kprintf(LOG_EMPTY, "Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-        terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_RED, TERMINAL_DEFAULT_BG));
-        kprintf(LOG_EMPTY, "<3\n");
+    qemu_printf(QEMU_INFO, "Show greeting messages");
+    kprintf("Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+        terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
+        kprintf("<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
 
@@ -64,12 +64,12 @@ void show_banner(void) {
     };
 
     enum vga_8b_colors rainbow[] = {
-        VGA_COLOR_LIGHT_RED,
-        VGA_COLOR_LIGHT_BROWN, /* VGA equivalent to orange/yellow */
-        VGA_COLOR_LIGHT_GREEN,
-        VGA_COLOR_LIGHT_CYAN,
-        VGA_COLOR_LIGHT_BLUE,
-        VGA_COLOR_LIGHT_MAGENTA
+        VGA_8B_LIGHT_RED,
+        VGA_8B_LIGHT_BROWN, /* VGA equivalent to orange/yellow */
+        VGA_8B_LIGHT_GREEN,
+        VGA_8B_LIGHT_CYAN,
+        VGA_8B_LIGHT_BLUE,
+        VGA_8B_LIGHT_MAGENTA
     };
 
     for (int row = 0; row < 5; row++) {
@@ -79,8 +79,8 @@ void show_banner(void) {
             uint8_t color = vga_entry_color(rainbow[color_idx], TERMINAL_DEFAULT_BG);
 
             terminal_set_color(color);
-            char ch_str[2] = { banner[row][col], '\0' };
-            kprintf(LOG_EMPTY, ch_str);
+            char ch_str[2] = {banner[row][col], '\0'};
+            kprintf(ch_str);
         }
 
         terminal_blankline();
@@ -94,17 +94,17 @@ void show_banner(void) {
 }
 
 void memory_initialize(struct multiboot_info *mbi) {
-    qemu_printf(QEMU_LOG_INFO, "Initializing memory");
+    qemu_printf(QEMU_INFO, "Initializing memory");
 
-    uint32_t mod_addr = *(uint32_t*)(mbi -> mods_addr + 4);
+    uint32_t mod_addr = *(uint32_t*)(mbi->mods_addr + 4);
     uint32_t physical_alloc_start = (mod_addr + 0xFFF) & ~0xFFF;
-    qemu_printf(QEMU_LOG_INFO, "Physical allocation start point is from %x", physical_alloc_start);
+    qemu_printf(QEMU_INFO, "Physical allocation start point is from %x", physical_alloc_start);
 
-    uint64_t mem_high_point = mbi -> mem_upper * 1024;
+    uint64_t mem_high_point = mbi->mem_upper * 1024;
     if (mem_high_point > MAX_PHYSICAL_BYTES)
         mem_high_point = MAX_PHYSICAL_BYTES;
 
-    qemu_printf(QEMU_LOG_INFO, "Memory high point is from %x", mem_high_point);
+    qemu_printf(QEMU_INFO, "Memory high point is from %x", mem_high_point);
 
-    paging_initialize((uint32_t) mem_high_point, physical_alloc_start);
+    paging_initialize((uint32_t)mem_high_point, physical_alloc_start);
 }

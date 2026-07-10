@@ -4,18 +4,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
-enum log_level {
-    LOG_EMPTY,
-    LOG_INFO,
-    LOG_WARNING,
-    LOG_ERR,
-    LOG_DEBUG
-};
-
 void kprint_uint(unsigned int val, int base);
 void kprint_int(int val);
-void kvprintf(enum log_level level, const char *fmt, va_list args);
-void kprintf(enum log_level level, const char *fmt, ...);
+void kvprintf(const char *fmt, va_list args);
+void kprintf(const char *fmt, ...);
 int  kvsnprintf(char *buf, size_t size, const char *fmt, va_list args);
 int  ksnprintf(char *buf, size_t size, const char *fmt, ...);
 
@@ -28,3 +20,8 @@ static inline uint8_t inb(uint16_t port) {
     __asm__ volatile ("inb %1, %0" : "=a" (ret) : "Nd" (port));
     return ret;
 }
+
+static inline void waitb(uint32_t n) {
+    for (uint32_t i = 0; i < n; i++)
+        outb(0x80, 0);
+} 

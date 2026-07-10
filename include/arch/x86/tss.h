@@ -6,8 +6,8 @@ struct [[gnu::packed]] tss_entry {
     uint16_t link;
     uint16_t reserved_link;
 
-    uint32_t esp0; /* Kernel stack pointer */
-    uint16_t ss0;  /* Kernel stack segment */
+    uint32_t esp0;
+    uint16_t ss0;
     uint16_t reserved_ss0;
 
     uint32_t esp1;
@@ -18,8 +18,8 @@ struct [[gnu::packed]] tss_entry {
     uint16_t ss2;
     uint16_t reserved_ss2;
     
-    uint32_t cr3; /* Page directory base */
-    uint32_t eip; /* Instruction pointer */
+    uint32_t cr3;
+    uint32_t eip;
     uint32_t eflags;
 
     uint32_t eax;

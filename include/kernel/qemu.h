@@ -6,11 +6,10 @@
 #define QEMU_PORT 0xE9
 
 enum qemu_log {
-    QEMU_LOG_EMPTY,
-    QEMU_LOG_INFO,
-    QEMU_LOG_WARNING,
-    QEMU_LOG_ERROR,
-    QEMU_LOG_PANIC
+    QEMU_INFO,
+    QEMU_WARN,
+    QEMU_ERROR,
+    QEMU_PANIC
 };
 
 static inline void qemu_putchar(char c) {

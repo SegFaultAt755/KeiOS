@@ -19,21 +19,7 @@ void kprint_int(int val) {
     kprint_uint(uval, 10);
 }
 
-void kvprintf(enum log_level level, const char *fmt, va_list args) {
-    switch (level) {
-        case LOG_INFO:    terminal_writestring("[INFO]: "); break;
-        case LOG_WARNING: terminal_writestring("[WARNING]: "); break;
-        case LOG_ERR:     terminal_writestring("[ERROR]: "); break;
-        case LOG_DEBUG:
-#if defined(DEBUG) && (DEBUG == true)
-            terminal_writestring("[DEBUG]: "); 
-            break;
-#else
-            return;
-#endif
-        default: break;
-    }
-
+void kvprintf(const char *fmt, va_list args) {
     for (size_t i = 0; fmt[i] != '\0'; i++) {
         if (fmt[i] == '%' && fmt[i + 1] != '\0') {
             i++;
@@ -88,7 +74,7 @@ void kvprintf(enum log_level level, const char *fmt, va_list args) {
                     void *ptr = va_arg(args, void *);
                     terminal_writestring("0x");
 
-                    len = uvalue_to_str(buf, (unsigned long long)(uintptr_t) ptr, 16, sizeof(void*) * 2, 1);
+                    len = uvalue_to_str(buf, (unsigned long long)(uintptr_t)ptr, 16, sizeof(void*) * 2, 1);
                     for (int k = 0; k < len; k++) terminal_write(&buf[k], 1);
                     break;
                 }
@@ -116,10 +102,10 @@ void kvprintf(enum log_level level, const char *fmt, va_list args) {
     }
 }
 
-void kprintf(enum log_level level, const char *fmt, ...) {
+void kprintf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    kvprintf(level, fmt, args);
+    kvprintf(fmt, args);
     va_end(args);
 }
 
@@ -183,7 +169,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
     }
 
     buf[buf_idx] = '\0'; /* Ensure null-termination */
-    return (int) buf_idx;
+    return (int)buf_idx;
 }
 
 int ksnprintf(char *buf, size_t size, const char *fmt, ...) {

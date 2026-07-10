@@ -2,64 +2,55 @@
 #include "kernel/panic.h"
 #include "libkern/stdio.h"
 
-isr isr_intr_handler[256];
-void intr_handler(uint8_t num, isr hld) {
+static inline uint32_t get_fault_addr(void) {
+    uint32_t addr;
+    __asm__ volatile ("mov %%cr2, %0" : "=r" (addr));
+    return addr;
+}
+
+isr_t isr_intr_handler[256];
+void intr_handler(uint8_t num, isr_t hld) {
     isr_intr_handler[num] = hld;
 }
 
 void divide_by_zero_fault_handler(struct registers *regs) {
-    uint32_t faulting_addr;
-    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_addr));
-
-    KERNEL_PANIC_FORMAT("Division by zero", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
-        faulting_addr, regs -> eip
+    KERNEL_PANIC_FORMAT("Division by zero fault", "CPU denied to divide a number by zero / data: %x | code: %x",
+        get_fault_addr(), regs->eip
     );
 }
 
 void invalid_opcode_fault_handler(struct registers *regs) {
-    uint32_t faulting_addr;
-    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_addr));
-
-    KERNEL_PANIC_FORMAT("Invalid opcode", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
-        faulting_addr, regs -> eip
+    KERNEL_PANIC_FORMAT("Invalid opcode fault", "CPU cannot decode code or a pointer leads to invalid data / data: %x | code: %x",
+        get_fault_addr(), regs->eip
     );
 }
 
 void stack_segment_fault_handler(struct registers *regs) {
-    uint32_t faulting_addr;
-    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_addr));
-
-    KERNEL_PANIC_FORMAT("Stack segment", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
-        faulting_addr, regs -> eip
+    KERNEL_PANIC_FORMAT("Stack segment fault", "Stack corrupted or stack overflow occured / data: %x | code: %x",
+        get_fault_addr(), regs->eip
     );
 }
 
 void general_protection_fault_handler(struct registers *regs) {
-    uint32_t faulting_addr;
-    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_addr));
-
-    KERNEL_PANIC_FORMAT("General protection", "From code:\n\t\tData address: %x\n\t\tCode address: %x",
-        faulting_addr, regs -> eip
+    KERNEL_PANIC_FORMAT("General protection fault", "Not enough permissions to execute code / data: %x | code: %x",
+        get_fault_addr(), regs->eip
     );
 }
 
 void double_fault_handler(struct registers *) {
-    KERNEL_PANIC("Double fault", 0);
+    KERNEL_PANIC("Double fault", "Failed to handle a fault");
 }
 
 void page_fault_handler(struct registers *regs) {
-    uint32_t faulting_addr;
-    __asm__ volatile ("mov %%cr2, %0" : "=r" (faulting_addr));
-
-    int present  = !(regs -> err & 0x1); /* Page not present */
-    int write    = regs -> err & 0x2;    /* Write operation failed */
-    int user     = regs -> err & 0x4;    /* Fault occurred in user mode */
-    int reserved = regs -> err & 0x8;    /* Overwrote protected CPU bits */
-    int id       = regs -> err & 0x10;   /* Caused by an instruction fetch */
+    int present  = !(regs->err & 0x1);
+    int write    = regs->err & 0x2;
+    int user     = regs->err & 0x4;
+    int reserved = regs->err & 0x8;
+    int id       = regs->err & 0x10;
 
     KERNEL_PANIC_FORMAT("Page fault",
-        "Received error codes:\n\t\tPresent: %d\n\t\tWrite: %d\n\t\tUser: %d\n\t\tReserved: %d\n\t\tId: %d",
-        present, write, user, reserved, id
+        "Memory corrupted or failed to access to memory / data: %x | code: %x / %d|%d|%d|%d|%d",
+        get_fault_addr(), regs->eip, present, write, user, reserved, id
     );
 }
 
@@ -84,6 +75,6 @@ void isr_handler(struct registers regs) {
             page_fault_handler(&regs);
             break;
         default:
-            KERNEL_PANIC("Unhandled interrupt", 0);
+            KERNEL_PANIC_FORMAT("Unhandled interrupt", "Interrupt number: %d", regs.intr_num);
     }
 }

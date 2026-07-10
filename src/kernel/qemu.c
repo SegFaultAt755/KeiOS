@@ -23,10 +23,10 @@ static void qemu_print_time(void) {
 
 void qemu_printf(enum qemu_log level, const char *fmt, ...) {
     switch (level) {
-        case QEMU_LOG_INFO:    { qemu_print("[INFO]: ");    qemu_print_time(); } break;
-        case QEMU_LOG_WARNING: { qemu_print("[WARNING]: "); qemu_print_time(); } break;
-        case QEMU_LOG_ERROR:   { qemu_print("[ERROR]: ");   qemu_print_time(); } break;
-        case QEMU_LOG_PANIC:   { qemu_print("[PANIC]: ");   qemu_print_time(); } break;
+        case QEMU_INFO:  {qemu_print("[INFO]: "); qemu_print_time();} break;
+        case QEMU_WARN:  {qemu_print("[WARN]: "); qemu_print_time();} break;
+        case QEMU_ERROR: {qemu_print("[ERROR]: "); qemu_print_time();} break;
+        case QEMU_PANIC: {qemu_print("[PANIC]: "); qemu_print_time();} break;
         default: break;
     }
 

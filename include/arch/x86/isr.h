@@ -26,8 +26,8 @@ struct registers {
     uint32_t eip, cs, eflags, useresp, ss;
 };
 
-typedef void (*isr)(struct registers *);
-extern isr isr_intr_handler[256];
+typedef void (*isr_t)(struct registers *);
+extern isr_t isr_intr_handler[256];
 
-void intr_handler(uint8_t num, isr handler);
+void intr_handler(uint8_t num, isr_t handler);
 void isr_handler(struct registers regs);
