@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "kernel/panic.h"
 #include "kernel/interrupts.h"
 #include "kernel/halt.h"
@@ -9,16 +11,17 @@
 #include "drivers/pit.h"
 #include "drivers/vga.h"
 
-#include "arch/x86/gdt.h"
-#include "arch/x86/idt.h"
-#include "arch/x86/isr.h"
-#include "arch/x86/paging.h"
+#if (ARCH == X86)
+    #include "arch/x86/gdt.h"
+    #include "arch/x86/idt.h"
+    #include "arch/x86/isr.h"
+    #include "arch/x86/paging.h"
+#elif (ARCH == X64)
 
-#include "arch/x86/paging.h"
+#endif
 
 #include "libkern/stdio.h"
 #include "libkern/bcd.h"
-#include "config.h"
 
 volatile uint64_t tick = 0;
 void pit_callback(struct registers *) {

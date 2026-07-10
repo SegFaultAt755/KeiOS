@@ -1,3 +1,4 @@
+import argparse
 import platform
 import shutil
 import subprocess
@@ -11,28 +12,25 @@ def get_make_command() -> str:
                 return cmd
     return "make"
 
-config = {
-    "disk_file": Path("disk.qcow2"),
-    "iso_file": Path("keios.iso"),
-    "disk_size": "8G",
-    "arch": "i386",
-    "cpu": "n270",
-    "memory": "4G",
-    "make_target": "all",
-    "skip_build": False,
-    "skip_run": False,
-}
-
 def main() -> None:
-    disk_file: Path = config["disk_file"]
-    iso_file: Path = config["iso_file"]
+    parser = argparse.ArgumentParser(description="Build the project and run it inside a QEMU virtual machine.")
+    parser.add_argument("--disk-file", type=Path, default=Path("disk.qcow2"), help="Path to the QEMU disk image (default: disk.qcow2)")
+    parser.add_argument("--iso-file", type=Path, default=Path("keios.iso"), help="Path to the system ISO file (default: keios.iso)")
+    parser.add_argument("--disk-size", default="8G", help="Size of the disk image if created (default: 8G)")
+    parser.add_argument("--arch", default="i386", help="QEMU architecture target (default: i386)")
+    parser.add_argument("--cpu", default="n270", help="QEMU CPU model (default: n270)")
+    parser.add_argument("--memory", default="4G", help="RAM allocated to QEMU (default: 4G)")
+    parser.add_argument("--make-target", default="all", help="Makefile target to run (default: all)")
+    parser.add_argument("--skip-build", action="store_true", help="Skip the compilation step")
+    parser.add_argument("--skip-run", action="store_true", help="Skip launching QEMU after building")
+    args = parser.parse_args()
 
     # Check if disk exists, otherwise create it
-    if not disk_file.is_file():
-        print(f">>> Creating {disk_file} ({config['disk_size']})...")
+    if not args.disk_file.is_file():
+        print(f">>> Creating {args.disk_file} ({args.disk_size})...")
         try:
             subprocess.run(
-                ["qemu-img", "create", "-f", "qcow2", str(disk_file), config["disk_size"]],
+                ["qemu-img", "create", "-f", "qcow2", str(args.disk_file), args.disk_size],
                 check=True
             )
         except FileNotFoundError:
@@ -45,12 +43,12 @@ def main() -> None:
             print(f"Error creating disk image: {err}", file=sys.stderr)
             sys.exit(err.returncode)
 
-    # Run the makefile (unless skipped)
-    if not config["skip_build"]:
+    # Run the makefile
+    if not args.skip_build:
         make_cmd = get_make_command()
-        print(f">>> Building project with '{make_cmd} {config['make_target']}'...")
+        print(f">>> Building project with '{make_cmd} {args.make_target}'...")
         try:
-            subprocess.run([make_cmd, config["make_target"]], check=True)
+            subprocess.run([make_cmd, args.make_target], check=True)
         except FileNotFoundError:
             print(
                 f"Error: '{make_cmd}' command not found. Please install Make and add it to your PATH.",
@@ -64,25 +62,25 @@ def main() -> None:
         print(">>> Skipping build step...")
 
     # Exit early if only building
-    if config["skip_run"]:
-        print(">>> Build finished (skip_run is True). Exiting.")
+    if args.skip_run:
+        print(">>> Build finished (--skip-run is True). Exiting.")
         return
 
     # Launch QEMU
-    qemu_executable = f"qemu-system-{config["arch"]}"
+    qemu_executable = f"qemu-system-{args.arch}"
     qemu_cmd = [
         qemu_executable,
-        "-cpu", config["cpu"],
-        "-m", config["memory"],
+        "-cpu", args.cpu,
+        "-m", args.memory,
         "-machine", "pc",
         "-rtc", "base=localtime",
         "-vga", "std",
-        "-hda", str(disk_file),
+        "-hda", str(args.disk_file),
         "-net", "nic,model=rtl8139", "-net", "user",
         "-device", "intel-hda",
         "-device", "hda-duplex",
         "-d", "int,cpu_reset", "-D", "qemu.log",
-        "-cdrom", str(iso_file),
+        "-cdrom", str(args.iso_file),
         "-debugcon", "file:debug.log"
     ]
 
