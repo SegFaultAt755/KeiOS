@@ -1,7 +1,11 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include "arch/x86/tss.h"
+
 #include "arch/x86/gdt.h"
-#include "libkern/memory.h"
 #include "kernel/qemu.h"
+#include "libkern/memory.h"
 
 struct tss_entry tss;
 

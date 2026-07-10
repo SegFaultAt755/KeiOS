@@ -1,0 +1,6 @@
+BasedOnStyle: Microsoft
+BreakBeforeBraces: Attach
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+SpaceAfterCStyleCast: false

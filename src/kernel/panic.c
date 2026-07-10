@@ -1,17 +1,21 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include "kernel/panic.h"
-#include "kernel/interrupts.h"
-#include "kernel/halt.h"
-#include "kernel/qemu.h"
+
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
+#include "kernel/halt.h"
+#include "kernel/interrupts.h"
+#include "kernel/qemu.h"
 
 #define CH(i) (__TIME__[i] ? (uintptr_t)__TIME__[i] : 0x7FU)
 #define CD(i) (__DATE__[i] ? (uintptr_t)__DATE__[i] : 0x31U)
 
-#define COMPILE_TIME_SEED \
-    (((CH(0) * 0x1F001511U + CH(1) * 0x0A3F1012U + CH(3) * 0x00A1F023U)  + \
-      (CH(4) * 0x0002F101U + CH(6) * 0x00003F12U + CH(7) * 0x000001FAU)) ^ \
-      (CD(0) << 24 | CD(2) << 16 | CD(4) << 8 | CD(5)))
+#define COMPILE_TIME_SEED                                                                                              \
+    (((CH(0) * 0x1F001511U + CH(1) * 0x0A3F1012U + CH(3) * 0x00A1F023U) +                                              \
+      (CH(4) * 0x0002F101U + CH(6) * 0x00003F12U + CH(7) * 0x000001FAU)) ^                                             \
+     (CD(0) << 24 | CD(2) << 16 | CD(4) << 8 | CD(5)))
 
 uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
@@ -20,25 +24,28 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
     qemu_printf(QEMU_PANIC, "(%s:%d) %s | %s", file, line, reason, desc);
 
     vga_init_text();
-    terminal_initialize((uint16_t*) VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+    terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     terminal_set_color(vga_entry_color(VGA_8B_RED, VGA_8B_BLACK));
     terminal_clear();
 
     terminal_writestring("==========\n");
-    terminal_writestring("            KEI IS VERY SAD\n");
+    terminal_writestring("            KERNEL PANIC\n");
     terminal_writestring("==========\n\n");
 
-    terminal_writestring("Reason: "); terminal_writestring(reason);
+    terminal_writestring("Reason: ");
+    terminal_writestring(reason);
     terminal_blankline();
 
     if (*desc != '\0') {
-        terminal_writestring("Description: "); terminal_writestring(desc);
+        terminal_writestring("Description: ");
+        terminal_writestring(desc);
         terminal_blankline();
     }
-    
-    terminal_writestring("File: "); terminal_writestring(file);
+
+    terminal_writestring("File: ");
+    terminal_writestring(file);
     terminal_blankline();
-    
+
     terminal_writestring("Line: ");
     if (line == 0) {
         terminal_writestring("0");
@@ -53,13 +60,15 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
         terminal_writestring(&buf[i + 1]);
     }
 
-    while (true) {halt();}
+    while (true) {
+        halt();
+    }
 }
 
 [[noreturn]] void runtime_panic_format(const char *reason, const char *desc, const char *file, uint32_t line, ...) {
     disable_interrupts();
-    char fmt_desc[1024]; 
-    
+    char fmt_desc[1024];
+
     va_list args;
     va_start(args, line);
     ksnprintf(fmt_desc, sizeof(fmt_desc), desc, args);

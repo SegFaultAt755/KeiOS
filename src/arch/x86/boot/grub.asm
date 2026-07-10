@@ -1,3 +1,6 @@
+; SPDX-License-Identifier: GPLv3
+; Copyright (C) 2026 KeiOS Developers
+
 ; Declare constants
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1

@@ -1,6 +1,9 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
+#include "drivers/terminal.h"
 #include "libkern/stdio.h"
 #include "libkern/string.h"
-#include "drivers/terminal.h"
 
 void kprint_uint(unsigned int val, int base) {
     char buf[32];
@@ -10,7 +13,7 @@ void kprint_uint(unsigned int val, int base) {
 }
 
 void kprint_int(int val) {
-    unsigned int uval = (unsigned int) val;
+    unsigned int uval = (unsigned int)val;
     if (val < 0) {
         terminal_putchar('-');
         uval = ~uval + 1;

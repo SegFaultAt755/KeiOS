@@ -1,3 +1,6 @@
+; SPDX-License-Identifier: GPLv3
+; Copyright (C) 2026 KeiOS Developers
+
 %macro IRQ 2
     global irq%1
     irq%1:

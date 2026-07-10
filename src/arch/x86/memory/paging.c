@@ -1,18 +1,22 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include "arch/x86/paging.h"
-#include "libkern/memory.h"
+
 #include "kernel/qemu.h"
+#include "libkern/memory.h"
 
 extern void *initial_page_dir;
 
 #define TOTAL_PAGES (MAX_PHYSICAL_BYTES / PAGE_SIZE)
-uint8_t physical_mem_bitmap[TOTAL_PAGES / 8]; 
+uint8_t physical_mem_bitmap[TOTAL_PAGES / 8];
 
 #define MAX_DIRECTORIES 256
 struct page_dir page_dirs[MAX_DIRECTORIES];
 uint32_t page_dirs_used[MAX_DIRECTORIES];
 
 static inline void invalidate(uint32_t addr) {
-    __asm__ volatile ("invlpg %0" :: "m"(addr));
+    __asm__ volatile("invlpg %0" ::"m"(addr));
 }
 
 void paging_set_physical_memory(uint32_t mem_high_point, uint32_t physical_alloc_start) {
@@ -26,7 +30,7 @@ void paging_set_physical_memory(uint32_t mem_high_point, uint32_t physical_alloc
 void paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) {
     qemu_printf(QEMU_INFO, "Paging memory");
 
-    struct page_dir initial_page_dir_c = *(struct page_dir *) initial_page_dir;
+    struct page_dir initial_page_dir_c = *(struct page_dir *)initial_page_dir;
     memset(&initial_page_dir_c.entries[0], 0, sizeof(struct page_dir_entry));
     invalidate(0);
 

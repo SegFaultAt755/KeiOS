@@ -1,5 +1,8 @@
 #pragma once
 
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include <stdint.h>
 
 #define MULTIBOOT_MEMORY_AVAILABLE        1

@@ -1,10 +1,14 @@
-#include "drivers/terminal.h"
-#include "libkern/string.h"
-#include "kernel/qemu.h"
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
 
-static uint16_t  term_row;
-static uint16_t  term_column;
-static uint8_t   term_color;
+#include "drivers/terminal.h"
+
+#include "kernel/qemu.h"
+#include "libkern/string.h"
+
+static uint16_t term_row;
+static uint16_t term_column;
+static uint8_t term_color;
 static uint16_t *term_mem;
 
 static uint16_t term_width;
@@ -17,7 +21,7 @@ void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height) {
     term_width = width;
     term_height = height;
     term_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
-    
+
     terminal_clear();
 }
 

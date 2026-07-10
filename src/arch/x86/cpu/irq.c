@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include "arch/x86/isr.h"
 #include "libkern/stdio.h"
 

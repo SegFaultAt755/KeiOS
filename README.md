@@ -162,13 +162,13 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso python3
 For **automatically building** and **running** execute the `run.py` python script:
 
 ```bash
-python3 run.py
+python run.py
 ```
 
 Also the `--help` flag can be passed to view available usage options:
 
 ```bash
-python3 run.py --help
+python run.py --help
 ```
 
 ### 1. Compile the OS

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPLv3
+# Copyright (C) 2026 KeiOS Developers
+
 import argparse
 import platform
 import shutil

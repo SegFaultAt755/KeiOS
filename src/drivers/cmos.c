@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include "drivers/cmos.h"
 
 #define CMOS_ADDR 0x70

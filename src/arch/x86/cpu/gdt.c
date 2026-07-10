@@ -1,4 +1,8 @@
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include "arch/x86/gdt.h"
+
 #include "arch/x86/tss.h"
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"

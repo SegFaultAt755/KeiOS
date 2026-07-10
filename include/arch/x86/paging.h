@@ -1,5 +1,8 @@
 #pragma once
 
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include <stdint.h>
 
 #define PAGING_KERNEL_START 0xC0000000
