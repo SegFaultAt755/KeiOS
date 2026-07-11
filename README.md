@@ -12,8 +12,8 @@
 - [🎯 Project Vision](#-project-vision)
 - [🚀 Key Features](#-key-features)
 - [📂 Project Structure](#-project-structure)
-- [🖥️ Emulating System Environment](#-emulating-system-environment)
-- [🛠️ Prerequisites](#-prerequisites)
+- [🖥️ Emulating System Environment](#%EF%B8%8F-emulating-system-environment)
+- [🛠️ Prerequisites](#%EF%B8%8F-prerequisites)
 - [🏃 Build and Run](#-build-and-run)
 - [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls)
 - [💬 Final Words](#-final-words)
@@ -34,7 +34,7 @@ The primary goal of KeiOS is to serve as an experimental lab environment. Its st
 ---
 ## 📂 Project Structure
 
-```text
+`````text
 KeiOS/
 ├── bin/         # Compiled binary
 ├── include/     # Main header directory
@@ -65,7 +65,7 @@ KeiOS/
 ├── muke.bat        # Compilation script for manual Windows builds
 ├── README.md       # Master repository documentation file
 └── run.py          # Master orchestration script handling builds, assets, and QEMU setups
-```
+`````
 
 ---
 ## 🖥️ Emulating System Environment
@@ -96,10 +96,10 @@ To build and run KeiOS, select the instructions matching the active development 
 
 Install the required development tools, ISO utilities, Python environment, and emulators via the system package manager:
 
-```bash
+`````bash
 sudo apt update
 sudo apt install build-essential nasm xorriso mtools qemu-system-x86 grub-common grub2-common grub-pc-bin grub-efi-amd64-bin python3
-```
+`````
 
 _(Note: `mtools` and `xorriso` are heavily used by tools like `grub-mkrescue` to build bootable ISO files. Install `grub2-common` if available on the distribution; otherwise, default to `grub-common`)._
 
@@ -119,9 +119,9 @@ This bypasses all Windows downsides by running a genuine Linux environment direc
 
 1. Open **PowerShell** as Administrator and install WSL:
 
-```powershell
+`````powershell
 wsl --install
-```
+`````
 
 2. Restart the computer if prompted.
 3. Open the new Linux terminal (e.g., Ubuntu) and run the **Linux Prerequisites** command listed above.
@@ -134,9 +134,9 @@ If a native Windows environment is preferred, MSYS2 provides a reliable Unix-lik
 2. Open the **MSYS2 MINGW32** terminal window (this targets the 32-bit architecture KeiOS requires).
 3. Install the compilation toolchain, assembler, Python, and ISO helpers:
 
-```bash
+`````bash
 pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso python3
-```
+`````
 
 #### Option 3: Manual Addition - Final Resort
 
@@ -163,15 +163,15 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-make nasm xorriso python3
 
 For **automatically building** and **running** execute the `run.py` python script:
 
-```bash
+`````bash
 python run.py
-```
+`````
 
 Also the `--help` flag can be passed to view available usage options:
 
-```bash
+`````bash
 python run.py --help
-```
+`````
 
 ### 1. Compile the OS
 
@@ -179,21 +179,21 @@ Build the kernel and generate the bootable `.iso` image using the provided Makef
 
 On **Linux** / **WSL**:
 
-```bash
+`````bash
 make
-```
+`````
 
 On **Native Windows** (**MSYS2 MINGW32**):
 
-```bash
+`````bash
 mingw32-make
-```
+`````
 
 For **Manual Addition (Windows)**: Run the provided batch script:
 
-```bash
+`````bash
 muke.bat
-```
+`````
 
 ### 2. Launch in Emulator
 
@@ -203,30 +203,30 @@ KeiOS can be booted using one of two methods depending on the setup:
 
 If skipping the ISO build entirely is desired (or if on native Windows where `grub-mkrescue` isn't available), QEMU can be instructed to act as a Multiboot bootloader and load the kernel binary directly:
 
-```bash
+`````bash
 qemu-system-i386 -kernel bin/keios.bin
-```
+`````
 
 #### Method B: Standard ISO Boot (Requires GRUB/Xorriso)
 
 If a full bootable CD image has been successfully generated and testing the actual bootloader configuration is needed:
 
-```bash
+`````bash
 qemu-system-i386 keios.iso
-```
+`````
 
 However, executing it via the `run.py` python script is recommended to get access to all features (such as 4GB memory, 8GB memory disk, network driver, etc.).
 
 If executing the ISO manually is preferred, follow these instructions:
 * **Build virtual disk**
 
-```bash
+`````bash
 qemu-img create -f qcow2 disk.qcow2 8G
-```
+`````
 
 * **Execute the ISO**
 
-```bash
+`````bash
 qemu-system-i386 \
   -cpu n270 \
   -m 4G \
@@ -240,7 +240,7 @@ qemu-system-i386 \
   -d int,cpu_reset -D qemu.log \
   -cdrom keios.iso \
   -debugcon file:debug.log
-```
+`````
 
 ---
 ## 🔍 Troubleshooting & Common Pitfalls
@@ -267,9 +267,9 @@ OS development is a fragile process. If a build fails or QEMU refuses to launch 
 - **The Cause:** Line Ending Conversions. Git on Windows automatically converts files from LF (`\n`) to CRLF (`\r\n`) during checkouts. This breaks low-level assembly definitions and linker maps.
 - **The Fix:** Force Git to preserve line endings by running:
 
-```bash
+`````bash
 git config --global core.autocrlf false
-```
+`````
 
 Then re-clone the repository or fix individual scripts using `dos2unix`.
 
