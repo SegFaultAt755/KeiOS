@@ -4,6 +4,7 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include <stdint.h>
+#include "kernel/multiboot.h"
 
 #define PAGING_KERNEL_START 0xC0000000
 #define PAGING_KERNEL_END   0xFFFFF000
@@ -48,4 +49,5 @@ struct [[gnu::aligned(PAGE_SIZE)]] page_dir {
     struct page_dir_entry entries[PAGE_TABLE_ENTRIES];
 };
 
+void memory_initialize(struct multiboot_info *mbi);
 void paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start);

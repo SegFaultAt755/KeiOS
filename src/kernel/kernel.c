@@ -16,7 +16,7 @@
 #include "arch/x86/gdt.h"
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
-#include "arch/x86/paging.h"
+#include "arch/x86/memory.h"
 #elif (ARCH == X64)
 
 #endif
@@ -86,20 +86,4 @@ void show_banner(void) {
 
     for (uint8_t i = 0; i < 5; i++)
         terminal_blankline();
-}
-
-void memory_initialize(struct multiboot_info *mbi) {
-    qemu_printf(QEMU_INFO, "Initializing memory");
-
-    uint32_t mod_addr = *(uint32_t *)(mbi->mods_addr + 4);
-    uint32_t physical_alloc_start = (mod_addr + 0xFFF) & ~0xFFF;
-    qemu_printf(QEMU_INFO, "Physical allocation start point is from 0x%x", physical_alloc_start);
-
-    uint64_t mem_high_point = mbi->mem_upper * 1024;
-    if (mem_high_point > MAX_PHYSICAL_BYTES)
-        mem_high_point = MAX_PHYSICAL_BYTES;
-
-    qemu_printf(QEMU_INFO, "Memory high point is from 0x%x", mem_high_point);
-
-    paging_initialize((uint32_t)mem_high_point, physical_alloc_start);
 }
