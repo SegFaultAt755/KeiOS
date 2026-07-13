@@ -53,16 +53,18 @@ struct [[gnu::aligned(PAGE_SIZE)]] page_dir {
     struct page_dir_entry entries[PAGE_TABLE_ENTRIES];
 };
 
-/* Heap */
+/* Heap segment structure */
 struct heap_segment {
     uint32_t len;
-    struct heap_segment* next;
-    struct heap_segment* prev;
+    struct heap_segment *next;
+    struct heap_segment *prev;
     bool is_free;
 };
 
 void memory_initialize(struct multiboot_info *mbi);
+
 uint32_t paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start);
+
 void heap_initialize(void *start_addr, uint32_t total_size);
 void *kmalloc(uint32_t size);
 void kfree(void *ptr);

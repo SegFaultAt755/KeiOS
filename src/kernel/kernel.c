@@ -53,23 +53,6 @@ void memory_initialize(struct multiboot_info *mbi);
     terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
 
-    /* Testing the kmalloc */
-#if 0
-    uint8_t *array = kmalloc(20);
-    if (array == nullptr)
-        qemu_printf(QEMU_ERROR, "kmalloc allocated to nullptr");
-
-    /* Set values */
-    for (uint8_t i = 0; i < 20; i++)
-        array[i] = i * 2;
-
-    /* Read values */
-    for (uint8_t i = 0; i < 20; i++)
-        kprintf("array[%d] = %d\n", i, array[i]);
-
-    kfree(array);
-#endif
-
     /* Infinite loop to prevent CPU fault */
     while (true) {
     }
