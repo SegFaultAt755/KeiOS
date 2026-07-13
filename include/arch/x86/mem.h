@@ -13,6 +13,10 @@
 #define PAGE_TABLE_ENTRIES 1024
 #define MAX_PHYSICAL_BYTES 0x100000000ULL /* 4GB */
 
+#define HEAP_ALIGNMENT 16
+#define HEAP_ALIGN_UP(val, align) (((val) + ((align) - 1)) & ~((align) - 1))
+#define HEAP_MIN_SPLIT_SIZE 32
+
 struct [[gnu::packed]] page_table_entry {
     uint32_t present   : 1;
     uint32_t rw        : 1;
@@ -49,5 +53,16 @@ struct [[gnu::aligned(PAGE_SIZE)]] page_dir {
     struct page_dir_entry entries[PAGE_TABLE_ENTRIES];
 };
 
+/* Heap */
+struct heap_segment {
+    uint32_t len;
+    struct heap_segment* next;
+    struct heap_segment* prev;
+    bool is_free;
+};
+
 void memory_initialize(struct multiboot_info *mbi);
-void paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start);
+uint32_t paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start);
+void heap_initialize(void *start_addr, uint32_t total_size);
+void *kmalloc(uint32_t size);
+void kfree(void *ptr);
