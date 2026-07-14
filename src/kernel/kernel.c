@@ -2,14 +2,12 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
-#include "drivers/cmos.h"
 #include "drivers/pit.h"
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
-#include "kernel/panic.h"
 #include "kernel/qemu.h"
 
 #if (ARCH == X86)
@@ -21,7 +19,6 @@
 
 #endif
 
-#include "libkern/bcd.h"
 #include "libkern/stdio.h"
 
 volatile uint64_t tick = 0;
@@ -55,6 +52,8 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Infinite loop to prevent CPU fault */
     while (true) {
+        disable_interrupts();
+        halt();
     }
 }
 
