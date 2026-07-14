@@ -39,11 +39,12 @@ void memory_initialize(struct multiboot_info *mbi);
     qemu_set_time_var(&tick);
 
     /* Initialize kernel */
-    qemu_printf(QEMU_INFO, "Loading kernel");
-
-    tick_wait(1); gdt_initialize();
-    tick_wait(1); idt_initialize();
-    tick_wait(1); pit_initialize(1193, pit_callback);
+    tick_wait(1); /* Manually freeze the execution for better debugging experience */
+    gdt_initialize();
+    tick_wait(1);
+    idt_initialize();
+    tick_wait(1);
+    pit_initialize(1193, pit_callback);
 
     memory_initialize(mbi);
     enable_interrupts();
@@ -53,7 +54,6 @@ void memory_initialize(struct multiboot_info *mbi);
     terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
     /* Show welcome message */
-    qemu_printf(QEMU_INFO, "Show greeting messages");
     kprintf("Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
     kprintf("<3\n");

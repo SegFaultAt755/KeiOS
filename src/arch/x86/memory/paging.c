@@ -32,8 +32,6 @@ void paging_set_physical_memory(uint32_t mem_high_point, uint32_t physical_alloc
 }
 
 uint32_t paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) {
-    qemu_printf(QEMU_INFO, "Paging memory");
-
     struct page_dir *dir = (struct page_dir *)initial_page_dir;
     memset(&dir->entries[0], 0, sizeof(struct page_dir_entry));
     invalidate(0);
@@ -50,6 +48,8 @@ uint32_t paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_star
 
     memset(page_dirs, 0, sizeof(page_dirs));
     memset(page_dirs_used, 0, sizeof(page_dirs_used));
+
+    qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: 0x%x)", &dir->entries[0]);
 
     return physical_alloc_start;
 }

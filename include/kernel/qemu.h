@@ -8,7 +8,7 @@
 
 #define QEMU_PORT 0xE9
 
-enum qemu_log {
+enum qemu_level {
     QEMU_OK,
     QEMU_INFO,
     QEMU_WARN,
@@ -16,9 +16,17 @@ enum qemu_log {
     QEMU_PANIC
 };
 
+enum qemu_category {
+    QEMU_CPU,
+    QEMU_MEM,
+    QEMU_ARCH,
+    QEMU_DRV,
+    QEMU_KERN
+};
+
 static inline void qemu_putchar(char c) {
     outb(QEMU_PORT, c);
 }
 
 void qemu_set_time_var(uint32_t *ms);
-void qemu_printf(enum qemu_log level, const char *fmt, ...);
+void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt, ...);

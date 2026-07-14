@@ -15,14 +15,15 @@ static uint16_t term_width;
 static uint16_t term_height;
 
 void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height) {
-    qemu_printf(QEMU_INFO, "Initializating terminal");
-
     term_mem = mem;
     term_width = width;
     term_height = height;
     term_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
 
     terminal_clear();
+
+    qemu_printf(QEMU_DRV, QEMU_OK, "Terminal initialized (memory: 0x%x, width: %u, height: %u, color: 0x%x)", term_mem,
+                (uint32_t)term_width, (uint32_t)term_height, term_color);
 }
 
 void terminal_clear(void) {

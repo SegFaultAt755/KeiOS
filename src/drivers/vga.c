@@ -15,25 +15,28 @@ static uint32_t gfx_pitch;
 static uint8_t gfx_bpp;
 
 void vga_init_text(void) {
-    qemu_printf(QEMU_INFO, "Initializing VGA text mode");
     gfx_mode_enabled = false;
     /* Switch to text mode */
+
+    qemu_printf(QEMU_DRV, QEMU_OK, "VGA text mode initialized");
 }
 
 bool vga_init_gfx(struct multiboot_info *mbi) {
-    qemu_printf(QEMU_INFO, "Initializing VGA video mode");
-    if (!(mbi->flags & (1 << 12)))
+    if (!(mbi->flags & (1 << 12))) {
+        qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to initialize GFX (flags: %d)", mbi->flags);
         return false;
+    }
 
-    qemu_printf(QEMU_INFO, "Loading data from multiboot data to local variables");
-    gfx_mem = (uint32_t *)(uintptr_t)mbi->framebuffer_addr;
+    gfx_mem = (uint32_t *)mbi->framebuffer_addr;
     gfx_width = mbi->framebuffer_width;
     gfx_height = mbi->framebuffer_height;
     gfx_pitch = mbi->framebuffer_pitch;
     gfx_bpp = mbi->framebuffer_bpp;
-
-    qemu_printf(QEMU_INFO, "Enabling video mode and returning");
     gfx_mode_enabled = true;
+
+    qemu_printf(QEMU_DRV, QEMU_OK, "GFX initialized (memory: 0x%x, width: %d, height: %d, pitch: %d, bpp: %d)", gfx_mem,
+                gfx_width, gfx_height, gfx_pitch, gfx_bpp);
+
     return true;
 }
 
@@ -54,8 +57,8 @@ void vga_clear(uint32_t color) {
 
 void vga_set_pixel(uint32_t x, uint32_t y, uint32_t color) {
     if (!gfx_mode_enabled || x >= gfx_width || y >= gfx_height) {
-        qemu_printf(QEMU_ERROR, "Failed to set pixel: {%d, %d:%d:%d, %d:%d:%d}", gfx_mode_enabled, x, gfx_width,
-                    x >= gfx_width, y, gfx_height, y >= gfx_height);
+        qemu_printf(QEMU_DRV, QEMU_ERROR, "GFX failed to set pixel: {%d, %d:%d:%d, %d:%d:%d}", gfx_mode_enabled, x,
+                    gfx_width, x >= gfx_width, y, gfx_height, y >= gfx_height);
         return;
     }
 

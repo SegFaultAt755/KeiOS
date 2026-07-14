@@ -7,7 +7,6 @@
 #include "libkern/stdio.h"
 
 void pit_initialize(uint32_t freq, void (*callback)(struct registers *regs)) {
-    qemu_printf(QEMU_INFO, "Initializing PIT");
     intr_handler(IRQ0, callback);
 
     uint32_t divisor = 1'193'180 / freq;
@@ -19,4 +18,6 @@ void pit_initialize(uint32_t freq, void (*callback)(struct registers *regs)) {
     /* Send the frequency divisor */
     outb(0x40, l);
     outb(0x40, h);
+
+    qemu_printf(QEMU_DRV, QEMU_OK, "PIT configured to %d hz", freq);
 }

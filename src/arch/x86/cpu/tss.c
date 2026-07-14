@@ -10,7 +10,6 @@
 struct tss_entry tss;
 
 void write_tss(uint16_t ss0, uint32_t esp0) {
-    qemu_printf(QEMU_INFO, "Writing TSS");
     uint32_t base = (uint32_t)&tss;
     uint32_t limit = base + sizeof(struct tss_entry);
 

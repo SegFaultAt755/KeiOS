@@ -21,7 +21,7 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
 [[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
     disable_interrupts();
-    qemu_printf(QEMU_PANIC, "(%s:%d) %s | %s", file, line, reason, desc);
+    qemu_printf(QEMU_KERN, QEMU_PANIC, "(file: %s, line: %d) reason: %s | description: %s", file, line, reason, desc);
 
     vga_init_text();
     terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);

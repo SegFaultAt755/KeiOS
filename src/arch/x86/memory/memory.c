@@ -7,8 +7,6 @@
 extern uint8_t _kernel_end;
 
 void memory_initialize(struct multiboot_info *mbi) {
-    qemu_printf(QEMU_INFO, "Initializing memory components");
-
     uint32_t physical_alloc_start = ((uint32_t)&_kernel_end + 0xFFF) & ~0xFFF;
 
     /* Check if Multiboot modules exist, and adjust start pointer past them */
@@ -20,8 +18,6 @@ void memory_initialize(struct multiboot_info *mbi) {
             physical_alloc_start = aligned_mod_end;
     }
 
-    qemu_printf(QEMU_INFO, "Physical allocation starts at: 0x%x", physical_alloc_start);
-
     /* Determine upper memory bounds */
     uint64_t mem_high_point = 0;
     if (mbi->flags & (1 << 0))
@@ -30,7 +26,8 @@ void memory_initialize(struct multiboot_info *mbi) {
     if (mem_high_point > MAX_PHYSICAL_BYTES || mem_high_point == 0)
         mem_high_point = MAX_PHYSICAL_BYTES;
 
-    qemu_printf(QEMU_INFO, "Memory high point: 0x%x", (uint32_t)mem_high_point);
+    qemu_printf(QEMU_MEM, QEMU_INFO, "Memory map: (physical allocation start: 0x%x, memory high point: 0x%x)",
+                physical_alloc_start, (uint32_t)mem_high_point);
 
     /* Initialize Paging */
     uint32_t post_paging_free_mem = paging_initialize((uint32_t)mem_high_point, physical_alloc_start);

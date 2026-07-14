@@ -7,13 +7,14 @@
 static struct heap_segment *heap_start = nullptr;
 
 void heap_initialize(void *start_addr, uint32_t total_size) {
-    qemu_printf(QEMU_INFO, "Initializing kernel heap at 0x%x", (uint32_t)start_addr);
-
     uint32_t aligned_addr = HEAP_ALIGN_UP((uint32_t)start_addr, HEAP_ALIGNMENT);
     uint32_t lost_bytes = aligned_addr - (uint32_t)start_addr;
 
-    if (total_size <= (sizeof(struct heap_segment) + lost_bytes))
+    if (total_size <= (sizeof(struct heap_segment) + lost_bytes)) {
+        qemu_printf(QEMU_MEM, QEMU_ERROR,
+                    "Failed to initialize heap (total requested size is less than minimum can be required)");
         return;
+    }
 
     /* Set up the first free memory block covering the rest of the available space */
     heap_start = (struct heap_segment *)aligned_addr;
@@ -21,6 +22,9 @@ void heap_initialize(void *start_addr, uint32_t total_size) {
     heap_start->next = nullptr;
     heap_start->prev = nullptr;
     heap_start->is_free = true;
+
+    qemu_printf(QEMU_MEM, QEMU_OK, "Heap initialized (start point: 0x%x, length: %d)", (uint32_t *)heap_start,
+                heap_start->len);
 }
 
 static void split_segment(struct heap_segment *segment, uint32_t requested_size) {

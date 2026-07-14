@@ -20,9 +20,9 @@ static void qemu_print_time(void) {
     char buf[1024] = {};
 
     if (var_ms_track != nullptr)
-        ksnprintf(buf, sizeof(buf), "[ %d.%d ]: ", *var_ms_track / 1000, *var_ms_track % 1000);
+        ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", *var_ms_track / 1000, *var_ms_track % 1000);
     else
-        ksnprintf(buf, sizeof(buf), "[ UNDEFI ]: ");
+        ksnprintf(buf, sizeof(buf), "[ UNDEFI ] ");
 
     qemu_print(buf);
 }
@@ -31,24 +31,44 @@ void qemu_set_time_var(uint32_t *ms) {
     var_ms_track = ms;
 }
 
-void qemu_printf(enum qemu_log level, const char *fmt, ...) {
+void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt, ...) {
     qemu_print_time();
+
+    switch (cat) {
+    case QEMU_CPU: {
+        qemu_print("[CPU ] ");
+    } break;
+    case QEMU_MEM: {
+        qemu_print("[MEM ] ");
+    } break;
+    case QEMU_ARCH: {
+        qemu_print("[ARCH] ");
+    } break;
+    case QEMU_DRV: {
+        qemu_print("[DRV ] ");
+    } break;
+    case QEMU_KERN: {
+        qemu_print("[KERN] ");
+    } break;
+    default:
+        break;
+    }
 
     switch (level) {
     case QEMU_OK: {
-        qemu_print("[ OK ]: ");
+        qemu_print("[ OK ] ");
     } break;
     case QEMU_INFO: {
-        qemu_print("[INFO]: ");
+        qemu_print("[INFO] ");
     } break;
     case QEMU_WARN: {
-        qemu_print("[WARN]: ");
+        qemu_print("[WARN] ");
     } break;
     case QEMU_ERROR: {
-        qemu_print("[ERR ]: ");
+        qemu_print("[ERR ] ");
     } break;
     case QEMU_PANIC: {
-        qemu_print("[PANIC]: ");
+        qemu_print("[PANIC] ");
     } break;
     default:
         break;
@@ -58,7 +78,7 @@ void qemu_printf(enum qemu_log level, const char *fmt, ...) {
     va_start(args, fmt);
 
     char buf[1024] = {};
-    ksnprintf(buf, sizeof(buf), fmt, args);
+    kvsnprintf(buf, sizeof(buf), fmt, args);
     qemu_print(buf);
     qemu_putchar('\n');
 
