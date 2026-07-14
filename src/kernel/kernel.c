@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "drivers/pit.h"
+#include "drivers/sleep.h"
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
 #include "kernel/halt.h"
@@ -21,20 +22,29 @@
 
 #include "libkern/stdio.h"
 
-volatile uint64_t tick = 0;
+uint32_t tick = 0;
 void pit_callback(struct registers *) {
     tick += 1;
+}
+
+static inline void tick_wait(uint32_t ms) {
+    sleep_ms(ms);
+    tick += ms;
 }
 
 void show_banner(void);
 void memory_initialize(struct multiboot_info *mbi);
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
+    qemu_set_time_var(&tick);
+
     /* Initialize kernel */
     qemu_printf(QEMU_INFO, "Loading kernel");
-    gdt_initialize();
-    idt_initialize();
-    pit_initialize(100, pit_callback);
+
+    tick_wait(1); gdt_initialize();
+    tick_wait(1); idt_initialize();
+    tick_wait(1); pit_initialize(1193, pit_callback);
+
     memory_initialize(mbi);
     enable_interrupts();
 

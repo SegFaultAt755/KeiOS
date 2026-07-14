@@ -15,31 +15,40 @@ static void qemu_print(const char *s) {
         qemu_putchar(s[i]);
 }
 
+static uint32_t *var_ms_track = nullptr;
 static void qemu_print_time(void) {
     char buf[1024] = {};
-    ksnprintf(buf, sizeof(buf), "[%d-%d-%d]: ", bcd_to_binary(read_cmos_reg(CMOS_HOUR)),
-              bcd_to_binary(read_cmos_reg(CMOS_MIN)), bcd_to_binary(read_cmos_reg(CMOS_SEC)));
+
+    if (var_ms_track != nullptr)
+        ksnprintf(buf, sizeof(buf), "[ %d.%d ]: ", *var_ms_track / 1000, *var_ms_track % 1000);
+    else
+        ksnprintf(buf, sizeof(buf), "[ UNDEFI ]: ");
 
     qemu_print(buf);
 }
 
+void qemu_set_time_var(uint32_t *ms) {
+    var_ms_track = ms;
+}
+
 void qemu_printf(enum qemu_log level, const char *fmt, ...) {
+    qemu_print_time();
+
     switch (level) {
+    case QEMU_OK: {
+        qemu_print("[ OK ]: ");
+    } break;
     case QEMU_INFO: {
         qemu_print("[INFO]: ");
-        qemu_print_time();
     } break;
     case QEMU_WARN: {
         qemu_print("[WARN]: ");
-        qemu_print_time();
     } break;
     case QEMU_ERROR: {
-        qemu_print("[ERROR]: ");
-        qemu_print_time();
+        qemu_print("[ERR ]: ");
     } break;
     case QEMU_PANIC: {
         qemu_print("[PANIC]: ");
-        qemu_print_time();
     } break;
     default:
         break;
