@@ -199,6 +199,13 @@ For **Manual Addition (Windows)**: Run the provided batch script:
 muke.bat
 `````
 
+Pass `--help` flag to get all available usage options:
+
+```bash
+# Use mingw32-make on Windows
+make --help
+```
+
 ### 2. Launch in Emulator
 
 KeiOS can be booted using one of two methods depending on the setup:

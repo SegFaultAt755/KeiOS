@@ -1,12 +1,14 @@
 # Binaries
 /bin
 /keios
+/.venv
 /**/*.iso
 /**/*.img
 /**/*.elf
 /**/*.o
 /*.qcow2
 /*.log
+/config.mk
 
 # Documents
 /.obsidian
