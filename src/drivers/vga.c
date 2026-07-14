@@ -27,7 +27,7 @@ bool vga_init_gfx(struct multiboot_info *mbi) {
         return false;
     }
 
-    gfx_mem = (uint32_t *)mbi->framebuffer_addr;
+    gfx_mem = (uint32_t *)(uintptr_t)mbi->framebuffer_addr;
     gfx_width = mbi->framebuffer_width;
     gfx_height = mbi->framebuffer_height;
     gfx_pitch = mbi->framebuffer_pitch;

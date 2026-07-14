@@ -1,6 +1,11 @@
 #pragma once
 
+/* SPDX-License-Identifier: GPLv3 */
+/* Copyright (C) 2026 KeiOS Developers */
+
 #include <stddef.h>
 
 void *memset(void *dest, int val, size_t n);
 void *memcpy(void *dest, const void *src, size_t n);
+void *memmove(void *dest, const void *src, size_t n);
+int memcmp(const void *s1, const void *s2, size_t n);
