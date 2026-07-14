@@ -13,27 +13,27 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
     for (size_t i = 0; fmt[i] != '\0' && buf_idx < size - 1; i++) {
         if (fmt[i] == '%' && fmt[i + 1] != '\0') {
             i++;
-            char buffer[32];
-            int length = 0;
+            char buf_num[32];
+            int len = 0;
 
             switch (fmt[i]) {
             case 'd':
             case 'i': {
-                int value = va_arg(args, int);
-                unsigned int uvalue = (unsigned int)value;
-                if (value < 0 && buf_idx < size - 1) {
+                int val = va_arg(args, int);
+                unsigned int uval = (unsigned int)val;
+                if (val < 0 && buf_idx < size - 1) {
                     buf[buf_idx++] = '-';
-                    uvalue = ~uvalue + 1;
+                    uval = ~uval + 1;
                 }
 
-                length = uvalue_to_str(buffer, uvalue, 10, 0, 0);
+                len = uvalue_to_str(buf_num, uval, 10, 0, 0);
                 break;
             }
             case 'u':
-                length = uvalue_to_str(buffer, va_arg(args, unsigned int), 10, 0, 0);
+                len = uvalue_to_str(buf_num, va_arg(args, unsigned int), 10, 0, 0);
                 break;
             case 'x':
-                length = uvalue_to_str(buffer, va_arg(args, unsigned int), 16, 0, 0);
+                len = uvalue_to_str(buf_num, va_arg(args, unsigned int), 16, 0, 0);
                 break;
             case 'c':
                 if (buf_idx < size - 1)
@@ -60,8 +60,8 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
             }
 
             /* Copy formatted numerical buffers over */
-            for (int k = 0; k < length && buf_idx < size - 1; k++)
-                buf[buf_idx++] = buffer[k];
+            for (int k = 0; k < len && buf_idx < size - 1; k++)
+                buf[buf_idx++] = buf_num[k];
         } else {
             buf[buf_idx++] = fmt[i];
         }

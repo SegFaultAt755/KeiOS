@@ -11,13 +11,13 @@
 #include "kernel/multiboot.h"
 #include "kernel/qemu.h"
 
-#if (ARCH == X86)
+#if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/gdt.h"
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
-#elif (ARCH == X64)
-
+#else
+    #error "Unsupported architecture! (i386 is available)"
 #endif
 
 #include "libkern/stdio.h"
@@ -54,10 +54,10 @@ void memory_initialize(struct multiboot_info *mbi);
     terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
     /* Show welcome message */
-    kprintf("Welcome to %s %d.%d.%d! ", NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-    terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
+    kprintf("Welcome to %s %d.%d.%d! ", "KeiOS", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+        terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
     kprintf("<3\n");
-    terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
+        terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
 
     /* Infinite loop to prevent CPU fault */
