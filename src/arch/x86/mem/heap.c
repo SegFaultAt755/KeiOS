@@ -34,8 +34,8 @@ void heap_initialize(void *start_addr, uint32_t total_size) {
     heap_start->next = nullptr;
     heap_start->prev = nullptr;
 
-    qemu_printf(QEMU_MEM, QEMU_OK, "Heap initialized (start point: 0x%x, length: %d)",
-                (uint32_t)heap_start, usable_len);
+    qemu_printf(QEMU_MEM, QEMU_OK, "Heap initialized (start point: 0x%x, length: %d)", (uint32_t)heap_start,
+                usable_len);
 }
 
 static void split_segment(struct heap_segment *segment, uint32_t requested_size) {

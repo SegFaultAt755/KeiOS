@@ -1,15 +1,16 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
+#include "arch/x86/heap.h"
 #include "arch/x86/mem.h"
 #include "arch/x86/vmm.h"
-#include "arch/x86/heap.h"
 #include "kernel/qemu.h"
 
 extern uint8_t _kernel_end;
 
 void memory_initialize(struct multiboot_info *mbi) {
-    uint32_t physical_alloc_start = ((uint32_t)&_kernel_end + 0xFFFU) & ~0xFFFU;
+    uint32_t virtual_alloc_start = ((uint32_t)&_kernel_end + 0xFFFU) & ~0xFFFU;
+    uint32_t physical_alloc_start = virtual_alloc_start - KERNEL_START;
 
     /* Check if multiboot modules exist, and adjust start pointer past them */
     if ((mbi->flags & (1U << 3)) && mbi->mods_count > 0) {
@@ -32,9 +33,11 @@ void memory_initialize(struct multiboot_info *mbi) {
                 physical_alloc_start, (uint32_t)mem_high_point);
 
     /* Initialize VMM & PMM */
-    uint32_t post_paging_free_mem = vmm_initialize((uint32_t)mem_high_point, physical_alloc_start);
+    uint32_t post_paging_free_mem_phys = vmm_initialize((uint32_t)mem_high_point, physical_alloc_start);
 
     /* Initialize Heap */
     uint32_t heap_size = 1024 * 1024 * 4; /* 4MB initial size */
-    heap_initialize((void *)post_paging_free_mem, heap_size);
+    uint32_t post_paging_free_mem_virt = post_paging_free_mem_phys + KERNEL_START;
+
+    heap_initialize((void *)post_paging_free_mem_virt, heap_size);
 }

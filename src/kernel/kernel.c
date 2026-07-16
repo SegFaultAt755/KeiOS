@@ -18,7 +18,7 @@
 #include "arch/x86/mem.h"
 #include "arch/x86/vmm.h"
 #else
-    #error "Unsupported architecture! (i386 is available)"
+#error "Unsupported architecture! (i386 is available)"
 #endif
 
 #include "libkern/stdio.h"
@@ -56,9 +56,9 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Show welcome message */
     kprintf("Welcome to %s %d.%d.%d! ", "KeiOS", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-        terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
+    terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
     kprintf("<3\n");
-        terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
+    terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
 
     /* Infinite loop to prevent CPU fault */

@@ -6,15 +6,15 @@
 #include "arch/x86/mem.h"
 #include "arch/x86/vmm.h"
 #else
-    #error "Unsupported architecture! (i386 is available)"
+#error "Unsupported architecture! (i386 is available)"
 #endif
 #include "kernel/qemu.h"
 
 static uint32_t *lfb = nullptr;
-static uint32_t  width = 0;
-static uint32_t  height = 0;
-static uint32_t  pitch = 0;
-static uint8_t   bpp = 0;
+static uint32_t width = 0;
+static uint32_t height = 0;
+static uint32_t pitch = 0;
+static uint8_t bpp = 0;
 
 void vbe_initialize(struct multiboot_info *mbi) {
     if (!(mbi->flags & (1 << 12))) {
@@ -22,18 +22,20 @@ void vbe_initialize(struct multiboot_info *mbi) {
         return;
     }
 
-    width  = mbi->framebuffer_width;
+    width = mbi->framebuffer_width;
     height = mbi->framebuffer_height;
-    pitch  = mbi->framebuffer_pitch;
-    bpp    = mbi->framebuffer_bpp;
+    pitch = mbi->framebuffer_pitch;
+    bpp = mbi->framebuffer_bpp;
 
-    qemu_printf(QEMU_DRV, QEMU_INFO, "VBE info: (width: %d, height: %d, pitch: %d, bpp: %d)", width, height, pitch, bpp);
+    qemu_printf(QEMU_DRV, QEMU_INFO, "VBE info: (width: %d, height: %d, pitch: %d, bpp: %d)", width, height, pitch,
+                bpp);
 
     uint32_t phys_addr = (uint32_t)mbi->framebuffer_addr;
     uint32_t virt_addr = VBE_VIRTUAL_LFB_START;
-    uint32_t fbo_size  = pitch * height;
+    uint32_t fbo_size = pitch * height;
 
-    qemu_printf(QEMU_DRV, QEMU_INFO, "VBE address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)", phys_addr, virt_addr, fbo_size);
+    qemu_printf(QEMU_DRV, QEMU_INFO, "VBE address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)", phys_addr,
+                virt_addr, fbo_size);
 
     bool map_success = true;
 
@@ -47,16 +49,17 @@ void vbe_initialize(struct multiboot_info *mbi) {
 
     if (!map_success) {
         qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map VBE framebuffer to virtual memory");
-        lfb = nullptr; 
+        lfb = nullptr;
         return;
     }
 
-    lfb = (uint32_t*)virt_addr;
+    lfb = (uint32_t *)virt_addr;
 }
 
 void vbe_set_pixel(int x, int y, uint32_t color) {
     if (x < 0 || x >= (int)width || y < 0 || y >= (int)height) {
-        qemu_printf(QEMU_DRV, QEMU_ERROR, "Pixel position is out of bounds {pos %d:%d, bounds %d:%d}", x, y, (int)width, (int)height);
+        qemu_printf(QEMU_DRV, QEMU_ERROR, "Pixel position is out of bounds {pos %d:%d, bounds %d:%d}", x, y, (int)width,
+                    (int)height);
         return;
     }
 

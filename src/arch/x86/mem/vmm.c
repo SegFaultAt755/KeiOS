@@ -7,7 +7,7 @@
 #include "kernel/qemu.h"
 #include "libkern/memory.h"
 
-extern void *initial_page_dir;
+extern uint32_t initial_page_dir[];
 
 static inline void invalidate(uint32_t addr) {
     __asm__ volatile("invlpg (%0)" ::"r"(addr) : "memory");
@@ -31,28 +31,45 @@ uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) 
     dir[1023] = (physical_dir_addr & PDE_FRAME) | PDE_PRESENT | PDE_RW;
     invalidate(KERNEL_START);
 
+    /* Reload cr3 to flush tlb completely and apply recursive mapping changes */
+    __asm__ volatile("mov %%cr3, %%eax\n\t"
+                     "mov %%eax, %%cr3"
+                     :
+                     :
+                     : "eax", "memory");
+
     /* Initialize physical frame allocation */
     pmm_initialize(mem_high_point, physical_alloc_start);
 
-    qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: 0x%x)", dir[0]);
+    qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: 0x%x)", physical_dir_addr);
     return physical_alloc_start;
 }
 
 bool vmm_map_page(uint32_t virt_addr, uint32_t phys_addr, uint32_t flags) {
+    qemu_printf(QEMU_MEM, QEMU_INFO, "Getting PDE");
     uint32_t *pde = get_pde(virt_addr);
 
     /* Check if the page table exists, if not, allocate a physical frame for it */
+    qemu_printf(QEMU_MEM, QEMU_INFO, "0: 0x%x", pde);
+    qemu_printf(QEMU_MEM, QEMU_INFO, "0: %d", *pde);
     if (!(*pde & PDE_PRESENT)) {
+        qemu_printf(QEMU_MEM, QEMU_INFO, "1");
         uint32_t new_table_phys = pmm_alloc_frame();
         if (new_table_phys == 0)
             return false;
+        qemu_printf(QEMU_MEM, QEMU_INFO, "2");
 
         *pde = (new_table_phys & PDE_FRAME) | PDE_PRESENT | PDE_RW | (flags & PDE_USER);
 
         uint32_t *table_base = (uint32_t *)((uint32_t)get_pte(virt_addr) & ~0xFFFU);
+        qemu_printf(QEMU_MEM, QEMU_INFO, "1");
         invalidate((uint32_t)table_base);
+        qemu_printf(QEMU_MEM, QEMU_INFO, "2");
         memset(table_base, 0, PAGE_SIZE);
+        qemu_printf(QEMU_MEM, QEMU_INFO, "3");
     }
+
+    qemu_printf(QEMU_MEM, QEMU_INFO, "5");
 
     uint32_t *pte = get_pte(virt_addr);
     *pte = (phys_addr & PTE_FRAME) | (flags & 0xFFF) | PTE_PRESENT;
