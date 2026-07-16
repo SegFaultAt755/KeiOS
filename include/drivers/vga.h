@@ -3,16 +3,11 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include "kernel/multiboot.h"
 #include <stdint.h>
 
 #define VGA_TEXT_WIDTH  80
 #define VGA_TEXT_HEIGHT 25
 #define VGA_TEXT_MEMORY 0xC00B8000
-
-#define VGA_GFX_WIDTH  640
-#define VGA_GFX_HEIGHT 480
-#define VGA_GFX_MEMORY 0xC00A0000
 
 enum vga_8b_colors {
     VGA_8B_BLACK         = 0,
@@ -42,8 +37,4 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 }
 
 void vga_init_text(void);
-bool vga_init_gfx(struct multiboot_info *mbi);
-bool vga_is_gfx_supported(void);
-
-void vga_clear(uint32_t color);
-void vga_set_pixel(uint32_t x, uint32_t y, uint32_t color);
+void vga_clear(enum vga_8b_colors color);

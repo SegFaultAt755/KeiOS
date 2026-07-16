@@ -68,7 +68,7 @@ void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt,
         qemu_print("[ERR ] ");
     } break;
     case QEMU_PANIC: {
-        qemu_print("[PANIC] ");
+        qemu_print("[PANC] ");
     } break;
     default:
         break;

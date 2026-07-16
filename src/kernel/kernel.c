@@ -5,7 +5,7 @@
 #include "drivers/pit.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
-#include "drivers/vga.h"
+#include "drivers/vbe.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -16,6 +16,7 @@
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
+#include "arch/x86/vmm.h"
 #else
     #error "Unsupported architecture! (i386 is available)"
 #endif
@@ -61,6 +62,8 @@ void memory_initialize(struct multiboot_info *mbi);
     show_banner();
 
     /* Infinite loop to prevent CPU fault */
+    goto halt;
+halt:
     while (true) {
         disable_interrupts();
         halt();

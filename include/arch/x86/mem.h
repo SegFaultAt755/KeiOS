@@ -6,65 +6,35 @@
 #include <stdint.h>
 #include "kernel/multiboot.h"
 
-#define PAGING_KERNEL_START 0xC0000000
-#define PAGING_KERNEL_END   0xFFFFF000
-
-#define PAGE_SIZE 4096
+#define PAGE_SIZE          4096
 #define PAGE_TABLE_ENTRIES 1024
 #define MAX_PHYSICAL_BYTES 0x100000000ULL /* 4GB */
 
-#define HEAP_ALIGNMENT 16
-#define HEAP_ALIGN_UP(val, align) (((val) + ((align) - 1)) & ~((align) - 1))
-#define HEAP_MIN_SPLIT_SIZE 32
+#define KERNEL_START 0xC0000000
 
-struct [[gnu::packed]] page_table_entry {
-    uint32_t present   : 1;
-    uint32_t rw        : 1;
-    uint32_t user      : 1;
-    uint32_t pwt       : 1;
-    uint32_t pcd       : 1;
-    uint32_t accessed  : 1;
-    uint32_t dirty     : 1;
-    uint32_t pat       : 1;
-    uint32_t global    : 1;
-    uint32_t available : 3;
-    uint32_t frame     : 20;
-};
+/* Paging flags */
+#define PTE_PRESENT  (1U << 0)   /* Present, is loaded in memory */
+#define PTE_RW       (1U << 1)   /* Read/write, allowed to write to page if set */
+#define PTE_USER     (1U << 2)   /* User/supervisor, user-mode code can access page if set */
+#define PTE_PWT      (1U << 3)   /* Page-level write-through, enables write-through caching */
+#define PTE_PCD      (1U << 4)   /* Page-level cache disable, disables caching for the page */
+#define PTE_ACCESSED (1U << 5)   /* Accessed, set by hardware when page is read or written */
+#define PTE_DIRTY    (1U << 6)   /* Dirty, set by hardware when page is written to */
+#define PTE_PAT      (1U << 7)   /* Page attribute table, selects memory attributes with pwt/pcd */
+#define PTE_GLOBAL   (1U << 8)   /* Global, prevents tlb flush on cr3 reload */
+#define PTE_FRAME    0xFFFFF000U /* Page frame address, mask for physical 4KB page address */
 
-struct [[gnu::packed]] page_dir_entry {
-    uint32_t present    : 1;
-    uint32_t rw         : 1;
-    uint32_t user       : 1;
-    uint32_t pwt        : 1;
-    uint32_t pcd        : 1;
-    uint32_t accessed   : 1;
-    uint32_t ignored    : 1;
-    uint32_t page_size  : 1;
-    uint32_t ignored2   : 4;
-    uint32_t table_addr : 20;
-};
+#define PDE_PRESENT  (1U << 0)   /* Present, is loaded in memory */
+#define PDE_RW       (1U << 1)   /* Read/write, allowed to write to mapped range if set */
+#define PDE_USER     (1U << 2)   /* User/supervisor, user-mode code can access mapped range if set */
+#define PDE_PWT      (1U << 3)   /* Page-level write-through, enables write-through for page table */
+#define PDE_PCD      (1U << 4)   /* Page-level cache disable, disables caching for page table */
+#define PDE_ACCESSED (1U << 5)   /* Accessed, set by hardware when directory range is accessed */
+#define PDE_PS       (1U << 7)   /* Page size, maps a direct 4MB page if set */
+#define PDE_FRAME    0xFFFFF000U /* Page frame address, mask for physical page table address */
 
-/* Aligned tables architecture */
-struct [[gnu::aligned(PAGE_SIZE)]] page_table {
-    struct page_table_entry entries[PAGE_TABLE_ENTRIES];
-};
+typedef uint32_t page_table_t[PAGE_TABLE_ENTRIES] [[gnu::aligned(PAGE_SIZE)]];
+typedef uint32_t page_dir_t[PAGE_TABLE_ENTRIES] [[gnu::aligned(PAGE_SIZE)]];
 
-struct [[gnu::aligned(PAGE_SIZE)]] page_dir {
-    struct page_dir_entry entries[PAGE_TABLE_ENTRIES];
-};
-
-/* Heap segment structure */
-struct heap_segment {
-    uint32_t len;
-    struct heap_segment *next;
-    struct heap_segment *prev;
-    bool is_free;
-};
-
+/* Initialization */
 void memory_initialize(struct multiboot_info *mbi);
-
-uint32_t paging_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start);
-
-void heap_initialize(void *start_addr, uint32_t total_size);
-void *kmalloc(uint32_t size);
-void kfree(void *ptr);

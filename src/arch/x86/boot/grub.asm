@@ -17,6 +17,7 @@ align 4
 	dd CHECKSUM
 
     ; Video mode request fields
+    dd 0, 0, 0, 0, 0 ; Address fields
     dd 0
     dd 1024
     dd 768

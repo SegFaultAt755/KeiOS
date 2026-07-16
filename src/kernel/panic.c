@@ -71,7 +71,7 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
     va_list args;
     va_start(args, line);
-    ksnprintf(fmt_desc, sizeof(fmt_desc), desc, args);
+    kvsnprintf(fmt_desc, sizeof(fmt_desc), desc, args);
     va_end(args);
 
     runtime_panic(reason, fmt_desc, file, line);
