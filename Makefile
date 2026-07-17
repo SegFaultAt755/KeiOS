@@ -33,6 +33,8 @@ CFLAGS  ?= -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra \
            -fno-exceptions -std=c23 -I $(INC_DIR) -MMD -MP $(CUSTOM_DEFINES)
 LDFLAGS ?= -m elf_i386 -static -T $(LDSCRIPT)
 
+bin/libkern/math.o: CFLAGS += -msse
+
 # Cross-platform file utilities
 ifeq ($(OS),Windows_NT)
     MKDIR = if not exist $(subst /,\,$1) mkdir $(subst /,\,$1)

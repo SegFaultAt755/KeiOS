@@ -12,11 +12,11 @@
 #include "kernel/qemu.h"
 
 #if defined(__i386__) || defined(_M_IX86)
+#include "arch/x86/features.h"
 #include "arch/x86/gdt.h"
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
-#include "arch/x86/vmm.h"
 #else
 #error "Unsupported architecture! (i386 is available)"
 #endif
@@ -48,6 +48,7 @@ void memory_initialize(struct multiboot_info *mbi);
     pit_initialize(1193, pit_callback);
 
     memory_initialize(mbi);
+    initialize_cpu_features();
     enable_interrupts();
 
     /* Logging */
@@ -55,7 +56,13 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Initialize graphics */
     vbe_initialize(mbi);
-    vbe_set_pixel(0, 0, 0x00FF0000);
+
+    /* Simply change screen color */
+    for (int y = 0; y < (int)mbi->framebuffer_height; y++) {
+        for (int x = 0; x < (int)mbi->framebuffer_width; x++) {
+            vbe_set_pixel(x, y, 0x0014141E);
+        }
+    }
 
 #if 0
     vga_init_text();
