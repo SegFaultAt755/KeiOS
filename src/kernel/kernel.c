@@ -55,6 +55,7 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Initialize graphics */
     vbe_initialize(mbi);
+    vbe_set_pixel(0, 0, 0x00FF0000);
 
 #if 0
     vga_init_text();
