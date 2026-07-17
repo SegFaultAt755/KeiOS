@@ -50,7 +50,13 @@ void memory_initialize(struct multiboot_info *mbi);
     memory_initialize(mbi);
     enable_interrupts();
 
+    /* Logging */
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x)", mbi);
+
     /* Initialize graphics */
+    vbe_initialize(mbi);
+
+#if 0
     vga_init_text();
     terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
@@ -60,6 +66,7 @@ void memory_initialize(struct multiboot_info *mbi);
     kprintf("<3\n");
     terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
+#endif
 
     /* Infinite loop to prevent CPU fault */
     goto halt;

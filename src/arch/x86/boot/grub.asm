@@ -4,7 +4,7 @@
 ; Declare constants
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
-MBUSEGFX equ  0
+MBUSEGFX equ  1 << 2
 MBFLAGS  equ  MBALIGN | MEMINFO | MBUSEGFX
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
@@ -50,6 +50,7 @@ _start:
 section .text
 higher:
     mov esp, stack_top
+    add ebx, 0xC0000000 ; Convert physical mbi pointer to higher half virtual pointer
     push ebx
     push eax
     xor ebp, ebp

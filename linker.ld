@@ -20,7 +20,7 @@ SECTIONS
     }
 
     .data ALIGN(4K): AT(ADDR(.data) - 0xC0000000) {
-        *(data)
+        *(.data)
     }
 
     .rodata ALIGN(4K): AT(ADDR(.rodata) - 0xC0000000) {
