@@ -48,6 +48,12 @@ else
     CP    = cp $1 $2
 endif
 
+# Rust configuration
+RUST_TARGET := i686-unknown-none
+RUST_DIR    := rust
+RUST_CRATES := drivers
+RUST_LIBS   := $(patsubst %, $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a, $(RUST_CRATES))
+
 # Source and object resolution
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
@@ -57,8 +63,8 @@ ASM_SRCS := $(call rwildcard,$(SRC_DIR),*.asm)
 C_OBJS   := $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(C_SRCS))
 ASM_OBJS := $(patsubst $(SRC_DIR)/%.asm, $(BIN_DIR)/%.o, $(ASM_SRCS))
 
-OBJS := $(C_OBJS) $(ASM_OBJS)
-DEPS := $(OBJS:.o=.d)
+OBJS := $(C_OBJS) $(ASM_OBJS) $(RUST_LIBS)
+DEPS := $(C_OBJS:.o=.d) $(ASM_OBJS:.o=.d)
 
 # Build rules
 .PHONY: all clean config help
@@ -87,6 +93,10 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.asm
 	@$(call MKDIR,$(dir $@))
 	@$(AS) $(ASFLAGS) $< -o $@
 
+$(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a:
+	@echo ">>> [RS]  Compiling Rust crate: $*"
+	@cd $(RUST_DIR) && cargo build --release -p $*
+
 # Generate a local configuration
 config:
 ifeq ($(wildcard config.mk),)
@@ -107,6 +117,7 @@ clean:
 	@$(call RM_RF,$(BIN_DIR))
 	@$(call RM_RF,$(ISO_DIR))
 	@$(call RM_F,$(ISO_IMAGE))
+	@if [ -d "$(RUST_DIR)" ]; then cd $(RUST_DIR) && cargo clean; fi
 
 help:
 	@echo "KeiOS Build System"

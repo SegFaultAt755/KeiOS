@@ -36,6 +36,8 @@ static inline void tick_wait(uint32_t ms) {
 void show_banner(void);
 void memory_initialize(struct multiboot_info *mbi);
 
+extern bool rust_validate_magic(uint32_t magic);
+
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     qemu_set_time_var(&tick);
 
@@ -62,6 +64,12 @@ void memory_initialize(struct multiboot_info *mbi);
         for (int x = 0; x < (int)mbi->framebuffer_width; x++) {
             vbe_set_pixel(x, y, 0x0014141E);
         }
+    }
+
+    if (rust_validate_magic(0x2BADB002)) {
+        qemu_printf(QEMU_KERN, QEMU_OK, "Rust works!");
+    } else {
+        qemu_printf(QEMU_KERN, QEMU_ERROR, "Rust doesn't work!");
     }
 
 #if 0
