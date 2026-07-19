@@ -2,6 +2,7 @@
 /bin
 /keios
 /.venv
+/.vscode
 /**/*.iso
 /**/*.img
 /**/*.elf

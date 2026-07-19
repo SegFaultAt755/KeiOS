@@ -16,21 +16,21 @@ static uint32_t height = 0;
 static uint32_t pitch = 0;
 static uint8_t bpp = 0;
 
-void vbe_initialize(struct multiboot_info *mbi) {
-    if (!(mbi->flags & (1 << 12))) {
+void vbe_initialize(struct vbe_info info) {
+    if (!(info.flags & (1 << 12))) {
         qemu_printf(QEMU_DRV, QEMU_ERROR, "No framebuffer was provided by GRUB for VBE");
         return;
     }
 
-    width = mbi->framebuffer_width;
-    height = mbi->framebuffer_height;
-    pitch = mbi->framebuffer_pitch;
-    bpp = mbi->framebuffer_bpp;
+    width = info.width;
+    height = info.height;
+    pitch = info.pitch;
+    bpp = info.bpp;
 
     qemu_printf(QEMU_DRV, QEMU_INFO, "VBE info: (width: %d, height: %d, pitch: %d, bpp: %d)", width, height, pitch,
                 bpp);
 
-    uint32_t phys_addr = (uint32_t)mbi->framebuffer_addr;
+    uint32_t phys_addr = (uint32_t)info.lfb_addr;
     uint32_t virt_addr = VBE_VIRTUAL_LFB_START;
     uint32_t fbo_size = pitch * height;
 
@@ -65,4 +65,20 @@ void vbe_set_pixel(int x, int y, uint32_t color) {
 
     uint32_t index = (y * (pitch / 4)) + x;
     lfb[index] = color;
+}
+
+uint32_t *vbe_get_lfb_addr(void) {
+    return lfb;
+}
+uint32_t vbe_get_width(void) {
+    return width;
+}
+uint32_t vbe_get_height(void) {
+    return height;
+}
+uint32_t vbe_get_pitch(void) {
+    return pitch;
+}
+uint8_t vbe_get_bpp(void) {
+    return bpp;
 }
