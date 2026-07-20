@@ -4,9 +4,8 @@
 
 > 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
 
-*(⚠️ Note: KeiOS is currently in active development...)*
-
 ---
+
 ## 🗺️ Table of Contents
 
 - [🎯 Project Vision](#-project-vision)
@@ -14,21 +13,23 @@
 - [📂 Project Structure](#-project-structure)
 - [🖥️ Emulating System Environment](#%EF%B8%8F-emulating-system-environment)
 - [🛠️ Prerequisites](#%EF%B8%8F-prerequisites)
-    - [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian)
-    - [🪟 Windows](#-windows)
+  - [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian)
+  - [🪟 Windows](#-windows)
 - [🏃 Build and Run](#-build-and-run)
-    - [⚙️ Compile](#1-compile-the-os)
-    - [🚀 Launch](#2-launch-in-emulator)
-- [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls)
+  - [⚙️ Compile](#1-compile-the-os)
+  - [🚀 Launch](#2-launch-in-emulator)
+  - [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls)
 - [💬 Final Words](#-final-words)
 - [📄 License](#-license)
 
 ---
+
 ## 🎯 Project Vision
 
 The primary goal of KeiOS is to serve as an experimental lab environment. Its standout feature is the planned implementation of **two distinct syscall tables**, allowing the OS to natively handle and execute both **Windows** and **Linux** binaries within a minimal custom kernel and user space
 
 ---
+
 ## 🚀 Key Features
 
 * **Hybrid Core Architecture:** Built using modern C23 and Rust (v1.96) with seamless FFI integration for memory safe driver and kernel component development
@@ -37,6 +38,7 @@ The primary goal of KeiOS is to serve as an experimental lab environment. Its st
 * **Modular Design:** Clean structural separation between the bootloader, kernel, drivers, and user space code
 
 ---
+
 ## 📂 Project Structure
 
 `````txt
@@ -79,6 +81,7 @@ KeiOS/
 `````
 
 ---
+
 ## 🖥️ Emulating System Environment
 
 To accurately reproduce the performance, bottlenecks, and hardware constraints of early-2010s netbooks (such as the classic ASUS Eee PC or Acer Aspire One), the virtual machine configuration is intentionally restricted. The profiles below are tailored for **QEMU** and **VirtualBox** to replicate the baseline environment of a first-generation Intel Atom device
@@ -91,6 +94,7 @@ To accurately reproduce the performance, bottlenecks, and hardware constraints o
 | **Storage**   | 8GB HDD           | Replicates early low-capacity storage |
 
 ---
+
 ## 🛠️ Prerequisites
 
 - **C Compiler:** C23 compliant compiler (e.g., `gcc` or `clang`)
@@ -173,6 +177,7 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-rust nasm make xorriso python3
 - Use the downloaded Windows `xorriso` binary targeting this manual directory structure to build `keios.iso`
 
 ---
+
 ## 🏃 Build and Run
 
 For **automatically building** and **running** execute the `run.py` python script:
@@ -204,9 +209,10 @@ mingw32-make
 `````
 
 For **Manual Addition (Windows)**: Run the provided batch script:
-_(⚠️ Warning: this build system doesn't work, due to Rust integration)_
+
 `````bash
 muke.bat
+# Run 'muke.bat help' to get usage options
 `````
 
 Pass `--help` flag to get all available usage options:
@@ -221,6 +227,8 @@ make --help
 KeiOS can be booted using one of two methods depending on the setup:
 
 #### Method A: Direct Kernel Boot (No GRUB / No ISO Required) — ⚡ Fastest for Windows/MSYS2
+
+***(Warning: This method currently doesn't work due to Multiboot protocol. Go to Method B)***
 
 If skipping the ISO build entirely is desired (or if on native Windows where `grub-mkrescue` isn't available), QEMU can be instructed to act as a Multiboot bootloader and load the kernel binary directly:
 
@@ -265,6 +273,7 @@ qemu-system-i386 \
 `````
 
 ---
+
 ## 🔍 Troubleshooting & Common Pitfalls
 
 OS development is a fragile process. If a build fails or QEMU refuses to launch properly, check these common issues first
@@ -282,8 +291,8 @@ _(Note: you can send `qemu.log` to your AI assistant with prompt to parse the fi
 - **The Symptom:** Running `make` or `run.py` fails while trying to build `keios.iso`
 - **The Cause:** `grub-mkrescue` acts as a compiler frontend and requires external backends to stitch the filesystem format together
 - **The Fix:**
-    - **Ubuntu/Debian/WSL:** Run `sudo apt install xorriso mtools`
-    - **MSYS2:** Run `pacman -S xorriso`
+  - **Ubuntu/Debian/WSL:** Run `sudo apt install xorriso mtools`
+  - **MSYS2:** Run `pacman -S xorriso`
 
 ### "Syntax Error" or "Invalid Command" in Linker/Assembly Scripts
 
@@ -304,18 +313,19 @@ Then re-clone the repository or fix individual scripts using `dos2unix`
 - **The Fix:** Use `i686-elf-gcc` or target the MSYS2 MINGW32 environment strictly to output the correct target architecture formats
 
 ---
+
 ## 💬 Final Words
 
 ### SegFaultAt755
 
 > **"If fighting is sure to result in victory, then you must fight!"**
-> 
+>
 > _Sun Tzu said that, and I'd say he knows a little more about fighting than you do, pal, because he invented it, and then he perfected it so that no living man could best him in the ring of honor!_
 
 ### Siterfis
 
 > **"With enough desire, you can do anything."**
-> 
+>
 > _Even if it takes some time._
 
 ## 📄 License

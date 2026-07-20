@@ -18,7 +18,7 @@ SRC_DIR := src
 
 # Target files
 LDSCRIPT   := linker.ld
-KERNEL_BIN := $(BIN_DIR)/keios.bin
+KERNEL_BIN := $(BIN_DIR)/keios.elf
 ISO_IMAGE  := keios.iso
 
 # Custom preprocessor defines
@@ -109,7 +109,7 @@ ifeq ($(wildcard config.mk),)
 	@echo "Configuration saved to config.mk"
 else
 	@echo ">>> WARNING: 'config.mk' already exists. Generation skipped to protect custom settings."
-	@echo ">>> NOTE: To reset all data, first delete the configuration file and then type 'make config'"
+	@echo ">>> NOTE: To reset all data, first delete the configuration file and re-run 'make config'"
 endif
 
 clean:
