@@ -10,6 +10,7 @@
 /*.qcow2
 /*.log
 /config.mk
+/*.cpio
 
 # Documents
 /.obsidian

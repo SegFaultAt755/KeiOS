@@ -15,10 +15,12 @@ BIN_DIR := bin
 ISO_DIR := keios
 INC_DIR := include
 SRC_DIR := src
+FS_DIR  := rootfs
 
 # Target files
 LDSCRIPT   := linker.ld
-KERNEL_BIN := $(BIN_DIR)/keios.bin
+KERNEL := keios.elf
+CPIO       := initramfs.cpio
 ISO_IMAGE  := keios.iso
 
 # Custom preprocessor defines
@@ -71,16 +73,20 @@ DEPS := $(C_OBJS:.o=.d) $(ASM_OBJS:.o=.d)
 
 all: $(ISO_IMAGE)
 
-$(ISO_IMAGE): $(KERNEL_BIN) grub.cfg
+$(ISO_IMAGE): $(KERNEL) grub.cfg $(CPIO)
 	@echo ">>> [ISO] Generating bootable image: $@"
 	@$(call MKDIR,$(ISO_DIR)/boot/grub)
 	@$(call CP,grub.cfg,$(ISO_DIR)/boot/grub/grub.cfg)
-	@$(call CP,$(KERNEL_BIN),$(ISO_DIR)/boot/$(notdir $(KERNEL_BIN)))
+	@$(call CP,$(KERNEL),$(ISO_DIR)/boot/$(notdir $(KERNEL)))
+	@$(call CP,$(CPIO),$(ISO_DIR)/boot/$(notdir $(CPIO)))
 	@grub-mkrescue -o $@ $(ISO_DIR) 2>/dev/null || (echo "Error: grub-mkrescue failed." && false)
 
-$(KERNEL_BIN): $(OBJS) $(LDSCRIPT)
+$(CPIO):
+	@echo ">>> [IO]  Generating rootfs file: $@"
+	@cd $(FS_DIR) && find . -print0 | cpio --null -o --format=newc > ../$(CPIO)
+
+$(KERNEL): $(OBJS) $(LDSCRIPT)
 	@echo ">>> [LD]  Linking kernel binary: $@"
-	@$(call MKDIR,$(dir $@))
 	@$(LD) $(LDFLAGS) -o $@ $(OBJS)
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
@@ -109,7 +115,7 @@ ifeq ($(wildcard config.mk),)
 	@echo "Configuration saved to config.mk"
 else
 	@echo ">>> WARNING: 'config.mk' already exists. Generation skipped to protect custom settings."
-	@echo ">>> NOTE: To reset all data, first delete the configuration file and then type 'make config'"
+	@echo ">>> NOTE: To reset all data, first delete the configuration file and re-run 'make config'"
 endif
 
 clean:
@@ -117,6 +123,8 @@ clean:
 	@$(call RM_RF,$(BIN_DIR))
 	@$(call RM_RF,$(ISO_DIR))
 	@$(call RM_F,$(ISO_IMAGE))
+	@$(call RM_F,$(KERNEL))
+	@$(call RM_F,$(CPIO))
 	@if [ -d "$(RUST_DIR)" ]; then cd $(RUST_DIR) && cargo clean; fi
 
 help:

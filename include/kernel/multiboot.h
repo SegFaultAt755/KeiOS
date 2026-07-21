@@ -4,6 +4,21 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include <stdint.h>
+#include <stddef.h>
+
+#define MULTIBOOT_INFO_MEMORY           (1 << 0)
+#define MULTIBOOT_INFO_BOOTDEV          (1 << 1)
+#define MULTIBOOT_INFO_CMDLINE          (1 << 2)
+#define MULTIBOOT_INFO_MODS             (1 << 3)
+#define MULTIBOOT_INFO_AOUT_SYMS        (1 << 4)
+#define MULTIBOOT_INFO_ELF_SHDR         (1 << 5)
+#define MULTIBOOT_INFO_MEM_MAP          (1 << 6)
+#define MULTIBOOT_INFO_DRIVE_INFO       (1 << 7)
+#define MULTIBOOT_INFO_CONFIG_TABLE     (1 << 8)
+#define MULTIBOOT_INFO_BOOT_LOADER_NAME (1 << 9)
+#define MULTIBOOT_INFO_APM_TABLE        (1 << 10)
+#define MULTIBOOT_INFO_VBE_INFO         (1 << 11)
+#define MULTIBOOT_INFO_FRAMEBUFFER_INFO (1 << 12)
 
 #define MULTIBOOT_MEMORY_AVAILABLE        1
 #define MULTIBOOT_MEMORY_RESERVED         2
@@ -32,6 +47,13 @@ struct [[gnu::packed]] multiboot_mmap_entry {
     uint32_t len_lower;
     uint32_t len_upper;
     uint32_t type;
+};
+
+struct [[gnu::packed]] multiboot_module {
+    uint32_t mod_start;
+    uint32_t mod_end;
+    uint32_t cmdline;
+    uint32_t reserved;
 };
 
 struct [[gnu::packed]] multiboot_info {
@@ -93,3 +115,15 @@ struct [[gnu::packed]] multiboot_info {
         };
     };
 };
+
+struct multiboot_parsed_module {
+    const void *start_addr;
+    const void *end_addr;
+    size_t size;
+    const char *cmdline;
+};
+
+typedef void (*multiboot_module_callback_t)(struct multiboot_parsed_module *mod, uint32_t index, void *data);
+
+bool multiboot_has_modules(struct multiboot_info *mbi);
+uint32_t multiboot_parse_modules(struct multiboot_info *mbi, multiboot_module_callback_t callback, void *data);

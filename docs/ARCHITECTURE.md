@@ -7,7 +7,7 @@ This operating system is built on a **true microkernel architecture** targeting 
 
 - **Target Architecture:** i386 (x86 32-bit, Intel/AMD)
 - **Kernel Model:** Microkernel
-- **Bootloader:** GRUB2 (Multiboot 2 specification compliant)
+- **Bootloader:** GRUB2 (Multiboot specification compliant)
 - **Executable Format:** ELF32 (Executable and Linkable Format)
 
 ---
