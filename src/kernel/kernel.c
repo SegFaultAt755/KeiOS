@@ -38,8 +38,6 @@ static inline void tick_wait(uint32_t ms) {
 void show_banner(void);
 void memory_initialize(struct multiboot_info *mbi);
 
-extern bool rust_validate_magic(uint32_t magic);
-
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     qemu_set_time_var(&tick);
 

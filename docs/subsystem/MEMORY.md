@@ -47,7 +47,7 @@ The PMM treats RAM as an array of 4 KB physical page frames. Frame allocation st
 
 - **Page Frame Size:** 4096 Bytes (4KB)
 - **Bitmap Scale:** 1 byte of bitmap tracks (8 x 4KB = 32KB) of physical RAM
-- **Initialization:** Parsed directly from the Multiboot2 `mmap` tag provided by GRUB2
+- **Initialization:** Parsed directly from the Multiboot `mmap` tag provided by GRUB2
 
 ### Bitmap Bit Legend
 
