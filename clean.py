@@ -18,7 +18,7 @@ logger = logging.getLogger("KeiOS-Cleaner")
 
 # Never delete these even if matched by gitignore patterns
 PROTECTED_EXTENSIONS = {".md", ".txt", ".cfg", ".py", ".c", ".asm", ".h", ".ld", ".mk"}
-PROTECTED_DIRS = {".obsidian", ".vscode", ".git", "src", "include"}
+PROTECTED_DIRS = {".obsidian", ".vscode", ".git", "src", "include", "rootfs"}
 
 
 def get_make_command() -> str:
