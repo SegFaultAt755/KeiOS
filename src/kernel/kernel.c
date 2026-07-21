@@ -2,11 +2,10 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
-#include "drivers/display.h"
 #include "drivers/pit.h"
+#include "drivers/ps2.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
-#include "drivers/vbe.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -18,7 +17,6 @@
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
-#include "arch/x86/vmm.h"
 #else
 #error "Unsupported architecture! (i386 is available)"
 #endif
@@ -56,45 +54,7 @@ void memory_initialize(struct multiboot_info *mbi);
     /* Logging */
     qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x)", mbi);
 
-    /* Initialize graphics */
-    {
-        struct display_info info;
-        info.flags = mbi->flags;
-        info.width = mbi->framebuffer_width;
-        info.height = mbi->framebuffer_height;
-        info.pitch = mbi->framebuffer_pitch;
-        info.bpp = mbi->framebuffer_bpp;
-
-        uint32_t phys_addr = (uint32_t)mbi->framebuffer_addr;
-        uint32_t virt_addr = VBE_VIRTUAL_LFB_START;
-        uint32_t fbo_size = info.pitch * info.height;
-
-        qemu_printf(QEMU_DRV, QEMU_INFO, "VBE address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)", phys_addr,
-                    virt_addr, fbo_size);
-
-        bool map_success = true;
-
-        /* Loop through the entire size of the framebuffer and map it page by page */
-        for (uint32_t offset = 0; offset < fbo_size; offset += PAGE_SIZE) {
-            if (!vmm_map_page(virt_addr + offset, phys_addr + offset, PTE_PRESENT | PTE_RW | PTE_PWT)) {
-                map_success = false;
-                break;
-            }
-        }
-
-        if (!map_success) {
-            qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map VBE framebuffer to virtual memory");
-            info.lfb_addr = nullptr;
-        }
-
-        info.lfb_addr = (uint32_t *)virt_addr;
-
-        display_initialize(info);
-        display_clear(0x0014141E);
-        display_draw_line(50, 50, 100, 120, 0x00FF0000);
-    }
-
-#if 0 /* Text mode */
+    /* Initialize VGA text mode */
     vga_init_text();
     terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
 
@@ -104,13 +64,15 @@ void memory_initialize(struct multiboot_info *mbi);
     kprintf("<3\n");
     terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
-#endif
+
+    /* Initialize PS/2 keyboard */
+    ps2_initialize();
 
     /* Infinite loop to prevent CPU fault */
     goto halt;
 halt:
     while (true) {
-        disable_interrupts();
+        enable_interrupts();
         halt();
     }
 }
