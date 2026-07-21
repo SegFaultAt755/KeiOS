@@ -38,7 +38,7 @@ unsafe impl GlobalAlloc for KernelAllocator {
 static ALLOCATOR: KernelAllocator = KernelAllocator;
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: Layout) -> ! {
+fn alloc_error_handler(_layout: Layout) -> ! {
     unsafe {
         // Making dynamic error messages here will cause a recursive panic loop
         runtime_panic(
@@ -53,6 +53,7 @@ fn alloc_error_handler(layout: Layout) -> ! {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+    #[allow(deprecated)]
     let msg = match info.payload().downcast_ref::<&str>() {
         Some(s) => s, // Use custom string if provided
         None => match info.message().as_str() {
