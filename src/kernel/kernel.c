@@ -24,13 +24,17 @@
 #include "libkern/stdio.h"
 
 uint32_t tick = 0;
-void pit_callback(struct registers *) {
+static inline void pit_callback(struct registers *) {
     tick += 1;
 }
 
 static inline void tick_wait(uint32_t ms) {
     sleep_ms(ms);
     tick += ms;
+}
+
+void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr, mod->size, mod->cmdline);
 }
 
 void show_banner(void);
@@ -47,12 +51,15 @@ void memory_initialize(struct multiboot_info *mbi);
     tick_wait(1);
     pit_initialize(1193, pit_callback);
 
+    /* Parse multiboot */
+    uint32_t multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, NULL);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, count: %d)", mbi, multiboot_mods_count);
+
     memory_initialize(mbi);
     initialize_cpu_features();
-    enable_interrupts();
 
-    /* Logging */
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x)", mbi);
+    /* Enabling interrupts */
+    enable_interrupts();
 
     /* Initialize VGA text mode */
     vga_init_text();
