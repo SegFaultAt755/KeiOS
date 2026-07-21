@@ -110,3 +110,23 @@ void terminal_scroll(void) {
 
     term_row = l_row;
 }
+
+void terminal_cursor_up(void) {
+    if (term_row > 0)
+        term_row--;
+}
+
+void terminal_cursor_down(void) {
+    if (term_row < term_height - 1)
+        term_row++;
+}
+
+void terminal_cursor_left(void) {
+    if (term_column > 0)
+        term_column--;
+}
+
+void terminal_cursor_right(void) {
+    if (term_column < term_width - 1)
+        term_column++;
+}

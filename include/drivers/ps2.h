@@ -32,12 +32,22 @@
 /* Extended scancode prefix */
 #define SC_EXTENDED 0xE0
 
+/* Extended scancode make codes (after 0xE0 prefix) */
+#define SC_EXT_UP      0x48
+#define SC_EXT_DOWN    0x50
+#define SC_EXT_LEFT    0x4B
+#define SC_EXT_RIGHT   0x4D
+#define SC_EXT_RCTRL   0x1D
+#define SC_EXT_RALT    0x38
+
 /* Modifier bit flags */
 #define MOD_LSHIFT   (1U << 0)
 #define MOD_RSHIFT   (1U << 1)
 #define MOD_LCTRL    (1U << 2)
 #define MOD_LALT     (1U << 3)
 #define MOD_CAPSLOCK (1U << 4)
+#define MOD_RCTRL    (1U << 5)
+#define MOD_RALT     (1U << 6)
 
 void ps2_initialize(void);
 void ps2_disable(void);

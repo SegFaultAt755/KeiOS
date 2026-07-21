@@ -77,7 +77,7 @@ static void keyboard_handler(struct registers *regs) {
     uint8_t scancode = inb(PS2_DATA_PORT);
 
     /* Discard error bytes from controller */
-    if (scancode == 0x00 || scancode == 0xAA || scancode == 0xE1)
+    if (scancode == 0x00 || scancode == 0xE1)
         return;
 
     /* Extended scancode prefix — discard, next IRQ gets the real byte */
@@ -86,9 +86,42 @@ static void keyboard_handler(struct registers *regs) {
         return;
     }
 
-    /* Handle extended scancodes (arrows, etc.) — discard for now */
+    /* Handle extended scancodes (arrows, Right Ctrl/Alt, etc.) */
     if (extended_prefix) {
         extended_prefix = 0;
+        if (scancode & 0x80) {
+            /* Extended break code — clear extended modifiers */
+            switch (scancode) {
+            case 0x9D:
+                modifier_state &= ~MOD_RCTRL;
+                break;
+            case 0xB8:
+                modifier_state &= ~MOD_RALT;
+                break;
+            }
+        } else {
+            /* Extended make code — handle arrow keys and modifiers */
+            switch (scancode) {
+            case SC_EXT_UP:
+                terminal_cursor_up();
+                break;
+            case SC_EXT_DOWN:
+                terminal_cursor_down();
+                break;
+            case SC_EXT_LEFT:
+                terminal_cursor_left();
+                break;
+            case SC_EXT_RIGHT:
+                terminal_cursor_right();
+                break;
+            case SC_EXT_RCTRL:
+                modifier_state |= MOD_RCTRL;
+                break;
+            case SC_EXT_RALT:
+                modifier_state |= MOD_RALT;
+                break;
+            }
+        }
         return;
     }
 
