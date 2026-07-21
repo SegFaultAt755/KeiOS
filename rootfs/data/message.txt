@@ -1,0 +1,10 @@
+Hello World!
+New line
+    Empty space
+1234567890
+qwertyuiopasdfghjklzxcvbnm
+QWERTYUIOPASDFGHJKLZXCVBNM
+!@#$%^&*(){}[]-=+_`~/?,.<>:";'|
+\ a
+\n
+\\
