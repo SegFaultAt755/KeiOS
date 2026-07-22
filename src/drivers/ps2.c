@@ -4,7 +4,6 @@
 #include "drivers/ps2.h"
 
 #include "arch/x86/isr.h"
-#include "drivers/terminal.h"
 #include "kernel/qemu.h"
 #include "libkern/stdio.h"
 
@@ -52,6 +51,7 @@ static const char sc1_shifted[128] = {
 
 static uint8_t modifier_state = 0;
 static uint8_t extended_prefix = 0;
+static void (*key_callback)(uint16_t) = NULL;
 
 static int is_letter(uint8_t sc) {
     return (sc >= 0x10 && sc <= 0x19) || (sc >= 0x1E && sc <= 0x26) ||
@@ -126,16 +126,20 @@ static void keyboard_handler(struct registers *regs) {
             /* Extended make code — handle arrow keys and modifiers */
             switch (scancode) {
             case SC_EXT_UP:
-                terminal_cursor_up();
+                if (key_callback)
+                    key_callback(KEY_UP);
                 break;
             case SC_EXT_DOWN:
-                terminal_cursor_down();
+                if (key_callback)
+                    key_callback(KEY_DOWN);
                 break;
             case SC_EXT_LEFT:
-                terminal_cursor_left();
+                if (key_callback)
+                    key_callback(KEY_LEFT);
                 break;
             case SC_EXT_RIGHT:
-                terminal_cursor_right();
+                if (key_callback)
+                    key_callback(KEY_RIGHT);
                 break;
             case SC_EXT_RCTRL:
                 modifier_state |= MOD_RCTRL;
@@ -164,8 +168,8 @@ static void keyboard_handler(struct registers *regs) {
 
     char ascii = shift ? sc1_shifted[scancode] : sc1_unshifted[scancode];
 
-    if (ascii)
-        terminal_putchar(ascii);
+    if (ascii && key_callback)
+        key_callback(ascii);
 }
 
 void ps2_initialize(void) {
@@ -219,4 +223,8 @@ void ps2_disable(void) {
 
 uint8_t ps2_get_modifiers(void) {
     return modifier_state;
+}
+
+void ps2_set_key_callback(void (*cb)(uint16_t)) {
+    key_callback = cb;
 }
