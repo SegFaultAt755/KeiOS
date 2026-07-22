@@ -2,12 +2,12 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
+#include "drivers/display.h"
 #include "drivers/pit.h"
 #include "drivers/ps2.h"
-#include "drivers/vbe.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
-#include "drivers/display.h"
+#include "drivers/vbe.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -37,12 +37,13 @@ static inline void tick_wait(uint32_t ms) {
 }
 
 void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr, mod->size, mod->cmdline);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
+                mod->size, mod->cmdline);
 }
 
 /**
-* @return 0 - VGA palette graphics, 1 - framebuffer, 2 - text mode
-*/
+ * @return 0 - VGA palette graphics, 1 - framebuffer, 2 - text mode
+ */
 int graphics_type(struct multiboot_info *mbi) {
     if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) {
         if (mbi->framebuffer_type == 1)
@@ -70,7 +71,8 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Parse multiboot */
     uint32_t multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, NULL);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, flags: %d, count: %d)", mbi, mbi->flags, multiboot_mods_count);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, flags: %d, count: %d)", mbi, mbi->flags,
+                multiboot_mods_count);
 
     memory_initialize(mbi);
     initialize_cpu_features();

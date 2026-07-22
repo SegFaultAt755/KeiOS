@@ -6,7 +6,7 @@
 bool multiboot_has_modules(struct multiboot_info *mbi) {
     if (!mbi)
         return false;
-    
+
     /* Check if bit 3 is set in the flags field */
     return (mbi->flags & MULTIBOOT_INFO_MODS) != 0;
 }
