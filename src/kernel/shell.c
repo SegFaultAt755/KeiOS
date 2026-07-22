@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include "shell/shell.h"
+#include "kernel/shell.h"
 
 #include "config.h"
 #include "drivers/cmos.h"
@@ -32,31 +32,22 @@ static void cmd_color(const char *args);
 static void cmd_datetime(void);
 
 /* Command table entry */
-typedef struct {
+struct builtin_cmd {
     const char *name;
     void (*handler)(void);
     void (*handler_args)(const char *);
-} builtin_cmd_t;
+};
 
-static const builtin_cmd_t builtins[] = {
-    {"help", cmd_help, NULL},
-    {"clear", cmd_clear, NULL},
-    {"echo", NULL, cmd_echo},
-    {"ver", cmd_ver, NULL},
-    {"uptime", cmd_uptime, NULL},
-    {"meminfo", cmd_meminfo, NULL},
-    {"reboot", cmd_reboot, NULL},
-    {"halt", cmd_halt, NULL},
-    {"color", NULL, cmd_color},
-    {"datetime", cmd_datetime, NULL},
-    {NULL, NULL, NULL},
+static const struct builtin_cmd builtins[] = {
+    {"help", cmd_help, nullptr},         {"clear", cmd_clear, nullptr},   {"echo", nullptr, cmd_echo},
+    {"ver", cmd_ver, nullptr},           {"uptime", cmd_uptime, nullptr}, {"meminfo", cmd_meminfo, nullptr},
+    {"reboot", cmd_reboot, nullptr},     {"halt", cmd_halt, nullptr},     {"color", nullptr, cmd_color},
+    {"datetime", cmd_datetime, nullptr}, {nullptr, nullptr, nullptr},
 };
 
 static void shell_print_prompt(void) {
     kprintf("keios> ");
 }
-
-/* ---- Built-in command implementations ---- */
 
 static void cmd_help(void) {
     kprintf("Available commands:\n");
@@ -93,11 +84,9 @@ static void cmd_uptime(void) {
 }
 
 static void cmd_meminfo(void) {
-    /* Heap stats — report what we can from the linker symbol */
     extern uint32_t _kernel_end;
     uint32_t kernel_end = (uint32_t)&_kernel_end;
     kprintf("Kernel end: 0x%x\n", kernel_end);
-    kprintf("Heap starts after kernel end (4MB configured)\n");
 }
 
 static void cmd_color(const char *args) {
@@ -145,8 +134,6 @@ static void cmd_halt(void) {
     }
 }
 
-/* ---- Shell core ---- */
-
 static void shell_execute(const char *line) {
     /* Skip leading whitespace */
     while (*line == ' ')
@@ -165,7 +152,7 @@ static void shell_execute(const char *line) {
         return;
 
     /* Extract remaining arguments (everything after the command) */
-    const char *args = NULL;
+    const char *args = nullptr;
     const char *rest = line + strlen(cmd);
     while (*rest == ' ')
         rest++;
@@ -173,7 +160,7 @@ static void shell_execute(const char *line) {
         args = rest;
 
     /* Look up command in builtin table */
-    for (int i = 0; builtins[i].name != NULL; i++) {
+    for (int i = 0; builtins[i].name != nullptr; i++) {
         if (strcmp(cmd, builtins[i].name) == 0) {
             if (builtins[i].handler_args && args)
                 builtins[i].handler_args(args);

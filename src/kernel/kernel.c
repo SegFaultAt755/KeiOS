@@ -11,7 +11,7 @@
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/qemu.h"
-#include "shell/shell.h"
+#include "kernel/shell.h"
 
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/features.h"
@@ -77,11 +77,13 @@ void memory_initialize(struct multiboot_info *mbi);
     memory_initialize(mbi);
     initialize_cpu_features();
 
+    /* Kernel level drivers */
+    ps2_initialize();
+
     /* Enabling interrupts */
     enable_interrupts();
 
     int graphics = graphics_type(mbi);
-
     if (graphics == 0) {
         /* Initialize VGA text mode */
         vga_init_text();
@@ -94,8 +96,7 @@ void memory_initialize(struct multiboot_info *mbi);
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
         show_banner();
 
-        /* Initialize PS/2 keyboard */
-        ps2_initialize();
+        shell_initialize();
     } else if (graphics == 1) {
         struct display_info info;
         info.flags = mbi->flags;
@@ -131,9 +132,6 @@ void memory_initialize(struct multiboot_info *mbi);
         display_initialize(info);
         display_clear(0x00141414);
     }
-
-    /* Initialize shell */
-    shell_initialize();
 
     /* Infinite loop to prevent CPU fault */
     goto halt;

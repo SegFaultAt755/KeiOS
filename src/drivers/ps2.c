@@ -27,7 +27,7 @@ static const char sc1_shifted[128] = {
 
 static uint8_t modifier_state = 0;
 static uint8_t extended_prefix = 0;
-static void (*key_callback)(uint16_t) = NULL;
+static void (*key_callback)(uint16_t) = nullptr;
 
 static int is_letter(uint8_t sc) {
     return (sc >= 0x10 && sc <= 0x19) || (sc >= 0x1E && sc <= 0x26) || (sc >= 0x2C && sc <= 0x32);

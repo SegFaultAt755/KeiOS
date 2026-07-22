@@ -61,17 +61,17 @@ char *strchr(const char *s, int c) {
         s++;
     }
 
-    return (c == '\0') ? (char *)s : NULL;
+    return (c == '\0') ? (char *)s : nullptr;
 }
 
 char *strtok(char *str, const char *delim) {
-    static char *next = NULL;
+    static char *next = nullptr;
 
     if (str)
         next = str;
 
     if (!next)
-        return NULL;
+        return nullptr;
 
     /* Skip leading delimiters */
     while (*next) {
@@ -90,7 +90,7 @@ char *strtok(char *str, const char *delim) {
     }
 
     if (*next == '\0')
-        return NULL;
+        return nullptr;
 
     char *token = next;
 
