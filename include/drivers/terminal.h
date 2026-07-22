@@ -24,3 +24,8 @@ void terminal_writestring(const char *s);
 
 void terminal_blankline(void);
 void terminal_scroll(void);
+
+void terminal_cursor_up(void);
+void terminal_cursor_down(void);
+void terminal_cursor_left(void);
+void terminal_cursor_right(void);
