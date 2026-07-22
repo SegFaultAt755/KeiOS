@@ -7,6 +7,7 @@
 #include "drivers/ps2.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
+#include "kernel/graphics.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -26,6 +27,9 @@
 
 #include "libkern/stdio.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
 uint32_t tick = 0;
 static inline void pit_callback(struct registers *) {
     tick += 1;
@@ -39,20 +43,6 @@ static inline void tick_wait(uint32_t ms) {
 void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
     qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
                 mod->size, mod->cmdline);
-}
-
-/**
- * @return 0 - VGA palette graphics, 1 - framebuffer, 2 - text mode
- */
-int graphics_type(struct multiboot_info *mbi) {
-    if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) {
-        if (mbi->framebuffer_type == 1)
-            return 1;
-
-        return 0;
-    }
-
-    return 2;
 }
 
 void show_banner(void);
@@ -83,8 +73,8 @@ void memory_initialize(struct multiboot_info *mbi);
     /* Enabling interrupts */
     enable_interrupts();
 
-    int graphics = graphics_type(mbi);
-    if (graphics == 0) {
+    int graphics = get_graphics_type(mbi);
+    if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
         /* Initialize VGA text mode */
         vga_init_text();
         terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
@@ -97,7 +87,7 @@ void memory_initialize(struct multiboot_info *mbi);
         show_banner();
 
         shell_initialize();
-    } else if (graphics == 1) {
+    } else if (graphics == GRAPHICS_TYPE_FRAMEBUFFER) {
         struct display_info info;
         info.flags = mbi->flags;
         info.width = mbi->framebuffer_width;
