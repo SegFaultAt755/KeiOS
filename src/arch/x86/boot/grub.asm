@@ -5,7 +5,7 @@
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
 MBUSEGFX equ  1 << 2
-MBFLAGS  equ  MBALIGN | MEMINFO
+MBFLAGS  equ  MBALIGN | MEMINFO | MBUSEGFX
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
 
@@ -16,8 +16,7 @@ align 4
 	dd MBFLAGS
 	dd CHECKSUM
 
-    ; Video mode request fields
-    dd 0, 0, 0, 0, 0 ; Address fields
+    dd 0, 0, 0, 0, 0
     dd 0
     dd 1024
     dd 768

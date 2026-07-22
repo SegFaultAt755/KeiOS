@@ -4,8 +4,10 @@
 #include "config.h"
 #include "drivers/pit.h"
 #include "drivers/ps2.h"
+#include "drivers/vbe.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
+#include "drivers/display.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -17,6 +19,7 @@
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
+#include "arch/x86/vmm.h"
 #else
 #error "Unsupported architecture! (i386 is available)"
 #endif
@@ -37,6 +40,20 @@ void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *
     qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr, mod->size, mod->cmdline);
 }
 
+/**
+* @return 0 - VGA palette graphics, 1 - framebuffer, 2 - text mode
+*/
+int graphics_type(struct multiboot_info *mbi) {
+    if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) {
+        if (mbi->framebuffer_type == 1)
+            return 1;
+
+        return 0;
+    }
+
+    return 2;
+}
+
 void show_banner(void);
 void memory_initialize(struct multiboot_info *mbi);
 
@@ -53,7 +70,7 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Parse multiboot */
     uint32_t multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, NULL);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, count: %d)", mbi, multiboot_mods_count);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, flags: %d, count: %d)", mbi, mbi->flags, multiboot_mods_count);
 
     memory_initialize(mbi);
     initialize_cpu_features();
@@ -61,16 +78,54 @@ void memory_initialize(struct multiboot_info *mbi);
     /* Enabling interrupts */
     enable_interrupts();
 
-    /* Initialize VGA text mode */
-    vga_init_text();
-    terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+    int graphics = graphics_type(mbi);
 
-    /* Show welcome message */
-    kprintf("Welcome to %s %d.%d.%d! ", "KeiOS", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-    terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
-    kprintf("<3\n");
-    terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
-    show_banner();
+    if (graphics == 0) {
+        /* Initialize VGA text mode */
+        vga_init_text();
+        terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+
+        /* Show welcome message */
+        kprintf("Welcome to KeiOS %d.%d.%d! ", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+        terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
+        kprintf("<3\n");
+        terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
+        show_banner();
+    } else if (graphics == 1) {
+        struct display_info info;
+        info.flags = mbi->flags;
+        info.width = mbi->framebuffer_width;
+        info.height = mbi->framebuffer_height;
+        info.pitch = mbi->framebuffer_pitch;
+        info.bpp = mbi->framebuffer_bpp;
+
+        uint32_t phys_addr = (uint32_t)mbi->framebuffer_addr;
+        uint32_t virt_addr = VBE_VIRTUAL_LFB_START;
+        uint32_t fbo_size = info.pitch * info.height;
+
+        qemu_printf(QEMU_DRV, QEMU_INFO, "VBE address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)", phys_addr,
+                    virt_addr, fbo_size);
+
+        bool map_success = true;
+
+        /* Loop through the entire size of the framebuffer and map it page by page */
+        for (uint32_t offset = 0; offset < fbo_size; offset += PAGE_SIZE) {
+            if (!vmm_map_page(virt_addr + offset, phys_addr + offset, PTE_PRESENT | PTE_RW | PTE_PWT)) {
+                map_success = false;
+                break;
+            }
+        }
+
+        if (!map_success) {
+            qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map VBE framebuffer to virtual memory");
+            info.lfb_addr = nullptr;
+        }
+
+        info.lfb_addr = (uint32_t *)virt_addr;
+
+        display_initialize(info);
+        display_clear(0x00141414);
+    }
 
     /* Initialize PS/2 keyboard */
     ps2_initialize();
