@@ -130,3 +130,11 @@ void terminal_cursor_right(void) {
     if (term_column < term_width - 1)
         term_column++;
 }
+
+uint16_t terminal_get_row(void) {
+    return term_row;
+}
+
+uint16_t terminal_get_column(void) {
+    return term_column;
+}
