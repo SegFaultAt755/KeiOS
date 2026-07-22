@@ -7,7 +7,6 @@
 #include "drivers/ps2.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
-#include "drivers/vbe.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -93,6 +92,9 @@ void memory_initialize(struct multiboot_info *mbi);
         kprintf("<3\n");
         terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
         show_banner();
+
+        /* Initialize PS/2 keyboard */
+        ps2_initialize();
     } else if (graphics == 1) {
         struct display_info info;
         info.flags = mbi->flags;
@@ -102,11 +104,11 @@ void memory_initialize(struct multiboot_info *mbi);
         info.bpp = mbi->framebuffer_bpp;
 
         uint32_t phys_addr = (uint32_t)mbi->framebuffer_addr;
-        uint32_t virt_addr = VBE_VIRTUAL_LFB_START;
+        uint32_t virt_addr = 0xE0000000;
         uint32_t fbo_size = info.pitch * info.height;
 
-        qemu_printf(QEMU_DRV, QEMU_INFO, "VBE address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)", phys_addr,
-                    virt_addr, fbo_size);
+        qemu_printf(QEMU_DRV, QEMU_INFO, "Framebuffer address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)",
+                    phys_addr, virt_addr, fbo_size);
 
         bool map_success = true;
 
@@ -119,7 +121,7 @@ void memory_initialize(struct multiboot_info *mbi);
         }
 
         if (!map_success) {
-            qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map VBE framebuffer to virtual memory");
+            qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map linear framebuffer to virtual memory");
             info.lfb_addr = nullptr;
         }
 
@@ -128,9 +130,6 @@ void memory_initialize(struct multiboot_info *mbi);
         display_initialize(info);
         display_clear(0x00141414);
     }
-
-    /* Initialize PS/2 keyboard */
-    ps2_initialize();
 
     /* Infinite loop to prevent CPU fault */
     goto halt;

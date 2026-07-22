@@ -66,7 +66,7 @@ To keep this documentation easily maintainable as development progresses, steps 
    - Map the ELF segments into the user space (`0x00001000 - 0xBFFFFFFF`)
 3. **Hardware Permission Mapping (Display Driver):**
    - **MMIO Mapping:** Map the physical framebuffer address (from Multiboot tag) into the driver's page directory
-   - **Port Access:** Configure the TSS **I/O Permission Bitmap** to allow the driver access to VBE/display ports
+   - **Port Access:** Configure the TSS **I/O Permission Bitmap** to allow the driver access to display ports
 
 ### Transition to User Mode (Ring 3) `[PLANNED]`
 

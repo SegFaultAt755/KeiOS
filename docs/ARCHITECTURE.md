@@ -64,14 +64,14 @@ All non-essential services run as isolated user mode processes. If a driver cras
 
 The system uses a **Higher-Half Kernel** memory model. The 4GB 32-bit virtual address space is split into a 3GB user space and a 1GB kernel space:
 
-| **Virtual Address Range**   | **Size** | **Access Level** | **Description**                                                                             |
-| --------------------------- | -------- | ---------------- | ------------------------------------------------------------------------------------------- |
-| `0x00000000` - `0x00000FFF` | 4 KB     | Unmapped         | **Null Pointer Guard:** Traps null pointer dereferences                                     |
-| `0x00001000` - `0xBFFFFFFF` | ~3 GB    | Ring 3 (User)    | **User Space:** Application code, heap, stack, and shared memory regions                    |
-| `0xC0000000` - `0xC03FFFFF` | 4 MB     | Ring 0 (Kernel)  | **Kernel Code & Data:** Mapped to physical memory starting at `0x00100000` (1MB)            |
-| `0xC0400000` - `0xEF000000` | ~748 MB  | Ring 0 (Kernel)  | **Kernel Heap:** Kernel dynamic memory allocation, IPC message buffers, page tables         |
-| `0xFD000000` - `0xFFFEFFFF` | Varies   | Ring 0 / Ring 3  | **MMIO / Framebuffer:** Physical video RAM mapped via VBE, accessible by the Display Server |
-| `0xFFFFF000` - `0xFFFFFFFF` | 4 KB     | Ring 0 (Kernel)  | **Recursive Page Directory:** Used for fast page table manipulation                         |
+| **Virtual Address Range**   | **Size** | **Access Level** | **Description**                                                                                            |
+| --------------------------- | -------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `0x00000000` - `0x00000FFF` | 4 KB     | Unmapped         | **Null Pointer Guard:** Traps null pointer dereferences                                                    |
+| `0x00001000` - `0xBFFFFFFF` | ~3 GB    | Ring 3 (User)    | **User Space:** Application code, heap, stack, and shared memory regions                                   |
+| `0xC0000000` - `0xC03FFFFF` | 4 MB     | Ring 0 (Kernel)  | **Kernel Code & Data:** Mapped to physical memory starting at `0x00100000` (1MB)                           |
+| `0xC0400000` - `0xEF000000` | ~748 MB  | Ring 0 (Kernel)  | **Kernel Heap:** Kernel dynamic memory allocation, IPC message buffers, page tables                        |
+| `0xFD000000` - `0xFFFEFFFF` | Varies   | Ring 0 / Ring 3  | **MMIO / Framebuffer:** Physical video RAM mapped via linear framebuffer, accessible by the Display Server |
+| `0xFFFFF000` - `0xFFFFFFFF` | 4 KB     | Ring 0 (Kernel)  | **Recursive Page Directory:** Used for fast page table manipulation                                        |
 
 ---
 ## Inter-Process Communication (IPC)
