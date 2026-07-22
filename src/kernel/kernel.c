@@ -10,6 +10,7 @@
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/qemu.h"
+#include "shell/shell.h"
 
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/features.h"
@@ -74,6 +75,9 @@ void memory_initialize(struct multiboot_info *mbi);
 
     /* Initialize PS/2 keyboard */
     ps2_initialize();
+
+    /* Initialize shell */
+    shell_initialize();
 
     /* Infinite loop to prevent CPU fault */
     goto halt;

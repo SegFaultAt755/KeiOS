@@ -125,6 +125,8 @@ class QemuRunner:
         logger.info(f"Launching virtual machine ({self.qemu_bin})...")
         try:
             subprocess.run(cmd, check=True)
+        except KeyboardInterrupt:
+            logger.info("QEMU terminated by user.")
         except FileNotFoundError:
             logger.critical(f"QEMU binary '{self.qemu_bin}' not found.")
             sys.exit(1)
