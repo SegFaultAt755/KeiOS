@@ -40,6 +40,12 @@
 #define SC_EXT_RCTRL   0x1D
 #define SC_EXT_RALT    0x38
 
+/* Special key codes returned via callback (no ASCII equivalent) */
+#define KEY_UP     0x100
+#define KEY_DOWN   0x101
+#define KEY_LEFT   0x102
+#define KEY_RIGHT  0x103
+
 /* Modifier bit flags */
 #define MOD_LSHIFT   (1U << 0)
 #define MOD_RSHIFT   (1U << 1)
@@ -52,3 +58,4 @@
 void ps2_initialize(void);
 void ps2_disable(void);
 uint8_t ps2_get_modifiers(void);
+void ps2_set_key_callback(void (*cb)(uint16_t));

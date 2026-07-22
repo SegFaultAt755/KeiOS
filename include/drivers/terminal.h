@@ -29,3 +29,6 @@ void terminal_cursor_up(void);
 void terminal_cursor_down(void);
 void terminal_cursor_left(void);
 void terminal_cursor_right(void);
+
+uint16_t terminal_get_row(void);
+uint16_t terminal_get_column(void);
