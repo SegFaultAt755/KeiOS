@@ -38,3 +38,7 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 
 void vga_init_text(void);
 void vga_clear(enum vga_8b_colors color);
+
+void vga_enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
+void vga_disable_cursor(void);
+void vga_update_cursor(uint16_t x, uint16_t y);

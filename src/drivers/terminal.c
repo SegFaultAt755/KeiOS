@@ -21,6 +21,8 @@ void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height) {
     term_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
 
     terminal_clear();
+    vga_enable_cursor(14, 15);
+    vga_update_cursor(term_column, term_row);
 
     qemu_printf(QEMU_DRV, QEMU_OK, "Terminal initialized (memory: 0x%x, width: %u, height: %u, color: 0x%x)", term_mem,
                 (uint32_t)term_width, (uint32_t)term_height, term_color);
@@ -32,6 +34,7 @@ void terminal_clear(void) {
     for (uint16_t y = 0; y < term_height; y++)
         for (uint16_t x = 0; x < term_width; x++)
             terminal_put_entry(' ', term_color, x, y);
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_set_color(uint8_t color) {
@@ -59,6 +62,7 @@ void terminal_putchar(char c) {
                 terminal_scroll();
         }
 
+        vga_update_cursor(term_column, term_row);
         return;
     }
 
@@ -71,6 +75,7 @@ void terminal_putchar(char c) {
         }
 
         terminal_put_entry(' ', term_color, term_column, term_row);
+        vga_update_cursor(term_column, term_row);
         return;
     }
 
@@ -81,6 +86,8 @@ void terminal_putchar(char c) {
         if (++term_row >= term_height)
             terminal_scroll();
     }
+
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_write(const char *s, size_t size) {
@@ -97,6 +104,7 @@ void terminal_blankline(void) {
     term_column = 0;
     if (++term_row >= term_height)
         terminal_scroll();
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_scroll(void) {
@@ -109,26 +117,31 @@ void terminal_scroll(void) {
         term_mem[l_row * term_width + x] = vga_entry(' ', term_color);
 
     term_row = l_row;
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_cursor_up(void) {
     if (term_row > 0)
         term_row--;
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_cursor_down(void) {
     if (term_row < term_height - 1)
         term_row++;
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_cursor_left(void) {
     if (term_column > 0)
         term_column--;
+    vga_update_cursor(term_column, term_row);
 }
 
 void terminal_cursor_right(void) {
     if (term_column < term_width - 1)
         term_column++;
+    vga_update_cursor(term_column, term_row);
 }
 
 uint16_t terminal_get_row(void) {

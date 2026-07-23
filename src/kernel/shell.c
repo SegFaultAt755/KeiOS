@@ -188,6 +188,14 @@ void shell_key_handler(uint16_t key) {
             input_len--;
             terminal_putchar('\b');
         }
+    } else if (key == KEY_LEFT) {
+        terminal_cursor_left();
+    } else if (key == KEY_RIGHT) {
+        terminal_cursor_right();
+    } else if (key == KEY_UP) {
+        terminal_cursor_up();
+    } else if (key == KEY_DOWN) {
+        terminal_cursor_down();
     } else if (key >= 32 && key <= 126 && input_len < INPUT_BUF_SIZE - 1) {
         input_buffer[input_len++] = (char)key;
         terminal_putchar((char)key);
