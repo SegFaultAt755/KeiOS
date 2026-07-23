@@ -65,7 +65,6 @@ static void cmd_help(void) {
 
 static void cmd_clear(void) {
     terminal_clear();
-    shell_print_prompt();
 }
 
 static void cmd_echo(const char *args) {
