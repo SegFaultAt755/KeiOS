@@ -6,11 +6,11 @@
 #include "libkern/stdio.h"
 
 #define VGA_CURSOR_INDEX 0x3D4
-#define VGA_CURSOR_DATA  0x3D5
+#define VGA_CURSOR_DATA 0x3D5
 #define VGA_REG_CURSOR_START 0x0A
-#define VGA_REG_CURSOR_END   0x0B
-#define VGA_REG_CURSOR_HIGH  0x0E
-#define VGA_REG_CURSOR_LOW   0x0F
+#define VGA_REG_CURSOR_END 0x0B
+#define VGA_REG_CURSOR_HIGH 0x0E
+#define VGA_REG_CURSOR_LOW 0x0F
 
 static volatile uint16_t *text_mem = (volatile uint16_t *)VGA_TEXT_MEMORY;
 

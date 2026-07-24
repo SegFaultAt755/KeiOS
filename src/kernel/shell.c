@@ -8,6 +8,7 @@
 #include "drivers/ps2.h"
 #include "drivers/terminal.h"
 #include "kernel/halt.h"
+#include "kernel/interrupts.h"
 #include "kernel/qemu.h"
 #include "libkern/stdio.h"
 #include "libkern/string.h"
@@ -46,7 +47,8 @@ static const struct builtin_cmd builtins[] = {
 };
 
 static void shell_print_prompt(void) {
-    kprintf("keios> ");
+    kprintf("keios"
+            "> ");
 }
 
 static void cmd_help(void) {
@@ -65,7 +67,6 @@ static void cmd_help(void) {
 
 static void cmd_clear(void) {
     terminal_clear();
-    shell_print_prompt();
 }
 
 static void cmd_echo(const char *args) {
@@ -80,7 +81,10 @@ static void cmd_ver(void) {
 }
 
 static void cmd_uptime(void) {
-    kprintf("Ticks: %d\n", tick);
+    int secs = tick / 1000;
+    int mins = secs / 60;
+    int hours = mins / 60;
+    kprintf("%d:%d:%d.%d\n", hours, mins % 60, secs % 60, tick % 1000);
 }
 
 static void cmd_meminfo(void) {
@@ -119,17 +123,19 @@ static void cmd_datetime(void) {
 
 static void cmd_reboot(void) {
     kprintf("Rebooting...\n");
-    /* Triple fault to reboot */
+    /* Triple fault to reboot (temporary) */
     __asm__ volatile("lidt (%%eax)" : : "a"(0));
     __asm__ volatile("int $3");
-    while (1) {
+    while (true) {
+        disable_interrupts();
         halt();
     }
 }
 
 static void cmd_halt(void) {
-    kprintf("Halting CPU.\n");
-    while (1) {
+    kprintf("Halting CPU...\n");
+    while (true) {
+        disable_interrupts();
         halt();
     }
 }
@@ -142,7 +148,7 @@ static void shell_execute(const char *line) {
     if (*line == '\0')
         return;
 
-    /* Copy line for tokenizing (strtok modifies the string) */
+    /* Copy line for tokenizing */
     char buf[INPUT_BUF_SIZE];
     strcpy(buf, line);
 
@@ -151,7 +157,7 @@ static void shell_execute(const char *line) {
     if (!cmd)
         return;
 
-    /* Extract remaining arguments (everything after the command) */
+    /* Extract remaining arguments */
     const char *args = nullptr;
     const char *rest = line + strlen(cmd);
     while (*rest == ' ')
