@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 struct display_info {
     uint32_t *lfb_addr;
@@ -38,3 +39,15 @@ int32_t display_get_pixel(int32_t x, int32_t y, uint32_t *out_color);
 /* Setters */
 void display_set_lfb_addr(uint32_t *new_lfb);
 void display_set_resolution(uint32_t width, uint32_t height, uint32_t pitch);
+
+/* Bitmap engine */
+bool display_draw_bitmap(const uint8_t *bmp_data, int32_t x, int32_t y);
+bool display_draw_bitmap_ex(const uint8_t *bmp_data, int32_t dst_x, int32_t dst_y,
+                            uint32_t scale_num, uint32_t scale_den,
+                            int32_t rotation_deg, uint8_t alpha);
+bool display_draw_bitmap_scaled(const uint8_t *bmp_data, int32_t x, int32_t y,
+                                uint32_t scale_num, uint32_t scale_den);
+bool display_draw_bitmap_rotated(const uint8_t *bmp_data, int32_t x, int32_t y,
+                                 int32_t degrees);
+bool display_draw_bitmap_alpha(const uint8_t *bmp_data, int32_t x, int32_t y,
+                               uint8_t alpha);

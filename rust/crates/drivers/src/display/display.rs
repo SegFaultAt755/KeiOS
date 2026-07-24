@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPLv3
 // Copyright (C) 2026 KeiOS Developers
 
+use super::bitmap;
 use super::wrapper::DisplayInfo;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13,6 +14,26 @@ impl Color {
     #[inline]
     pub const fn rgb(r: u8, g: u8, b: u8) -> Self {
         Color(((r as u32) << 16) | ((g as u32) << 8) | (b as u32))
+    }
+
+    #[inline]
+    pub const fn r(self) -> u8 {
+        ((self.0 >> 16) & 0xFF) as u8
+    }
+
+    #[inline]
+    pub const fn g(self) -> u8 {
+        ((self.0 >> 8) & 0xFF) as u8
+    }
+
+    #[inline]
+    pub const fn b(self) -> u8 {
+        (self.0 & 0xFF) as u8
+    }
+
+    #[inline]
+    pub const fn with_alpha(self, a: u8) -> u32 {
+        ((a as u32) << 24) | (self.0 & 0x00FFFFFF)
     }
 }
 
@@ -112,5 +133,93 @@ impl Display {
                 self.lfb.add(i).write_volatile(color.0);
             }
         }
+    }
+}
+
+pub trait BitmapEngine {
+    fn draw_bitmap(&mut self, bmp_data: *const u8, dst_x: i32, dst_y: i32) -> bool;
+    fn draw_bitmap_scaled(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        scale_num: u32,
+        scale_den: u32,
+    ) -> bool;
+    fn draw_bitmap_rotated(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        degrees: i32,
+    ) -> bool;
+    fn draw_bitmap_alpha(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        alpha: u8,
+    ) -> bool;
+    fn draw_bitmap_ex(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        scale_num: u32,
+        scale_den: u32,
+        rotation_deg: i32,
+        alpha: u8,
+    ) -> bool;
+}
+
+impl BitmapEngine for Display {
+    fn draw_bitmap(&mut self, bmp_data: *const u8, dst_x: i32, dst_y: i32) -> bool {
+        bitmap::draw_bitmap_simple(self, bmp_data, dst_x, dst_y)
+    }
+
+    fn draw_bitmap_scaled(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        scale_num: u32,
+        scale_den: u32,
+    ) -> bool {
+        bitmap::draw_bitmap_scaled(self, bmp_data, dst_x, dst_y, scale_num, scale_den)
+    }
+
+    fn draw_bitmap_rotated(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        degrees: i32,
+    ) -> bool {
+        bitmap::draw_bitmap_rotated(self, bmp_data, dst_x, dst_y, degrees)
+    }
+
+    fn draw_bitmap_alpha(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        alpha: u8,
+    ) -> bool {
+        bitmap::draw_bitmap_alpha(self, bmp_data, dst_x, dst_y, alpha)
+    }
+
+    fn draw_bitmap_ex(
+        &mut self,
+        bmp_data: *const u8,
+        dst_x: i32,
+        dst_y: i32,
+        scale_num: u32,
+        scale_den: u32,
+        rotation_deg: i32,
+        alpha: u8,
+    ) -> bool {
+        bitmap::draw_bitmap_ex(
+            self, bmp_data, dst_x, dst_y, scale_num, scale_den, rotation_deg, alpha,
+        )
     }
 }

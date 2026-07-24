@@ -40,9 +40,23 @@ static inline void tick_wait(uint32_t ms) {
     tick += ms;
 }
 
+static const void *bmp_module_ptr = NULL;
+
 void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
     qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
                 mod->size, mod->cmdline);
+
+    /* Check if this module is a BMP file */
+    if (mod->cmdline != NULL) {
+        const char *cmd = mod->cmdline;
+        for (const char *p = cmd; *p != '\0'; p++) {
+            if (p[0] == '.' && p[1] == 'b' && p[2] == 'm' && p[3] == 'p') {
+                bmp_module_ptr = mod->start_addr;
+                qemu_printf(QEMU_KERN, QEMU_INFO, "Found BMP module %u at %p", index, bmp_module_ptr);
+                return;
+            }
+        }
+    }
 }
 
 void show_banner(void);
@@ -121,6 +135,15 @@ void memory_initialize(struct multiboot_info *mbi);
 
         display_initialize(info);
         display_clear(0x00141414);
+
+        /* BMP module was found during early init (before VMM), convert to virtual address */
+        if (bmp_module_ptr != NULL) {
+            const uint8_t *bmp_virt = (const uint8_t *)((uint32_t)bmp_module_ptr + KERNEL_START);
+            qemu_printf(QEMU_KERN, QEMU_INFO, "Rendering BMP image at (0, 0), ptr=%p", bmp_virt);
+            display_draw_bitmap(bmp_virt, 0, 0);
+        } else {
+            qemu_printf(QEMU_KERN, QEMU_INFO, "No BMP module found");
+        }
     }
 
     /* Infinite loop to prevent CPU fault */

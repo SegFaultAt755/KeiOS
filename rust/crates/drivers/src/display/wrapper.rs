@@ -162,3 +162,87 @@ pub extern "C" fn display_set_resolution(width: u32, height: u32, pitch: u32) {
         }
     }
 }
+
+// Bitmap operations
+#[unsafe(no_mangle)]
+pub extern "C" fn display_draw_bitmap(bmp_data: *const u8, x: i32, y: i32) -> bool {
+    unsafe {
+        if let Some(display) = get_display() {
+            return super::bitmap::draw_bitmap_simple(display, bmp_data, x, y);
+        }
+    }
+    false
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn display_draw_bitmap_ex(
+    bmp_data: *const u8,
+    dst_x: i32,
+    dst_y: i32,
+    scale_num: u32,
+    scale_den: u32,
+    rotation_deg: i32,
+    alpha: u8,
+) -> bool {
+    unsafe {
+        if let Some(display) = get_display() {
+            return super::bitmap::draw_bitmap_ex(
+                display,
+                bmp_data,
+                dst_x,
+                dst_y,
+                scale_num,
+                scale_den,
+                rotation_deg,
+                alpha,
+            );
+        }
+    }
+    false
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn display_draw_bitmap_scaled(
+    bmp_data: *const u8,
+    x: i32,
+    y: i32,
+    scale_num: u32,
+    scale_den: u32,
+) -> bool {
+    unsafe {
+        if let Some(display) = get_display() {
+            return super::bitmap::draw_bitmap_scaled(display, bmp_data, x, y, scale_num, scale_den);
+        }
+    }
+    false
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn display_draw_bitmap_rotated(
+    bmp_data: *const u8,
+    x: i32,
+    y: i32,
+    degrees: i32,
+) -> bool {
+    unsafe {
+        if let Some(display) = get_display() {
+            return super::bitmap::draw_bitmap_rotated(display, bmp_data, x, y, degrees);
+        }
+    }
+    false
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn display_draw_bitmap_alpha(
+    bmp_data: *const u8,
+    x: i32,
+    y: i32,
+    alpha: u8,
+) -> bool {
+    unsafe {
+        if let Some(display) = get_display() {
+            return super::bitmap::draw_bitmap_alpha(display, bmp_data, x, y, alpha);
+        }
+    }
+    false
+}

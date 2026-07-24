@@ -12,10 +12,17 @@ void memory_initialize(struct multiboot_info *mbi) {
     uint32_t virtual_alloc_start = ((uint32_t)&_kernel_end + 0xFFFU) & ~0xFFFU;
     uint32_t physical_alloc_start = virtual_alloc_start - KERNEL_START;
 
-    /* Check if multiboot modules exist, and adjust start pointer past them */
+    /* Check if multiboot modules exist, and adjust start pointer past ALL modules */
     if ((mbi->flags & (1U << 3)) && mbi->mods_count > 0) {
-        uint32_t first_mod_end = *(uint32_t *)(mbi->mods_addr + 4);
-        uint32_t aligned_mod_end = (first_mod_end + 0xFFFU) & ~0xFFFU;
+        struct multiboot_module *modules = (struct multiboot_module *)(uintptr_t)mbi->mods_addr;
+        uint32_t max_mod_end = 0;
+
+        for (uint32_t i = 0; i < mbi->mods_count; i++) {
+            if (modules[i].mod_end > max_mod_end)
+                max_mod_end = modules[i].mod_end;
+        }
+
+        uint32_t aligned_mod_end = (max_mod_end + 0xFFFU) & ~0xFFFU;
 
         if (aligned_mod_end > physical_alloc_start)
             physical_alloc_start = aligned_mod_end;

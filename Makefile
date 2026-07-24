@@ -79,6 +79,10 @@ $(ISO_IMAGE): $(KERNEL) grub.cfg $(CPIO)
 	@$(call CP,grub.cfg,$(ISO_DIR)/boot/grub/grub.cfg)
 	@$(call CP,$(KERNEL),$(ISO_DIR)/boot/$(notdir $(KERNEL)))
 	@$(call CP,$(CPIO),$(ISO_DIR)/boot/$(notdir $(CPIO)))
+	@if [ -f $(FS_DIR)/data/image.bmp ]; then \
+		echo ">>> [ISO] Copying BMP image to boot directory"; \
+		$(call CP,$(FS_DIR)/data/image.bmp,$(ISO_DIR)/boot/image.bmp); \
+	fi
 	@grub-mkrescue -o $@ $(ISO_DIR) 2>/dev/null || (echo "Error: grub-mkrescue failed." && false)
 
 $(CPIO):
@@ -101,7 +105,7 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.asm
 
 $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a:
 	@echo ">>> [RS]  Compiling Rust crate: $*"
-	@cd $(RUST_DIR) && cargo build --release -p $*
+	@cd $(RUST_DIR) && cargo build --release --target ./$(RUST_TARGET).json -Zbuild-std=core,alloc -p $*
 
 # Generate a local configuration
 config:
