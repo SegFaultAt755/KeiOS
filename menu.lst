@@ -1,5 +1,0 @@
-timeout 5
-default 0
-
-title Keios
-    kernel /boot/keios.elf

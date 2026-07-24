@@ -37,12 +37,16 @@ KeiOS leverages both modern C23 and Rust. When bridging the two languages, prior
 
 ## AI Assistant Policy
 
-We embrace modern development tools, including AI coding assistants (e.g., Copilot, ChatGPT, Claude), but **you remain entirely responsible for the code you submit**
+While we acknowledge the availability of AI coding assistants (e.g., ChatGPT, Gemini, Claude), their use in KeiOS is strictly regulated. Systems programming requires extreme precision, and you remain entirely responsible for the code you submit
 
-If you use AI to assist in writing code, you must ensure:
-1. **Full Understanding:** You know exactly how every line of generated code works. Never submit code you cannot verbally explain and defend during review
-2. **Zero Issues:** The code must be fully tested, bug free, and introduce no security vulnerabilities or performance bottlenecks
-3. **Architectural Alignment:** The AI generated code must cleanly match the existing project architecture, naming conventions, and style guidelines without introducing unnecessary bloat or weird patterns
+If you use AI to assist in writing code, you **must** adhere to the following strict rules:
+
+1. **Mandatory Disclosure:** You must explicitly declare the use of AI tools in your Pull Request description. Undisclosed AI-generated code will result in immediate rejection of the PR
+2. **Restricted Areas:** AI tools **must not** be used to generate code for critical system components. This includes memory management logic, raw pointers, FFI boundary wrappers, and cryptographic modules
+3. **No Direct Copy-Pasting:** Do not blindly copy-paste AI-generated code. Any AI suggestions must be heavily reviewed, manually refactored, and adapted to perfectly match the project's exact architectural context
+4. **Human-Written Tests:** All test cases must be written manually by a human engineer. You cannot use AI to generate tests for AI-assisted code
+5. **Full Comprehension & Accountability:** You must know exactly how every single line of submitted code works
+6. **Licensing & Copyright:** You are completely responsible for ensuring that any AI-assisted code does not violate copyright laws or introduce code snippets from incompatible licenses
 
 ---
 

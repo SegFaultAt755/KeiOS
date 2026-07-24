@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: GPLv3
 # Copyright (C) 2026 KeiOS Developers
 
-# Toolchain
-TOOLCHAIN_PREFIX ?= $(shell which i686-elf-gcc >/dev/null 2>&1 && echo "i686-elf-" || echo "")
+SHELL := /bin/sh
+
+# Toolchain configuration
+TOOLCHAIN_PREFIX ?= i686-elf-
 AS := nasm
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
@@ -18,13 +20,12 @@ SRC_DIR := src
 FS_DIR  := rootfs
 
 # Target files
-LDSCRIPT   := linker.ld
-KERNEL := keios.elf
-CPIO       := initramfs.cpio
-ISO_IMAGE  := keios.iso
+LDSCRIPT  := linker.ld
+KERNEL    := keios.elf
+CPIO      := initramfs.cpio
+ISO_IMAGE := keios.iso
 
 # Custom preprocessor defines
-# Usage: make D="DEBUG VERBOSE=1" -> -DDEBUG -DVERBOSE=1
 ifneq ($(strip $(D)),)
     CUSTOM_DEFINES := $(foreach def,$(D),-D$(def))
 endif
@@ -37,18 +38,11 @@ LDFLAGS ?= -m elf_i386 -static -T $(LDSCRIPT)
 
 bin/libkern/math.o: CFLAGS += -msse
 
-# Cross-platform file utilities
-ifeq ($(OS),Windows_NT)
-    MKDIR = if not exist $(subst /,\,$1) mkdir $(subst /,\,$1)
-    RM_RF = if exist $(subst /,\,$1) rmdir /s /q $(subst /,\,$1)
-    RM_F  = if exist $(subst /,\,$1) del /q $(subst /,\,$1)
-    CP    = copy /y $(subst /,\,$1) $(subst /,\,$2) >nul
-else
-    MKDIR = mkdir -p $1
-    RM_RF = rm -rf $1
-    RM_F  = rm -f $1
-    CP    = cp $1 $2
-endif
+# Standard POSIX File Utilities
+MKDIR = mkdir -p $1
+RM_RF = rm -rf $1
+RM_F  = rm -f $1
+CP    = cp $1 $2
 
 # Rust configuration
 RUST_TARGET := i686-unknown-none
