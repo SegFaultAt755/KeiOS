@@ -27,9 +27,9 @@ uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) 
     invalidate(0);
 
     /* Recursive page directory mapping */
-    uint32_t physical_dir_addr = (uint32_t)dir - KERNEL_START;
+    uint32_t physical_dir_addr = (uint32_t)dir - KERNEL_VIRTUAL_ADDRESS;
     dir[1023] = (physical_dir_addr & PDE_FRAME) | PDE_PRESENT | PDE_RW;
-    invalidate(KERNEL_START);
+    invalidate(KERNEL_VIRTUAL_ADDRESS);
 
     __asm__ volatile("mov %0, %%cr3" ::"r"(physical_dir_addr) : "memory");
 

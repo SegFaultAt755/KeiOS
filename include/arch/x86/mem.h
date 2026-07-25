@@ -10,7 +10,7 @@
 #define PAGE_TABLE_ENTRIES 1024
 #define MAX_PHYSICAL_BYTES 0x100000000ULL /* 4GB */
 
-#define KERNEL_START 0xC0000000
+#define KERNEL_VIRTUAL_ADDRESS 0xC0000000
 
 /* Paging flags */
 #define PTE_PRESENT  (1U << 0)   /* Present, is loaded in memory */
