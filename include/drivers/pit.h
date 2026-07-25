@@ -6,4 +6,6 @@
 #include <stdint.h>
 #include "arch/x86/isr.h"
 
+extern uint64_t pit_ticks;
+
 void pit_initialize(uint32_t freq, void (*callback)(struct registers *regs));

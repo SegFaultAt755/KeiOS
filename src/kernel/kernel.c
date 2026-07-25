@@ -30,14 +30,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-uint32_t tick = 0;
 static inline void pit_callback(struct registers *) {
-    tick += 1;
+    pit_ticks += 1;
 }
 
 static inline void tick_wait(uint32_t ms) {
     sleep_ms(ms);
-    tick += ms;
+    pit_ticks += ms;
 }
 
 void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
@@ -46,10 +45,9 @@ void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *
 }
 
 void show_banner(void);
-void memory_initialize(struct multiboot_info *mbi);
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
-    qemu_set_time_var(&tick);
+    qemu_set_time_var(&pit_ticks);
 
     /* Initialize kernel */
     tick_wait(1); /* Manually freeze the execution for better debugging experience */

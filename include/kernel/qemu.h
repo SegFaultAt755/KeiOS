@@ -28,5 +28,5 @@ static inline void qemu_putchar(char c) {
     outb(QEMU_PORT, c);
 }
 
-void qemu_set_time_var(uint32_t *ms);
+void qemu_set_time_var(uint64_t *ticks);
 void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt, ...);

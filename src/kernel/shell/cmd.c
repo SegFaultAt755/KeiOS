@@ -5,15 +5,16 @@
 
 #include "config.h"
 #include "drivers/cmos.h"
+#include "drivers/pit.h"
 #include "drivers/terminal.h"
+
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/reboot.h"
+
 #include "libkern/bcd.h"
 #include "libkern/stdio.h"
 #include "libkern/string.h"
-
-extern uint32_t tick;
 
 void cmd_help(void) {
     kprintf("Available commands:\n");
@@ -46,11 +47,11 @@ void cmd_ver(void) {
 }
 
 void cmd_uptime(void) {
-    int secs = tick / 1000;
+    int secs = pit_ticks / 1000;
     int mins = secs / 60;
     int hours = mins / 60;
 
-    kprintf("%d:%02d:%02d.%03d\n", hours, mins % 60, secs % 60, tick % 1000);
+    kprintf("%d:%02d:%02d.%03d\n", hours, mins % 60, secs % 60, pit_ticks % 1000);
 }
 
 void cmd_meminfo(void) {

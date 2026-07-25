@@ -15,20 +15,20 @@ static void qemu_print(const char *s) {
         qemu_putchar(s[i]);
 }
 
-static uint32_t *var_ms_track = nullptr;
+static uint64_t *var_ticks_track = nullptr;
 static void qemu_print_time(void) {
     char buf[1024] = {};
 
-    if (var_ms_track != nullptr)
-        ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", *var_ms_track / 1000, *var_ms_track % 1000);
+    if (var_ticks_track != nullptr)
+        ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", *var_ticks_track / 1000, *var_ticks_track % 1000);
     else
         ksnprintf(buf, sizeof(buf), "[ UNDEFI ] ");
 
     qemu_print(buf);
 }
 
-void qemu_set_time_var(uint32_t *ms) {
-    var_ms_track = ms;
+void qemu_set_time_var(uint64_t *ticks) {
+    var_ticks_track = ticks;
 }
 
 void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt, ...) {
