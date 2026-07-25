@@ -15,7 +15,7 @@ void reboot_raw() {
     outb(0x64, 0xFE);
 
     /* Try via PCI register */
-    outb(0xCF9, 0x0E); 
+    outb(0xCF9, 0x0E);
 
     /* Perform a warm restart (preserves memory and cache) */
     /* outb(0xCF9, 0x06); */
@@ -30,5 +30,5 @@ void reboot_raw() {
         uint32_t base;
     } null_idt = {0, 0};
 
-    __asm__ volatile ("lidt %0; int3" : : "m"(null_idt));
+    __asm__ volatile("lidt %0; int3" : : "m"(null_idt));
 }

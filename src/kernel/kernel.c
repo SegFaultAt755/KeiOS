@@ -12,7 +12,7 @@
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/qemu.h"
-#include "kernel/shell.h"
+#include "kernel/shell/shell.h"
 
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/features.h"
