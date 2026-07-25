@@ -10,6 +10,7 @@
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
+#include "kernel/reboot.h"
 #include "libkern/stdio.h"
 #include "libkern/string.h"
 
@@ -123,9 +124,7 @@ static void cmd_datetime(void) {
 
 static void cmd_reboot(void) {
     kprintf("Rebooting...\n");
-    /* Triple fault to reboot (temporary) */
-    __asm__ volatile("lidt (%%eax)" : : "a"(0));
-    __asm__ volatile("int $3");
+    reboot();
     while (true) {
         disable_interrupts();
         halt();
