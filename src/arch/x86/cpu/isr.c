@@ -17,33 +17,33 @@ void intr_handler(uint8_t num, isr_t hld) {
     isr_intr_handler[num] = hld;
 }
 
-void divide_by_zero_fault_handler(struct registers *regs) {
+static void divide_by_zero_fault_handler(struct registers *regs) {
     KERNEL_PANIC_FORMAT("Division by zero fault", "CPU denied to divide a number by zero / data: %x | code: %x",
                         get_fault_addr(), regs->eip);
 }
 
-void invalid_opcode_fault_handler(struct registers *regs) {
+static void invalid_opcode_fault_handler(struct registers *regs) {
     KERNEL_PANIC_FORMAT("Invalid opcode fault",
                         "CPU cannot decode code or a pointer leads to invalid "
                         "data / data: %x | code: %x",
                         get_fault_addr(), regs->eip);
 }
 
-void stack_segment_fault_handler(struct registers *regs) {
+static void stack_segment_fault_handler(struct registers *regs) {
     KERNEL_PANIC_FORMAT("Stack segment fault", "Stack corrupted or stack overflow occured / data: %x | code: %x",
                         get_fault_addr(), regs->eip);
 }
 
-void general_protection_fault_handler(struct registers *regs) {
+static void general_protection_fault_handler(struct registers *regs) {
     KERNEL_PANIC_FORMAT("General protection fault", "Not enough permissions to execute code / data: %x | code: %x",
                         get_fault_addr(), regs->eip);
 }
 
-void double_fault_handler(struct registers *) {
+static void double_fault_handler(struct registers *) {
     KERNEL_PANIC("Double fault", "Failed to handle a fault");
 }
 
-void page_fault_handler(struct registers *regs) {
+static void page_fault_handler(struct registers *regs) {
     int present = !(regs->err & 0x1);
     int write = regs->err & 0x2;
     int user = regs->err & 0x4;

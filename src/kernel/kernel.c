@@ -39,12 +39,12 @@ static inline void tick_wait(uint32_t ms) {
     pit_ticks += ms;
 }
 
-void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
+static void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
     qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
                 mod->size, mod->cmdline);
 }
 
-void show_banner(void);
+static void show_banner(void);
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     qemu_set_time_var(&pit_ticks);
@@ -130,7 +130,7 @@ halt:
     }
 }
 
-void show_banner(void) {
+static void show_banner(void) {
     const char *banner[] = {" _  __        _   ___    ____", "| |/ /  ___  (_) / _ \\  / ___|",
                             "| ' /  / _ \\ | || | | | \\__ \\", "| . \\ |  __/ | || |_| | ___) |",
                             "|_|\\_\\ \\___| |_| \\___/ |____/"};

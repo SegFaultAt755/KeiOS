@@ -7,7 +7,7 @@
 #include "kernel/qemu.h"
 #include "libkern/memory.h"
 
-struct tss_entry tss;
+static struct tss_entry tss;
 
 void write_tss(uint16_t ss0, uint32_t esp0) {
     uint32_t base = (uint32_t)&tss;
