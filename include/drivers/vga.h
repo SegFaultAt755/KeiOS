@@ -7,7 +7,7 @@
 
 #define VGA_TEXT_WIDTH  80
 #define VGA_TEXT_HEIGHT 25
-#define VGA_TEXT_MEMORY 0xC00B8000
+#define VGA_TEXT_MEMORY 0xC00'B8000
 
 enum vga_8b_colors {
     VGA_8B_BLACK         = 0,

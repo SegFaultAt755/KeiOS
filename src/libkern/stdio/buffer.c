@@ -14,11 +14,11 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
         if (fmt[i] == '%' && fmt[i + 1] != '\0') {
             i++;
 
-            int zpad = 0;
+            bool zpad = false;
             int min_w = 0;
 
             if (fmt[i] == '0') {
-                zpad = 1;
+                zpad = true;
                 i++;
 
                 while (fmt[i] >= '0' && fmt[i] <= '9') {
@@ -27,14 +27,14 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                 }
             }
 
-            char buf_num[32];
+            char buf_num[32] = {};
             int len = 0;
 
             switch (fmt[i]) {
             case 'd':
             case 'i': {
-                int val = va_arg(args, int);
-                unsigned int uval = (unsigned int)val;
+                auto val = va_arg(args, int);
+                auto uval = (unsigned int)val;
                 if (val < 0 && buf_idx < size - 1) {
                     buf[buf_idx++] = '-';
                     uval = ~uval + 1;
@@ -56,21 +56,21 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                 len = uvalue_to_str(buf_num, va_arg(args, unsigned int), 2, min_w, zpad);
                 break;
             case 'p': {
-                void *ptr = va_arg(args, void *);
+                auto ptr = va_arg(args, void *);
                 if (buf_idx < size - 1)
                     buf[buf_idx++] = '0';
                 if (buf_idx < size - 1)
                     buf[buf_idx++] = 'x';
 
-                len = uvalue_to_str(buf_num, (unsigned long long)(uintptr_t)ptr, 16, sizeof(void *) * 2, 1);
+                len = uvalue_to_str(buf_num, (unsigned long long)(uintptr_t)ptr, 16, sizeof(void *) * 2, true);
                 break;
             }
             case 'f': {
-                double val = va_arg(args, double);
+                auto val = va_arg(args, double);
 
                 /* Check for NaN */
                 if (val != val) {
-                    const char *nan_str = "NaN";
+                    constexpr char nan_str[] = "NaN";
                     for (int k = 0; nan_str[k] != '\0' && buf_idx < size - 1; k++)
                         buf[buf_idx++] = nan_str[k];
                     break;
@@ -83,9 +83,9 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
 
                 /* Rounding adjustment for 6 decimal places precision */
                 val += 0.0000005f;
-                unsigned int ipart = (unsigned int)val;
-                double fpart = val - (double)ipart;
-                unsigned int fpart_int = (unsigned int)(fpart * 1000000.0f);
+                auto ipart = (unsigned int)val;
+                auto fpart = val - (double)ipart;
+                auto fpart_int = (unsigned int)(fpart * 1000000.0f);
 
                 /* Format and copy the integer part */
                 len = uvalue_to_str(buf_num, ipart, 10, min_w, zpad);
@@ -97,7 +97,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                     buf[buf_idx++] = '.';
 
                 /* Format the fractional part */
-                len = uvalue_to_str(buf_num, fpart_int, 10, 6, 1);
+                len = uvalue_to_str(buf_num, fpart_int, 10, 6, true);
                 break;
             }
             case 'c':
@@ -105,7 +105,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                     buf[buf_idx++] = (char)va_arg(args, int);
                 continue;
             case 's': {
-                const char *s = va_arg(args, const char *);
+                auto s = va_arg(args, const char *);
                 if (!s)
                     s = "(null)";
                 while (*s && buf_idx < size - 1)
@@ -139,7 +139,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
 int ksnprintf(char *buf, size_t size, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    int res = kvsnprintf(buf, size, fmt, args);
+    auto res = kvsnprintf(buf, size, fmt, args);
     va_end(args);
 
     return res;

@@ -12,7 +12,7 @@ float sqrtf(float n) {
         union {
             unsigned int i;
             float f;
-        } nan = {0x7FC00000};
+        } nan = {.i = 0x7FC0'0000};
         return nan.f;
     }
 
@@ -23,8 +23,8 @@ float sqrtf(float n) {
 
 float sinf(float n) {
     /* Range formula: n = n - (2*PI) * round(n / (2*PI)) */
-    float two_pi = 2.0f * PI;
-    int quotients = (int)(n / two_pi);
+    const float two_pi = 2.0f * PI;
+    auto quotients = (int)(n / two_pi);
     n = n - (quotients * two_pi);
 
     if (n > PI)
@@ -39,9 +39,9 @@ float sinf(float n) {
         n = -PI - n;
 
     /* 7th degree Taylor series */
-    float n2 = n * n;
-    float term = n;
-    float sum = n;
+    auto n2 = n * n;
+    auto term = n;
+    auto sum = n;
 
     term = -term * n2 / 6.0f; /* -n^3 / 3! */
     sum += term;

@@ -7,17 +7,17 @@
 
 size_t strlen(const char *s) {
     size_t i = 0;
-    for (; s[i] != '\0'; i++) {
-    }
+    for (; s[i] != '\0'; i++)
+        ;
 
     return i;
 }
 
 char *strcpy(char *dest, const char *src) {
-    char *tmp = dest;
+    auto tmp = dest;
 
-    while ((*dest++ = *src++) != '\0') {
-    }
+    while ((*dest++ = *src++) != '\0')
+        ;
 
     return tmp;
 }
@@ -43,13 +43,13 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 char *strcat(char *dest, const char *src) {
-    char *tmp = dest;
+    auto tmp = dest;
 
     while (*dest)
         dest++;
 
-    while ((*dest++ = *src++) != '\0') {
-    }
+    while ((*dest++ = *src++) != '\0')
+        ;
 
     return tmp;
 }
@@ -75,28 +75,30 @@ char *strtok(char *str, const char *delim) {
 
     /* Skip leading delimiters */
     while (*next) {
-        const char *d = delim;
-        int is_delim = 0;
+        auto d = delim;
+        bool is_delim = false;
         while (*d) {
             if (*next == *d) {
-                is_delim = 1;
+                is_delim = true;
                 break;
             }
             d++;
         }
+
         if (!is_delim)
             break;
+
         next++;
     }
 
     if (*next == '\0')
         return nullptr;
 
-    char *token = next;
+    auto token = next;
 
     /* Find end of token */
     while (*next) {
-        const char *d = delim;
+        auto d = delim;
         while (*d) {
             if (*next == *d) {
                 *next = '\0';
@@ -112,8 +114,8 @@ char *strtok(char *str, const char *delim) {
 }
 
 char *strdup(const char *s) {
-    size_t len = strlen(s) + 1;
-    char *dup = kmalloc(len);
+    auto len = strlen(s) + 1;
+    auto dup = (char *)kmalloc(len);
     if (dup)
         strcpy(dup, s);
     return dup;
@@ -143,7 +145,7 @@ int atoi(const char *s) {
 
 void itoa(int val, char *buf, int base) {
     int i = 0;
-    int is_negative = 0;
+    bool is_negative = false;
 
     if (val == 0) {
         buf[i++] = '0';
@@ -152,12 +154,12 @@ void itoa(int val, char *buf, int base) {
     }
 
     if (val < 0 && base == 10) {
-        is_negative = 1;
+        is_negative = true;
         val = -val;
     }
 
     while (val > 0) {
-        int rem = val % base;
+        auto rem = val % base;
         buf[i++] = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
         val /= base;
     }
@@ -175,14 +177,14 @@ void itoa(int val, char *buf, int base) {
     }
 }
 
-int uvalue_to_str(char *buf, unsigned int val, int base, int min_w, int zpad) {
+int uvalue_to_str(char *buf, unsigned int val, int base, int min_w, bool zpad) {
     int i = 0;
 
     if (val == 0) {
         buf[i++] = '0';
     } else {
         while (val > 0) {
-            int rem = val % base;
+            auto rem = val % base;
             buf[i++] = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
             val /= base;
         }

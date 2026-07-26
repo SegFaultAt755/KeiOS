@@ -6,8 +6,10 @@
 #include "libkern/string.h"
 
 void kvprintf(const char *fmt, va_list args) {
-    char buf[1024];
-    int len = kvsnprintf(buf, sizeof(buf), fmt, args);
+    constexpr size_t PRINT_BUF_SIZE = 1024;
+    char buf[PRINT_BUF_SIZE] = {};
+
+    auto len = kvsnprintf(buf, sizeof(buf), fmt, args);
 
     if (len > 0)
         terminal_write(buf, len);

@@ -4,17 +4,17 @@
 #include "libkern/memory.h"
 
 void *memset(void *dest, int val, size_t n) {
-    unsigned char *ptr = (unsigned char *)dest;
+    auto ptr = (unsigned char *)dest;
 
     while (n--)
-        *ptr++ = val;
+        *ptr++ = (unsigned char)val;
 
     return dest;
 }
 
 void *memcpy(void *dest, const void *src, size_t n) {
-    unsigned char *d = (unsigned char *)dest;
-    const unsigned char *s = (const unsigned char *)src;
+    auto d = (unsigned char *)dest;
+    auto s = (const unsigned char *)src;
 
     while (n--)
         *d++ = *s++;
@@ -23,8 +23,8 @@ void *memcpy(void *dest, const void *src, size_t n) {
 }
 
 void *memmove(void *dest, const void *src, size_t n) {
-    unsigned char *d = (unsigned char *)dest;
-    const unsigned char *s = (const unsigned char *)src;
+    auto d = (unsigned char *)dest;
+    auto s = (const unsigned char *)src;
 
     if (d == s)
         return dest;
@@ -44,8 +44,8 @@ void *memmove(void *dest, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-    const unsigned char *p1 = (const unsigned char *)s1;
-    const unsigned char *p2 = (const unsigned char *)s2;
+    auto p1 = (const unsigned char *)s1;
+    auto p2 = (const unsigned char *)s2;
 
     while (n--) {
         if (*p1 != *p2)
