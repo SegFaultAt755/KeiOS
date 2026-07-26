@@ -3,32 +3,24 @@
 
 #include "kernel/qemu.h"
 
-#include <stddef.h>
-
 #include "config.h"
+#include "drivers/pit.h"
 #include "drivers/cmos.h"
 #include "libkern/bcd.h"
 #include "libkern/string.h"
+
+#include <stddef.h>
 
 static void qemu_print(const char *s) {
     for (size_t i = 0; i < strlen(s); i++)
         qemu_putchar(s[i]);
 }
 
-static uint64_t *var_ticks_track = nullptr;
 static void qemu_print_time(void) {
     char buf[1024] = {};
-
-    if (var_ticks_track != nullptr)
-        ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", *var_ticks_track / 1000, *var_ticks_track % 1000);
-    else
-        ksnprintf(buf, sizeof(buf), "[ UNDEFI ] ");
+    ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", (uint32_t)(pit_ticks / 1000), (uint32_t)(pit_ticks % 1000));
 
     qemu_print(buf);
-}
-
-void qemu_set_time_var(uint64_t *ticks) {
-    var_ticks_track = ticks;
 }
 
 void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt, ...) {

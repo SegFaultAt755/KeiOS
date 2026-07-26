@@ -8,7 +8,7 @@
 #include "libkern/stdio.h"
 
 /* Scancode Set 1 (unshifted) */
-static const char sc1_unshifted[128] = {
+constexpr static char sc1_unshifted[128] = {
     0,   0,   '1', '2', '3', '4', '5',  '6', '7', '8', '9', '0', '-', '=', '\b', 0,   'q', 'w', 'e',  'r', 't', 'y',
     'u', 'i', 'o', 'p', '[', ']', '\n', 0,   'a', 's', 'd', 'f', 'g', 'h', 'j',  'k', 'l', ';', '\'', '`', 0,   '\\',
     'z', 'x', 'c', 'v', 'b', 'n', 'm',  ',', '.', '/', 0,   '*', 0,   ' ', 0,    0,   0,   0,   0,    0,   0,   0,
@@ -17,7 +17,7 @@ static const char sc1_unshifted[128] = {
     0,   0,   0,   0,   0,   0,   0,    0,   0,   0,   0,   0,   0,   0,   0,    0,   0};
 
 /* Scancode Set 1 (shifted) */
-static const char sc1_shifted[128] = {
+constexpr static char sc1_shifted[128] = {
     0,   0,   '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0,   0,   'Q', 'W', 'E', 'R', 'T', 'Y',
     'U', 'I', 'O', 'P', '{', '}', 0,   0,   'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0,   '|',
     'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 0,   '*', 0,   ' ', 0,   0,   0,   0,   0,   0,   0,   0,
@@ -26,10 +26,10 @@ static const char sc1_shifted[128] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
 
 static uint8_t modifier_state = 0;
-static uint8_t extended_prefix = 0;
+static bool extended_prefix = false;
 static void (*key_callback)(uint16_t) = nullptr;
 
-static int is_letter(uint8_t sc) {
+static bool is_letter(uint8_t sc) {
     return (sc >= 0x10 && sc <= 0x19) || (sc >= 0x1E && sc <= 0x26) || (sc >= 0x2C && sc <= 0x32);
 }
 
@@ -70,9 +70,8 @@ static void clear_modifiers(uint8_t scancode) {
     }
 }
 
-static void keyboard_handler(struct registers *regs) {
-    (void)regs;
-    uint8_t scancode = inb(PS2_DATA_PORT);
+static void keyboard_handler([[maybe_unused]] struct registers *regs) {
+    auto scancode = inb(PS2_DATA_PORT);
 
     /* Discard error bytes from controller */
     if (scancode == 0x00 || scancode == 0xE1)
@@ -80,13 +79,13 @@ static void keyboard_handler(struct registers *regs) {
 
     /* Extended scancode prefix — discard, next IRQ gets the real byte */
     if (scancode == SC_EXTENDED) {
-        extended_prefix = 1;
+        extended_prefix = true;
         return;
     }
 
     /* Handle extended scancodes (arrows, Right Ctrl/Alt, etc.) */
     if (extended_prefix) {
-        extended_prefix = 0;
+        extended_prefix = false;
         if (scancode & 0x80) {
             /* Extended break code — clear extended modifiers */
             switch (scancode) {
@@ -137,17 +136,17 @@ static void keyboard_handler(struct registers *regs) {
     update_modifiers(scancode);
 
     /* Determine if shift is active for this key */
-    uint8_t shift = (modifier_state & (MOD_LSHIFT | MOD_RSHIFT)) != 0;
+    bool shift = (modifier_state & (MOD_LSHIFT | MOD_RSHIFT)) != 0;
     if (is_letter(scancode) && (modifier_state & MOD_CAPSLOCK))
         shift = !shift;
 
-    char ascii = shift ? sc1_shifted[scancode] : sc1_unshifted[scancode];
+    auto ascii = shift ? sc1_shifted[scancode] : sc1_unshifted[scancode];
 
     if (ascii && key_callback)
         key_callback(ascii);
 }
 
-void ps2_initialize(void) {
+void ps2_initialize() {
     /* Flush output buffer */
     while (inb(PS2_STATUS_PORT) & 0x01)
         inb(PS2_DATA_PORT);
@@ -159,7 +158,7 @@ void ps2_initialize(void) {
     /* Read config byte */
     outb(PS2_STATUS_PORT, PS2_CMD_READ_CONFIG);
     waitb(1);
-    uint8_t cfg = inb(PS2_DATA_PORT);
+    auto cfg = inb(PS2_DATA_PORT);
 
     /* Enable IRQ1, disable mouse IRQ */
     cfg = (cfg | PS2_CFG_IRQ1_ENABLED) & ~PS2_CFG_MOUSE_IRQ;
@@ -170,7 +169,7 @@ void ps2_initialize(void) {
     /* Controller self-test */
     outb(PS2_STATUS_PORT, PS2_CMD_SELF_TEST);
     waitb(1);
-    uint8_t result = inb(PS2_DATA_PORT);
+    auto result = inb(PS2_DATA_PORT);
     if (result != 0x55)
         qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 controller self-test result: 0x%x | must be 0x55", result);
 
@@ -190,12 +189,12 @@ void ps2_initialize(void) {
     qemu_printf(QEMU_DRV, QEMU_OK, "PS/2 Keyboard initialized");
 }
 
-void ps2_disable(void) {
-    intr_handler(IRQ1, 0);
+void ps2_disable() {
+    intr_handler(IRQ1, nullptr);
     outb(PS2_STATUS_PORT, PS2_CMD_DISABLE_KBD);
 }
 
-uint8_t ps2_get_modifiers(void) {
+uint8_t ps2_get_modifiers() {
     return modifier_state;
 }
 

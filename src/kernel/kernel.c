@@ -47,8 +47,6 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
 static void show_banner(void);
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
-    qemu_set_time_var(&pit_ticks);
-
     /* Initialize kernel */
     tick_wait(1); /* Manually freeze the execution for better debugging experience */
     gdt_initialize();

@@ -4,9 +4,11 @@
 #include "drivers/sleep.h"
 #include "libkern/stdio.h"
 
-void sleep_initialize(void) {
+constexpr uint16_t PIT_TICKS_1_MS = 1'193;
+
+void sleep_initialize() {
     /* Enable the pit channel 2 gate */
-    uint8_t val = inb(0x61);
+    auto val = inb(0x61);
     outb(0x61, (val & 0xFE) | 0x01);
 }
 
@@ -25,11 +27,11 @@ void sleep(uint16_t ticks) {
 }
 
 void sleep_ms(uint32_t ms) {
-    for (uint32_t i = 0; i < ms; i++)
-        sleep(1193); /* ~1ms worth of pit ticks */
+    for (auto i = 0u; i < ms; i++)
+        sleep(PIT_TICKS_1_MS); /* ~1ms worth of pit ticks */
 }
 
-void sleep_deinitialize(void) {
+void sleep_deinitialize() {
     /* Disable the pit channel 2 gate */
     outb(0x61, inb(0x61) & 0xFC);
 }
