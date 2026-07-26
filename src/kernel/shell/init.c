@@ -1,6 +1,8 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
+#include "config.h"
+
 #include "kernel/shell/cmd.h"
 #include "kernel/shell/shell.h"
 
@@ -26,6 +28,37 @@ static const struct builtin_cmd builtins[] = {
 
 static void shell_print_prompt() {
     kprintf("$ ");
+}
+
+static void show_banner() {
+    const char *banner[] = {" _  __        _   ___    ____", "| |/ /  ___  (_) / _ \\  / ___|",
+                            "| ' /  / _ \\ | || | | | \\__ \\", "| . \\ |  __/ | || |_| | ___) |",
+                            "|_|\\_\\ \\___| |_| \\___/ |____/"};
+
+    const enum vga_8b_colors rainbow[] = {VGA_8B_LIGHT_RED,    VGA_8B_LIGHT_BROWN, /* VGA equivalent to
+                                                                                                 orange/yellow */
+                                          VGA_8B_LIGHT_GREEN,  VGA_8B_LIGHT_CYAN,  VGA_8B_LIGHT_BLUE,
+                                          VGA_8B_LIGHT_MAGENTA};
+
+    for (auto row = 0; row < 5; row++) {
+        for (auto col = 0; banner[row][col] != '\0'; col++) {
+            /* Calculate the diagonal rainbow color */
+            auto color_idx = (row + col) % 5;
+            auto color = vga_entry_color(rainbow[color_idx], TERMINAL_DEFAULT_BG);
+
+            terminal_set_color(color);
+            char ch_str[2] = {banner[row][col], '\0'};
+            kprintf(ch_str);
+        }
+
+        terminal_blankline();
+    }
+
+    auto default_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
+    terminal_set_color(default_color);
+
+    for (auto i = 0u; i < 5u; i++)
+        terminal_blankline();
 }
 
 static void shell_execute(const char *line) {
@@ -196,6 +229,13 @@ void shell_key_handler(uint16_t key) {
 }
 
 void shell_initialize() {
+    /* Show welcome message */
+    kprintf("Welcome to KeiOS %d.%d.%d! ", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
+    kprintf("<3\n");
+    terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
+    show_banner();
+
     ps2_set_key_callback(shell_key_handler);
     shell_print_prompt();
 }

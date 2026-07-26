@@ -10,3 +10,4 @@
 #define GRAPHICS_TYPE_TEXT_MODE   0
 
 int get_graphics_type(struct multiboot_info *mbi);
+int graphics_initialize(struct multiboot_info *mbi);

@@ -3,11 +3,9 @@
 
 #include "config.h"
 
-#include "drivers/display.h"
 #include "drivers/pit.h"
 #include "drivers/ps2.h"
 #include "drivers/sleep.h"
-#include "drivers/terminal.h"
 
 #include "kernel/graphics.h"
 #include "kernel/halt.h"
@@ -46,8 +44,6 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
                 mod->size, mod->cmdline);
 }
 
-static void show_banner();
-
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     /* Initialize kernel */
     tick_wait(1); /* Manually freeze the execution for better debugging experience */
@@ -71,54 +67,12 @@ static void show_banner();
     /* Enabling interrupts */
     enable_interrupts();
 
-    auto graphics = get_graphics_type(mbi);
+    /* Initialize graphics */
+    auto graphics = graphics_initialize(mbi);
+
+    /* Initialize user space */
     if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
-        /* Initialize VGA text mode */
-        vga_init_text();
-        terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-
-        /* Show welcome message */
-        kprintf("Welcome to KeiOS %d.%d.%d! ", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-        terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
-        kprintf("<3\n");
-        terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
-        show_banner();
-
         shell_initialize();
-    } else if (graphics == GRAPHICS_TYPE_FRAMEBUFFER) {
-        struct display_info info;
-        info.flags = mbi->flags;
-        info.width = mbi->framebuffer_width;
-        info.height = mbi->framebuffer_height;
-        info.pitch = mbi->framebuffer_pitch;
-        info.bpp = mbi->framebuffer_bpp;
-
-        auto phys_addr = (uint32_t)mbi->framebuffer_addr;
-        constexpr uint32_t virt_addr = 0xE0000000;
-        auto fbo_size = info.pitch * info.height;
-
-        qemu_printf(QEMU_DRV, QEMU_INFO, "Framebuffer address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)",
-                    phys_addr, virt_addr, fbo_size);
-
-        auto map_success = true;
-
-        /* Loop through the entire size of the framebuffer and map it page by page */
-        for (auto offset = 0u; offset < fbo_size; offset += PAGE_SIZE) {
-            if (!vmm_map_page(virt_addr + offset, phys_addr + offset, PTE_PRESENT | PTE_RW | PTE_PWT)) {
-                map_success = false;
-                break;
-            }
-        }
-
-        if (!map_success) {
-            qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map linear framebuffer to virtual memory");
-            info.lfb_addr = nullptr;
-        }
-
-        info.lfb_addr = (uint32_t *)virt_addr;
-
-        display_initialize(info);
-        display_clear(0x00'14'14'14);
     }
 
     /* Infinite loop to prevent CPU fault */
@@ -128,35 +82,4 @@ halt:
         enable_interrupts();
         halt();
     }
-}
-
-static void show_banner() {
-    const char *banner[] = {" _  __        _   ___    ____", "| |/ /  ___  (_) / _ \\  / ___|",
-                            "| ' /  / _ \\ | || | | | \\__ \\", "| . \\ |  __/ | || |_| | ___) |",
-                            "|_|\\_\\ \\___| |_| \\___/ |____/"};
-
-    const enum vga_8b_colors rainbow[] = {VGA_8B_LIGHT_RED,    VGA_8B_LIGHT_BROWN, /* VGA equivalent to
-                                                                                                 orange/yellow */
-                                          VGA_8B_LIGHT_GREEN,  VGA_8B_LIGHT_CYAN,  VGA_8B_LIGHT_BLUE,
-                                          VGA_8B_LIGHT_MAGENTA};
-
-    for (auto row = 0; row < 5; row++) {
-        for (auto col = 0; banner[row][col] != '\0'; col++) {
-            /* Calculate the diagonal rainbow color */
-            auto color_idx = (row + col) % 5;
-            auto color = vga_entry_color(rainbow[color_idx], TERMINAL_DEFAULT_BG);
-
-            terminal_set_color(color);
-            char ch_str[2] = {banner[row][col], '\0'};
-            kprintf(ch_str);
-        }
-
-        terminal_blankline();
-    }
-
-    auto default_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
-    terminal_set_color(default_color);
-
-    for (auto i = 0u; i < 5u; i++)
-        terminal_blankline();
 }
