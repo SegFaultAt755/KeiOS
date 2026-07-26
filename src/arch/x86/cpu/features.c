@@ -30,5 +30,5 @@ void initialize_cpu_features() {
 
     __asm__ volatile("mov %0, %%cr4" ::"r"(cr4));
 
-    qemu_printf(QEMU_CPU, QEMU_OK, "CPU features initialized (cr0: 0x%x, cr4: 0x%x)", cr0, cr4);
+    qemu_printf(QEMU_CPU, QEMU_OK, "CPU features initialized (cr0: %p, cr4: %p)", cr0, cr4);
 }

@@ -34,7 +34,7 @@ endif
 ASFLAGS ?= -f elf32 $(CUSTOM_DEFINES)
 CFLAGS  ?= -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra \
            -fno-exceptions -std=c23 -I $(INC_DIR) -MMD -MP $(CUSTOM_DEFINES)
-LDFLAGS ?= -m elf_i386 -static -T $(LDSCRIPT)
+LDFLAGS ?= -m elf_i386 -static -z noexecstack -T $(LDSCRIPT)
 
 bin/libkern/math.o: CFLAGS += -msse
 

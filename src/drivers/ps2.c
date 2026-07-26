@@ -171,7 +171,7 @@ void ps2_initialize() {
     waitb(1);
     auto result = inb(PS2_DATA_PORT);
     if (result != 0x55)
-        qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 controller self-test result: 0x%x | must be 0x55", result);
+        qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 controller self-test result: %p | must be 0x55", result);
 
     /* Interface test */
     outb(PS2_STATUS_PORT, PS2_CMD_IF_TEST);

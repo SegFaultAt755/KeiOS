@@ -10,6 +10,7 @@ use core::alloc::{GlobalAlloc, Layout};
 use core::panic::PanicInfo;
 
 // Modules
+pub mod cpio;
 pub mod display;
 
 // External C kernel functions

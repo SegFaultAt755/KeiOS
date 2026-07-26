@@ -43,7 +43,7 @@ int graphics_initialize(struct multiboot_info *mbi) {
         constexpr uint32_t virt_addr = 0xE0000000;
         auto fbo_size = info.pitch * info.height;
 
-        qemu_printf(QEMU_DRV, QEMU_INFO, "Framebuffer address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)",
+        qemu_printf(QEMU_DRV, QEMU_INFO, "Framebuffer address info: (physical: %p, virtual: %p, FBO size: %d)",
                     phys_addr, virt_addr, fbo_size);
 
         auto map_success = true;

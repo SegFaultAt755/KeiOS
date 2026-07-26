@@ -30,7 +30,7 @@ void memory_initialize(struct multiboot_info *mbi) {
     if (mem_high_point > MAX_PHYSICAL_BYTES || mem_high_point == 0)
         mem_high_point = MAX_PHYSICAL_BYTES;
 
-    qemu_printf(QEMU_MEM, QEMU_INFO, "Memory map: (physical allocation start: 0x%x, memory high point: 0x%x)",
+    qemu_printf(QEMU_MEM, QEMU_INFO, "Memory map: (physical allocation start: %p, memory high point: %p)",
                 physical_alloc_start, (uint32_t)mem_high_point);
 
     /* Initialize VMM & PMM */

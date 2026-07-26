@@ -36,7 +36,7 @@ uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) 
     /* Initialize physical frame allocation */
     pmm_initialize(mem_high_point, physical_alloc_start);
 
-    qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: 0x%x)", physical_dir_addr);
+    qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: %p)", physical_dir_addr);
     return physical_alloc_start;
 }
 

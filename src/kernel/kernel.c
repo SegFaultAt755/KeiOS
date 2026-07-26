@@ -3,6 +3,7 @@
 
 #include "config.h"
 
+#include "drivers/cpio.h"
 #include "drivers/pit.h"
 #include "drivers/ps2.h"
 #include "drivers/sleep.h"
@@ -11,6 +12,7 @@
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
+#include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "kernel/shell/shell.h"
 
@@ -26,6 +28,7 @@
 #endif
 
 #include "libkern/stdio.h"
+#include "libkern/string.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -42,6 +45,21 @@ static inline void tick_wait(uint32_t ms) {
 static void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
     qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
                 mod->size, mod->cmdline);
+
+    /* Parse CPIO */
+    const char *initramfs_cmd = "initramfs";
+    if (strcmp(mod->cmdline, initramfs_cmd) == 0) {
+        struct cpio_info info;
+        info.base_addr = (const uint8_t *)mod->start_addr;
+        info.size = mod->size;
+
+        if (cpio_initialize(info) != 0) { /* Important to work properly */
+            qemu_printf(QEMU_DRV, QEMU_PANIC, "Failed to initialize CPIO parser");
+            KERNEL_PANIC("CPIO Parser", "Failed to initialize CPIO parser");
+        }
+
+        qemu_printf(QEMU_DRV, QEMU_OK, "CPIO parser initialized");
+    }
 }
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
@@ -55,7 +73,7 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
 
     /* Parse multiboot */
     auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, flags: %d, count: %d)", mbi, mbi->flags,
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi, mbi->flags,
                 multiboot_mods_count);
 
     memory_initialize(mbi);

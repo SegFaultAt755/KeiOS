@@ -5,12 +5,13 @@
 #include "libkern/stdio.h"
 #include "libkern/string.h"
 
-#define EMIT_CHAR(c) do { \
-    if (buf != NULL && size > 0 && buf_idx < size - 1) { \
-        buf[buf_idx] = (c); \
-    } \
-    buf_idx++; \
-} while (0)
+#define EMIT_CHAR(c)                                                                                                   \
+    do {                                                                                                               \
+        if (buf != NULL && size > 0 && buf_idx < size - 1) {                                                           \
+            buf[buf_idx] = (c);                                                                                        \
+        }                                                                                                              \
+        buf_idx++;                                                                                                     \
+    } while (0)
 
 static constexpr size_t buf_num_len = 70;
 
@@ -49,7 +50,10 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
             }
 
             /* Length modifier parsing */
-            enum { LEN_DEFAULT, LEN_LONG } len_mod = LEN_DEFAULT;
+            enum {
+                LEN_DEFAULT,
+                LEN_LONG
+            } len_mod = LEN_DEFAULT;
             if (fmt[i] == 'l') {
                 len_mod = LEN_LONG;
                 i++;
@@ -88,9 +92,12 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                     uval = va_arg(args, unsigned int);
 
                 auto base = 10;
-                if (fmt[i] == 'x') base = 16;
-                else if (fmt[i] == 'o') base = 8;
-                else if (fmt[i] == 'b') base = 2;
+                if (fmt[i] == 'x')
+                    base = 16;
+                else if (fmt[i] == 'o')
+                    base = 8;
+                else if (fmt[i] == 'b')
+                    base = 2;
 
                 len = uvalue_to_str(buf_num, uval, base, min_w, zpad);
                 break;

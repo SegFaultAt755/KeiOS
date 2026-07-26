@@ -24,7 +24,7 @@ void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height) {
     vga_enable_cursor(14, 15);
     vga_update_cursor(term_column, term_row);
 
-    qemu_printf(QEMU_DRV, QEMU_OK, "Terminal initialized (memory: 0x%x, width: %u, height: %u, color: 0x%x)", term_mem,
+    qemu_printf(QEMU_DRV, QEMU_OK, "Terminal initialized (memory: %p, width: %u, height: %u, color: %p)", term_mem,
                 (uint32_t)term_width, (uint32_t)term_height, term_color);
 }
 
