@@ -15,4 +15,4 @@ char *strtok(char *str, const char *delim);
 char *strdup(const char *s);
 int atoi(const char *s);
 void itoa(int val, char *buf, int base);
-int uvalue_to_str(char *buf, unsigned int val, int base, int min_w, bool zpad);
+int uvalue_to_str(char *buf, unsigned long long int val, int base, int min_w, bool zpad);

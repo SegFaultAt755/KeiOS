@@ -177,7 +177,7 @@ void itoa(int val, char *buf, int base) {
     }
 }
 
-int uvalue_to_str(char *buf, unsigned int val, int base, int min_w, bool zpad) {
+int uvalue_to_str(char *buf, unsigned long long int val, int base, int min_w, bool zpad) {
     int i = 0;
 
     if (val == 0) {

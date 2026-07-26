@@ -18,7 +18,7 @@ static void qemu_print(const char *s) {
 
 static void qemu_print_time() {
     char buf[1024] = {};
-    ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", (uint32_t)(pit_ticks / 1000), (uint32_t)(pit_ticks % 1000));
+    ksnprintf(buf, sizeof(buf), "[ %lu.%u ] ", (uint64_t)(pit_ticks / 1000), (uint32_t)(pit_ticks % 1000));
 
     qemu_print(buf);
 }
