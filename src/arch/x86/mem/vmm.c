@@ -13,12 +13,12 @@ static inline void invalidate(uint32_t addr) {
     __asm__ volatile("invlpg (%0)" ::"r"(addr) : "memory");
 }
 
-static inline uint32_t *get_pde(uint32_t virt_addr) {
-    return (uint32_t *)(0xFFFFF000U + ((virt_addr >> 20) & 0xFFCU));
+[[nodiscard]] static inline uint32_t *get_pde(uint32_t virt_addr) {
+    return (uint32_t *)(0xFFFF'F000U + ((virt_addr >> 20) & 0x0000'0FFCU));
 }
 
-static inline uint32_t *get_pte(uint32_t virt_addr) {
-    return (uint32_t *)(0xFFC00000U + ((virt_addr >> 10) & 0x3FFFFCU));
+[[nodiscard]] static inline uint32_t *get_pte(uint32_t virt_addr) {
+    return (uint32_t *)(0xFFC0'0000U + ((virt_addr >> 10) & 0x003F'FFFCU));
 }
 
 uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) {
@@ -27,9 +27,9 @@ uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) 
     invalidate(0);
 
     /* Recursive page directory mapping */
-    uint32_t physical_dir_addr = (uint32_t)dir - KERNEL_VIRTUAL_ADDRESS;
+    auto physical_dir_addr = (uint32_t)dir - KERNEL_VIRTUAL_OFFSET;
     dir[1023] = (physical_dir_addr & PDE_FRAME) | PDE_PRESENT | PDE_RW;
-    invalidate(KERNEL_VIRTUAL_ADDRESS);
+    invalidate(KERNEL_VIRTUAL_OFFSET);
 
     __asm__ volatile("mov %0, %%cr3" ::"r"(physical_dir_addr) : "memory");
 
@@ -40,24 +40,24 @@ uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) 
     return physical_alloc_start;
 }
 
-bool vmm_map_page(uint32_t virt_addr, uint32_t phys_addr, uint32_t flags) {
+[[nodiscard]] bool vmm_map_page(uint32_t virt_addr, uint32_t phys_addr, uint32_t flags) {
     uint32_t *pde = get_pde(virt_addr);
 
     /* Check if the page table exists, if not, allocate a physical frame for it */
     if (!(*pde & PDE_PRESENT)) {
-        uint32_t new_table_phys = pmm_alloc_frame();
+        auto new_table_phys = pmm_alloc_frame();
         if (new_table_phys == 0)
             return false;
 
         *pde = (new_table_phys & PDE_FRAME) | PDE_PRESENT | PDE_RW | (flags & PDE_USER);
 
-        uint32_t *table_base = (uint32_t *)((uint32_t)get_pte(virt_addr) & ~0xFFFU);
+        uint32_t *table_base = (uint32_t *)((uint32_t)get_pte(virt_addr) & ~0x0000'0FFFU);
         invalidate((uint32_t)table_base);
         memset(table_base, 0, PAGE_SIZE);
     }
 
     uint32_t *pte = get_pte(virt_addr);
-    *pte = (phys_addr & PTE_FRAME) | (flags & 0xFFF) | PTE_PRESENT;
+    *pte = (phys_addr & PTE_FRAME) | (flags & 0x0000'0FFFU) | PTE_PRESENT;
     invalidate(virt_addr);
     return true;
 }
@@ -72,7 +72,7 @@ void vmm_unmap_page(uint32_t virt_addr) {
     invalidate(virt_addr);
 }
 
-uint32_t vmm_get_phys(uint32_t virt_addr) {
+[[nodiscard]] uint32_t vmm_get_phys(uint32_t virt_addr) {
     uint32_t *pde = get_pde(virt_addr);
     if (!(*pde & PDE_PRESENT))
         return 0;
@@ -81,5 +81,5 @@ uint32_t vmm_get_phys(uint32_t virt_addr) {
     if (!(*pte & PTE_PRESENT))
         return 0;
 
-    return (*pte & PTE_FRAME) + (virt_addr & 0xFFF);
+    return (*pte & PTE_FRAME) + (virt_addr & 0x0000'0FFFU);
 }

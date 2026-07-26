@@ -15,8 +15,8 @@ void irq_handler(struct registers *regs) {
     outb(0x20, 0x20);
     waitb(1);
 
-    if (isr_intr_handler[regs->intr_num] != 0) {
-        isr_t handler = isr_intr_handler[regs->intr_num];
+    if (isr_intr_handler[regs->intr_num] != nullptr) {
+        auto handler = isr_intr_handler[regs->intr_num];
         handler(regs);
     }
 }

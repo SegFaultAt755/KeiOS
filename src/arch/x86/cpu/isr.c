@@ -6,13 +6,14 @@
 #include "kernel/panic.h"
 #include "libkern/stdio.h"
 
-static inline uint32_t get_fault_addr(void) {
+[[nodiscard]] static inline uint32_t get_fault_addr() {
     uint32_t addr;
     __asm__ volatile("mov %%cr2, %0" : "=r"(addr));
     return addr;
 }
 
 isr_t isr_intr_handler[256];
+
 void intr_handler(uint8_t num, isr_t hld) {
     isr_intr_handler[num] = hld;
 }
@@ -44,11 +45,11 @@ static void double_fault_handler(struct registers *) {
 }
 
 static void page_fault_handler(struct registers *regs) {
-    int present = !(regs->err & 0x1);
-    int write = regs->err & 0x2;
-    int user = regs->err & 0x4;
-    int reserved = regs->err & 0x8;
-    int id = regs->err & 0x10;
+    auto present = !(regs->err & 0b0000'0001);
+    auto write = regs->err & 0b0000'0010;
+    auto user = regs->err & 0b0000'0100;
+    auto reserved = regs->err & 0b0000'1000;
+    auto id = regs->err & 0b0001'0000;
 
     KERNEL_PANIC_FORMAT("Page fault",
                         "Memory corrupted or failed to access to memory / "

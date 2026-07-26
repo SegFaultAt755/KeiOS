@@ -7,20 +7,22 @@
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
 
-static struct gdt_entry entries[6];
+constexpr size_t GDT_ENTRIES_COUNT = 6;
+
+static struct gdt_entry entries[GDT_ENTRIES_COUNT];
 static struct gdt_pointer ptr;
 
 extern void gdt_flush(uint32_t);
-extern void tss_flush(void);
+extern void tss_flush();
 
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran) {
-    entries[num].base_low = (base & 0xFFFF);
-    entries[num].base_middle = (base >> 16) & 0xFF;
-    entries[num].base_high = (base >> 24) & 0xFF;
+    entries[num].base_low = (base & 0xFFFFU);
+    entries[num].base_middle = (base >> 16) & 0xFFU;
+    entries[num].base_high = (base >> 24) & 0xFFU;
 
-    entries[num].limit_low = (limit & 0xFFFF);
-    entries[num].gran = (limit >> 16) & 0x0F;
-    entries[num].gran |= gran & 0xF0;
+    entries[num].limit_low = (limit & 0xFFFFU);
+    entries[num].gran = (limit >> 16) & 0x0FU;
+    entries[num].gran |= gran & 0xF0U;
     entries[num].access = access;
 }
 
@@ -31,10 +33,10 @@ void gdt_initialize() {
     disable_interrupts();
 
     gdt_set_gate(0, 0, 0, 0, 0);
-    gdt_set_gate(1, 0, 0xFFFFF, 0x9A, 0xCF);
-    gdt_set_gate(2, 0, 0xFFFFF, 0x92, 0xCF);
-    gdt_set_gate(3, 0, 0xFFFFF, 0xFA, 0xCF);
-    gdt_set_gate(4, 0, 0xFFFFF, 0xF2, 0xCF);
+    gdt_set_gate(1, 0, 0x000F'FFFFU, 0x9A, 0xCF);
+    gdt_set_gate(2, 0, 0x000F'FFFFU, 0x92, 0xCF);
+    gdt_set_gate(3, 0, 0x000F'FFFFU, 0xFA, 0xCF);
+    gdt_set_gate(4, 0, 0x000F'FFFFU, 0xF2, 0xCF);
     write_tss(0x10, 0x0);
 
     gdt_flush((uint32_t)&ptr);

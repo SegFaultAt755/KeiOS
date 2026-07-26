@@ -10,13 +10,13 @@ extern uint32_t _kernel_start;
 extern uint32_t _kernel_end;
 
 void memory_initialize(struct multiboot_info *mbi) {
-    uint32_t virtual_alloc_start = ((uint32_t)&_kernel_end + 0xFFFU) & ~0xFFFU;
-    uint32_t physical_alloc_start = virtual_alloc_start - (uint32_t)&_kernel_start;
+    auto virtual_alloc_start = ((uint32_t)&_kernel_end + 0x0000'0FFFU) & ~0x0000'0FFFU;
+    auto physical_alloc_start = virtual_alloc_start - (uint32_t)&_kernel_start;
 
     /* Check if multiboot modules exist, and adjust start pointer past them */
     if ((mbi->flags & (1U << 3)) && mbi->mods_count > 0) {
-        uint32_t first_mod_end = *(uint32_t *)(mbi->mods_addr + 4);
-        uint32_t aligned_mod_end = (first_mod_end + 0xFFFU) & ~0xFFFU;
+        auto first_mod_end = *(uint32_t *)(mbi->mods_addr + 4);
+        auto aligned_mod_end = (first_mod_end + 0x0000'0FFFU) & ~0x0000'0FFFU;
 
         if (aligned_mod_end > physical_alloc_start)
             physical_alloc_start = aligned_mod_end;
@@ -25,7 +25,7 @@ void memory_initialize(struct multiboot_info *mbi) {
     /* Determine upper memory bounds */
     uint64_t mem_high_point = 0;
     if (mbi->flags & (1U << 0))
-        mem_high_point = (uint64_t)mbi->mem_upper * 1024;
+        mem_high_point = (uint64_t)mbi->mem_upper * 1024U;
 
     if (mem_high_point > MAX_PHYSICAL_BYTES || mem_high_point == 0)
         mem_high_point = MAX_PHYSICAL_BYTES;
@@ -34,11 +34,11 @@ void memory_initialize(struct multiboot_info *mbi) {
                 physical_alloc_start, (uint32_t)mem_high_point);
 
     /* Initialize VMM & PMM */
-    uint32_t post_paging_free_mem_phys = vmm_initialize((uint32_t)mem_high_point, physical_alloc_start);
+    auto post_paging_free_mem_phys = vmm_initialize((uint32_t)mem_high_point, physical_alloc_start);
 
     /* Initialize Heap */
-    uint32_t heap_size = 1024 * 1024 * 4; /* 4MB initial size */
-    uint32_t post_paging_free_mem_virt = post_paging_free_mem_phys + (uint32_t)&_kernel_start;
+    constexpr uint32_t heap_size = 4'194'304; /* 4MB initial size */
+    auto post_paging_free_mem_virt = post_paging_free_mem_phys + (uint32_t)&_kernel_start;
 
     heap_initialize((void *)post_paging_free_mem_virt, heap_size);
 }
