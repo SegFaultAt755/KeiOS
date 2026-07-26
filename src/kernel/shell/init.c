@@ -24,7 +24,7 @@ static const struct builtin_cmd builtins[] = {
     {"datetime", cmd_datetime, nullptr}, {nullptr, nullptr, nullptr},
 };
 
-static void shell_print_prompt(void) {
+static void shell_print_prompt() {
     kprintf("$ ");
 }
 
@@ -38,12 +38,12 @@ static void shell_execute(const char *line) {
     char buf[SHELL_INPUT_BUF_SIZE];
     strcpy(buf, line);
 
-    char *cmd = strtok(buf, " ");
+    auto cmd = strtok(buf, " ");
     if (!cmd)
         return;
 
     const char *args = nullptr;
-    const char *rest = line + strlen(cmd);
+    auto rest = line + strlen(cmd);
 
     while (*rest == ' ')
         rest++;
@@ -51,7 +51,7 @@ static void shell_execute(const char *line) {
     if (*rest != '\0')
         args = rest;
 
-    for (int i = 0; builtins[i].name != nullptr; i++) {
+    for (auto i = 0; builtins[i].name != nullptr; i++) {
         if (strcmp(cmd, builtins[i].name) == 0) {
             if (builtins[i].handler_args) {
                 builtins[i].handler_args(args);
@@ -72,7 +72,7 @@ static void shell_execute(const char *line) {
     cmd_help();
 }
 
-static void shell_clear_current_line(void) {
+static void shell_clear_current_line() {
     while (input_pos < input_len) {
         terminal_cursor_right();
         input_pos++;
@@ -109,7 +109,7 @@ void shell_key_handler(uint16_t key) {
         input_buffer[input_len] = '\0';
 
         if (input_len > 0) {
-            int save_idx = history_count % SHELL_HISTORY_MAX;
+            auto save_idx = history_count % SHELL_HISTORY_MAX;
             strcpy(history_buffer[save_idx], input_buffer);
 
             history_count++;
@@ -125,7 +125,7 @@ void shell_key_handler(uint16_t key) {
     } else if (key == '\b') {
         if (input_pos > 0) {
             /* Shift buffer left to erase character at input_pos - 1 */
-            for (int i = input_pos - 1; i < input_len; i++)
+            for (auto i = input_pos - 1; i < input_len; i++)
                 input_buffer[i] = input_buffer[i + 1];
 
             input_pos--;
@@ -135,14 +135,14 @@ void shell_key_handler(uint16_t key) {
             terminal_cursor_left();
 
             /* Redraw tail of the string */
-            for (int i = input_pos; i < input_len; i++)
+            for (auto i = input_pos; i < input_len; i++)
                 terminal_putchar(input_buffer[i]);
 
             /* Overwrite old trailing character on screen with a whitespace */
             terminal_putchar(' ');
 
             /* Return visual cursor back to the deletion point */
-            for (int i = input_pos; i <= input_len; i++)
+            for (auto i = input_pos; i <= input_len; i++)
                 terminal_cursor_left();
         }
 
@@ -159,7 +159,7 @@ void shell_key_handler(uint16_t key) {
         }
 
     } else if (key == KEY_UP) {
-        int min_idx = (history_count > SHELL_HISTORY_MAX) ? (history_count - SHELL_HISTORY_MAX) : 0;
+        auto min_idx = (history_count > SHELL_HISTORY_MAX) ? (history_count - SHELL_HISTORY_MAX) : 0;
         if (history_count > 0 && history_index > min_idx) {
             history_index--;
             shell_set_current_line(history_buffer[history_index % SHELL_HISTORY_MAX]);
@@ -177,7 +177,7 @@ void shell_key_handler(uint16_t key) {
 
     } else if (key >= 32 && key <= 126 && input_len < SHELL_INPUT_BUF_SIZE - 1) {
         /* Shift buffer right from input_pos to make room for insertion */
-        for (int i = input_len; i > input_pos; i--)
+        for (auto i = input_len; i > input_pos; i--)
             input_buffer[i] = input_buffer[i - 1];
 
         input_buffer[input_pos] = (char)key;
@@ -186,16 +186,16 @@ void shell_key_handler(uint16_t key) {
         input_buffer[input_len] = '\0';
 
         /* Redraw from inserted character to end of string */
-        for (int i = input_pos - 1; i < input_len; i++)
+        for (auto i = input_pos - 1; i < input_len; i++)
             terminal_putchar(input_buffer[i]);
 
         /* Return visual cursor back to insertion position */
-        for (int i = input_len; i > input_pos; i--)
+        for (auto i = input_len; i > input_pos; i--)
             terminal_cursor_left();
     }
 }
 
-void shell_initialize(void) {
+void shell_initialize() {
     ps2_set_key_callback(shell_key_handler);
     shell_print_prompt();
 }

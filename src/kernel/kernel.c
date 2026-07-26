@@ -2,11 +2,13 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
+
 #include "drivers/display.h"
 #include "drivers/pit.h"
 #include "drivers/ps2.h"
 #include "drivers/sleep.h"
 #include "drivers/terminal.h"
+
 #include "kernel/graphics.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
@@ -44,7 +46,7 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
                 mod->size, mod->cmdline);
 }
 
-static void show_banner(void);
+static void show_banner();
 
 [[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
     /* Initialize kernel */
@@ -56,7 +58,7 @@ static void show_banner(void);
     pit_initialize(1193, pit_callback);
 
     /* Parse multiboot */
-    uint32_t multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, NULL);
+    auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
     qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: 0x%x, flags: %d, count: %d)", mbi, mbi->flags,
                 multiboot_mods_count);
 
@@ -69,7 +71,7 @@ static void show_banner(void);
     /* Enabling interrupts */
     enable_interrupts();
 
-    int graphics = get_graphics_type(mbi);
+    auto graphics = get_graphics_type(mbi);
     if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
         /* Initialize VGA text mode */
         vga_init_text();
@@ -91,17 +93,17 @@ static void show_banner(void);
         info.pitch = mbi->framebuffer_pitch;
         info.bpp = mbi->framebuffer_bpp;
 
-        uint32_t phys_addr = (uint32_t)mbi->framebuffer_addr;
-        uint32_t virt_addr = 0xE0000000;
-        uint32_t fbo_size = info.pitch * info.height;
+        auto phys_addr = (uint32_t)mbi->framebuffer_addr;
+        constexpr uint32_t virt_addr = 0xE0000000;
+        auto fbo_size = info.pitch * info.height;
 
         qemu_printf(QEMU_DRV, QEMU_INFO, "Framebuffer address info: (physical: 0x%x, virtual: 0x%x, FBO size: %d)",
                     phys_addr, virt_addr, fbo_size);
 
-        bool map_success = true;
+        auto map_success = true;
 
         /* Loop through the entire size of the framebuffer and map it page by page */
-        for (uint32_t offset = 0; offset < fbo_size; offset += PAGE_SIZE) {
+        for (auto offset = 0u; offset < fbo_size; offset += PAGE_SIZE) {
             if (!vmm_map_page(virt_addr + offset, phys_addr + offset, PTE_PRESENT | PTE_RW | PTE_PWT)) {
                 map_success = false;
                 break;
@@ -116,7 +118,7 @@ static void show_banner(void);
         info.lfb_addr = (uint32_t *)virt_addr;
 
         display_initialize(info);
-        display_clear(0x00141414);
+        display_clear(0x00'14'14'14);
     }
 
     /* Infinite loop to prevent CPU fault */
@@ -128,20 +130,21 @@ halt:
     }
 }
 
-static void show_banner(void) {
+static void show_banner() {
     const char *banner[] = {" _  __        _   ___    ____", "| |/ /  ___  (_) / _ \\  / ___|",
                             "| ' /  / _ \\ | || | | | \\__ \\", "| . \\ |  __/ | || |_| | ___) |",
                             "|_|\\_\\ \\___| |_| \\___/ |____/"};
 
-    enum vga_8b_colors rainbow[] = {VGA_8B_LIGHT_RED,   VGA_8B_LIGHT_BROWN, /* VGA equivalent to
-                                                                               orange/yellow */
-                                    VGA_8B_LIGHT_GREEN, VGA_8B_LIGHT_CYAN,  VGA_8B_LIGHT_BLUE, VGA_8B_LIGHT_MAGENTA};
+    const enum vga_8b_colors rainbow[] = {VGA_8B_LIGHT_RED,    VGA_8B_LIGHT_BROWN, /* VGA equivalent to
+                                                                                                 orange/yellow */
+                                          VGA_8B_LIGHT_GREEN,  VGA_8B_LIGHT_CYAN,  VGA_8B_LIGHT_BLUE,
+                                          VGA_8B_LIGHT_MAGENTA};
 
-    for (int row = 0; row < 5; row++) {
-        for (int col = 0; banner[row][col] != '\0'; col++) {
+    for (auto row = 0; row < 5; row++) {
+        for (auto col = 0; banner[row][col] != '\0'; col++) {
             /* Calculate the diagonal rainbow color */
-            int color_idx = (row + col) % 5;
-            uint8_t color = vga_entry_color(rainbow[color_idx], TERMINAL_DEFAULT_BG);
+            auto color_idx = (row + col) % 5;
+            auto color = vga_entry_color(rainbow[color_idx], TERMINAL_DEFAULT_BG);
 
             terminal_set_color(color);
             char ch_str[2] = {banner[row][col], '\0'};
@@ -151,9 +154,9 @@ static void show_banner(void) {
         terminal_blankline();
     }
 
-    uint8_t default_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
+    auto default_color = vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
     terminal_set_color(default_color);
 
-    for (uint8_t i = 0; i < 5; i++)
+    for (auto i = 0u; i < 5u; i++)
         terminal_blankline();
 }

@@ -16,7 +16,7 @@
 #include "libkern/stdio.h"
 #include "libkern/string.h"
 
-void cmd_help(void) {
+void cmd_help() {
     kprintf("Available commands:\n");
     kprintf("\thelp      Show this help message\n");
     kprintf("\tclear     Clear the screen\n");
@@ -30,7 +30,7 @@ void cmd_help(void) {
     kprintf("\thalt      Halt the CPU\n");
 }
 
-void cmd_clear(void) {
+void cmd_clear() {
     terminal_clear();
 }
 
@@ -42,25 +42,25 @@ void cmd_echo(const char *args) {
     }
 }
 
-void cmd_ver(void) {
+void cmd_ver() {
     kprintf("KeiOS %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 }
 
-void cmd_uptime(void) {
-    int secs = pit_ticks / 1000;
-    int mins = secs / 60;
-    int hours = mins / 60;
+void cmd_uptime() {
+    auto secs = pit_ticks / 1000;
+    auto mins = secs / 60;
+    auto hours = mins / 60;
 
     kprintf("%d:%02d:%02d.%03d\n", hours, mins % 60, secs % 60, pit_ticks % 1000);
 }
 
-void cmd_meminfo(void) {
+void cmd_meminfo() {
     extern uint32_t _kernel_start;
     extern uint32_t _kernel_end;
 
-    uint32_t start = (uint32_t)&_kernel_start;
-    uint32_t end = (uint32_t)&_kernel_end;
-    uint32_t size = end - start;
+    auto start = (uint32_t)&_kernel_start;
+    auto end = (uint32_t)&_kernel_end;
+    auto size = end - start;
 
     kprintf("System Memory Information:\n");
     kprintf("  Kernel Start: 0x%08x\n", start);
@@ -77,7 +77,7 @@ void cmd_color(const char *args) {
         return;
     }
 
-    int color = -1;
+    auto color = -1;
 
     if (strcmp(args, "blue") == 0)
         color = 1;
@@ -110,8 +110,8 @@ void cmd_color(const char *args) {
     else if (strcmp(args, "lwhite") == 0)
         color = 15;
     else {
-        bool is_num = true;
-        for (int i = 0; args[i] != '\0'; i++) {
+        auto is_num = true;
+        for (auto i = 0; args[i] != '\0'; i++) {
             if (args[i] < '0' || args[i] > '9') {
                 is_num = false;
                 break;
@@ -137,18 +137,18 @@ void cmd_color(const char *args) {
     terminal_set_color((uint8_t)color);
 }
 
-void cmd_datetime(void) {
-    uint8_t sec = bcd_to_binary(read_cmos_reg(CMOS_SEC));
-    uint8_t min = bcd_to_binary(read_cmos_reg(CMOS_MIN));
-    uint8_t hour = bcd_to_binary(read_cmos_reg(CMOS_HOUR));
-    uint8_t day = bcd_to_binary(read_cmos_reg(CMOS_DAY));
-    uint8_t month = bcd_to_binary(read_cmos_reg(CMOS_MONTH));
-    uint8_t year = bcd_to_binary(read_cmos_reg(CMOS_YEAR));
+void cmd_datetime() {
+    auto sec = bcd_to_binary(read_cmos_reg(CMOS_SEC));
+    auto min = bcd_to_binary(read_cmos_reg(CMOS_MIN));
+    auto hour = bcd_to_binary(read_cmos_reg(CMOS_HOUR));
+    auto day = bcd_to_binary(read_cmos_reg(CMOS_DAY));
+    auto month = bcd_to_binary(read_cmos_reg(CMOS_MONTH));
+    auto year = bcd_to_binary(read_cmos_reg(CMOS_YEAR));
 
     kprintf("20%02d-%02d-%02d %02d:%02d:%02d\n", year, month, day, hour, min, sec);
 }
 
-void cmd_reboot(void) {
+void cmd_reboot() {
     kprintf("Rebooting...\n");
     reboot();
 
@@ -158,7 +158,7 @@ void cmd_reboot(void) {
     }
 }
 
-void cmd_halt(void) {
+void cmd_halt() {
     kprintf("Halting CPU...\n");
 
     while (true) {

@@ -4,19 +4,19 @@
 #include "kernel/qemu.h"
 
 #include "config.h"
-#include "drivers/pit.h"
 #include "drivers/cmos.h"
+#include "drivers/pit.h"
 #include "libkern/bcd.h"
 #include "libkern/string.h"
 
 #include <stddef.h>
 
 static void qemu_print(const char *s) {
-    for (size_t i = 0; i < strlen(s); i++)
+    for (auto i = 0u; i < strlen(s); i++)
         qemu_putchar(s[i]);
 }
 
-static void qemu_print_time(void) {
+static void qemu_print_time() {
     char buf[1024] = {};
     ksnprintf(buf, sizeof(buf), "[ %d.%d ] ", (uint32_t)(pit_ticks / 1000), (uint32_t)(pit_ticks % 1000));
 
@@ -67,7 +67,7 @@ void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt,
     }
 
     va_list args;
-    va_start(args, fmt);
+    va_start(args);
 
     char buf[1024] = {};
     kvsnprintf(buf, sizeof(buf), fmt, args);

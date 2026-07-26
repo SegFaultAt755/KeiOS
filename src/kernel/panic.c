@@ -5,6 +5,7 @@
 
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
+
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
@@ -51,12 +52,13 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
         terminal_writestring("0");
     } else {
         char buf[12];
-        int i = 10;
+        auto i = 10;
         buf[11] = '\0';
         while (line > 0 && i >= 0) {
-            buf[i--] = (line % 10) + '0';
+            buf[i--] = (char)((line % 10) + '0');
             line /= 10;
         }
+
         terminal_writestring(&buf[i + 1]);
     }
 
@@ -67,20 +69,20 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
 [[noreturn]] void runtime_panic_format(const char *reason, const char *desc, const char *file, uint32_t line, ...) {
     disable_interrupts();
-    char fmt_desc[1024];
+    char fmt_desc[1024] = {};
 
     va_list args;
-    va_start(args, line);
+    va_start(args);
     kvsnprintf(fmt_desc, sizeof(fmt_desc), desc, args);
     va_end(args);
 
     runtime_panic(reason, fmt_desc, file, line);
 }
 
-[[noreturn]] void __stack_chk_fail(void) {
+[[noreturn]] void __stack_chk_fail() {
     runtime_panic("Kernel stack smashed", "Buffer overflow detected", __FILE__, __LINE__);
 }
 
-[[noreturn]] void __stack_chk_fail_local(void) {
+[[noreturn]] void __stack_chk_fail_local() {
     __stack_chk_fail();
 }

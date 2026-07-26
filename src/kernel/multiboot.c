@@ -15,10 +15,10 @@ uint32_t multiboot_parse_modules(struct multiboot_info *mbi, multiboot_module_ca
     if (!multiboot_has_modules(mbi) || mbi->mods_count == 0)
         return 0;
 
-    struct multiboot_module *modules = (struct multiboot_module *)(uintptr_t)mbi->mods_addr;
+    auto modules = (struct multiboot_module *)(uintptr_t)mbi->mods_addr;
 
-    for (uint32_t i = 0; i < mbi->mods_count; i++) {
-        struct multiboot_module *mod = &modules[i];
+    for (auto i = 0u; i < mbi->mods_count; i++) {
+        auto mod = &modules[i];
 
         if (callback) {
             struct multiboot_parsed_module parsed;

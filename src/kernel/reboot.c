@@ -21,7 +21,7 @@ void reboot_raw() {
     /* outb(0xCF9, 0x06); */
 
     /* Try via fast reset */
-    uint8_t val = inb(0x92);
+    auto val = inb(0x92);
     outb(0x92, val | 0x01);
 
     /* Final option */
