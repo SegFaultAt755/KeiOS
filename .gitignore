@@ -3,6 +3,7 @@
 /keios
 /.venv
 /.vscode
+/*.code-workspace
 /**/*.iso
 /**/*.img
 /**/*.elf
