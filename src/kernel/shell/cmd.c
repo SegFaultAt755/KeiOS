@@ -51,7 +51,7 @@ void cmd_uptime() {
     auto mins = secs / 60;
     auto hours = mins / 60;
 
-    kprintf("%d:%02d:%02d.%03d\n", hours, mins % 60, secs % 60, pit_ticks % 1000);
+    kprintf("%02ld:%02d:%02d.%03d\n", hours, (uint8_t)(mins % 60), (uint8_t)(secs % 60), (uint16_t)(pit_ticks % 1000));
 }
 
 void cmd_meminfo() {
