@@ -42,6 +42,13 @@ static inline void tick_wait(uint32_t ms) {
     pit_ticks += ms;
 }
 
+void cpio_callback_function(
+    const char *name, struct cpio_header header,
+    const uint8_t *data, size_t data_len, void *user_context
+) {
+    qemu_printf(QEMU_KERN, QEMU_INFO, "CPIO: Got a file '%s' with length %d", name, data_len);
+}
+
 static void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
     qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
                 mod->size, mod->cmdline);
@@ -58,7 +65,8 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
             KERNEL_PANIC("CPIO Parser", "Failed to initialize CPIO parser");
         }
 
-        qemu_printf(QEMU_DRV, QEMU_OK, "CPIO parser initialized");
+        cpio_parse(cpio_callback_function, nullptr);
+        qemu_printf(QEMU_DRV, QEMU_OK, "CPIO archive parsed");
     }
 }
 
@@ -70,14 +78,13 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
     idt_initialize();
     tick_wait(1);
     pit_initialize(1193, pit_callback);
-
-    /* Parse multiboot */
-    auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi, mbi->flags,
-                multiboot_mods_count);
-
     memory_initialize(mbi);
     initialize_cpu_features();
+
+    /* Parse multiboot */
+    // auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
+    // qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi, mbi->flags,
+    //             multiboot_mods_count);
 
     /* Kernel level drivers */
     ps2_initialize();
