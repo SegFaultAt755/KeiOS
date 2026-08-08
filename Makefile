@@ -13,11 +13,12 @@ LD := $(TOOLCHAIN_PREFIX)ld
 -include config.mk
 
 # Directory configuration
-BIN_DIR := bin
-ISO_DIR := keios
-INC_DIR := include
-SRC_DIR := src
-FS_DIR  := rootfs
+BIN_DIR  := bin
+ISO_DIR  := keios
+INC_DIR  := include
+SRC_DIR  := src
+FS_DIR   := rootfs
+USER_DIR := userspace
 
 # Target files
 LDSCRIPT  := linker.ld
