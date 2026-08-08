@@ -3,9 +3,7 @@ ASFLAGS = -f elf32
 
 SRC = main
 PROG_NAME = simplest_bin
-
-# Hardcoded path, and it must be called from the project's root to avoid errors
-OUT_DIR = bin/userspace/$(PROG_NAME)
+OUT_DIR ?= ../../bin/userspace/$(PROG_NAME)
 
 default: all
 

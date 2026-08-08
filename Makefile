@@ -64,7 +64,7 @@ OBJS := $(C_OBJS) $(ASM_OBJS) $(RUST_LIBS)
 DEPS := $(C_OBJS:.o=.d) $(ASM_OBJS:.o=.d)
 
 # Build rules
-.PHONY: all clean config help
+.PHONY: all clean config help userspace FORCE_RUST
 
 all: $(ISO_IMAGE)
 
@@ -74,9 +74,9 @@ $(ISO_IMAGE): $(KERNEL) grub.cfg $(CPIO)
 	@$(call CP,grub.cfg,$(ISO_DIR)/boot/grub/grub.cfg)
 	@$(call CP,$(KERNEL),$(ISO_DIR)/boot/$(notdir $(KERNEL)))
 	@$(call CP,$(CPIO),$(ISO_DIR)/boot/$(notdir $(CPIO)))
-	@grub-mkrescue -o $@ $(ISO_DIR) 2>/dev/null || (echo "Error: grub-mkrescue failed." && false)
+	@grub-mkrescue -o $@ $(ISO_DIR)
 
-$(CPIO):
+$(CPIO): userspace
 	@echo ">>> [IO]  Generating rootfs file: $@"
 	@cd $(FS_DIR) && find . -print0 | cpio --null -o --format=newc > ../$(CPIO)
 
@@ -94,7 +94,7 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.asm
 	@$(call MKDIR,$(dir $@))
 	@$(AS) $(ASFLAGS) $< -o $@
 
-$(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a:
+$(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a: FORCE_RUST
 	@echo ">>> [RS]  Compiling Rust crate: $*"
 	@cd $(RUST_DIR) && cargo build --release -p $*
 
@@ -113,14 +113,25 @@ else
 	@echo ">>> NOTE: To reset all data, first delete the configuration file and re-run 'make config'"
 endif
 
+userspace:
+	@echo ">>> [USER] Building userspace programs..."
+	@$(call MKDIR,$(FS_DIR)/bin)
+	@for dir in $(wildcard $(USER_DIR)/*/); do \
+		$(MAKE) -C $$dir --no-print-directory OUT_DIR=$(CURDIR)/$(BIN_DIR)/$$dir; \
+		find $(CURDIR)/$(BIN_DIR)/$$dir -maxdepth 1 -type f \
+			\( -name "*.elf" -o -name "*.bin" -o -name "*.com" -o -name "*.exe" \) \
+			-exec cp {} $(FS_DIR)/bin/ \; 2>/dev/null || true; \
+	done
+
 clean:
 	@echo ">>> [CLEAN] Removing build directories..."
 	@$(call RM_RF,$(BIN_DIR))
 	@$(call RM_RF,$(ISO_DIR))
+	@$(call RM_RF,$(FS_DIR)/bin)
 	@$(call RM_F,$(ISO_IMAGE))
 	@$(call RM_F,$(KERNEL))
 	@$(call RM_F,$(CPIO))
-	@if [ -d "$(RUST_DIR)" ]; then cd $(RUST_DIR) && cargo clean; fi
+	@if [ -d "$(RUST_DIR)" ]; then cd $(RUST_DIR) && cargo clean --quiet; fi
 
 help:
 	@echo "KeiOS Build System"
