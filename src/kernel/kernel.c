@@ -33,6 +33,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+uint8_t *exec_init = nullptr;
+
 static inline void pit_callback(struct registers *) {
     pit_ticks += 1;
 }
@@ -43,10 +45,13 @@ static inline void tick_wait(uint32_t ms) {
 }
 
 void cpio_callback_function(
-    const char *name, struct cpio_header header,
-    const uint8_t *data, size_t data_len, void *user_context
+    const char *name, [[maybe_unused]] struct cpio_header header,
+    const uint8_t *data, [[maybe_unused]] size_t data_len, [[maybe_unused]] void *user_context
 ) {
-    qemu_printf(QEMU_KERN, QEMU_INFO, "CPIO: Got a file '%s' with length %d", name, data_len);
+    const char *exec_name = "bin/main.elf";
+    if (strcmp(name, exec_name) == 0) {
+        exec_init = (uint8_t *)data;
+    }
 }
 
 static void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
@@ -86,7 +91,7 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
     memory_initialize(mbi);
     initialize_cpu_features();
 
-    // Parse CPIO later
+    /* Parse CPIO */
     cpio_parse(cpio_callback_function, nullptr);
 
     /* Kernel level drivers */
@@ -95,6 +100,11 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
     /* Enabling interrupts */
     enable_interrupts();
 
+    /* Load first user program */
+    if (exec_init == nullptr)
+        KERNEL_PANIC("No initial executable", "Initial executable data pointer is null, maybe failed to parse it from CPIO archive");
+
+#if 0
     /* Initialize graphics */
     auto graphics = graphics_initialize(mbi);
 
@@ -102,6 +112,7 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
     if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
         shell_initialize();
     }
+#endif
 
     /* Infinite loop to prevent CPU fault */
     goto halt;
