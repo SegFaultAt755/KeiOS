@@ -64,27 +64,30 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
             qemu_printf(QEMU_DRV, QEMU_PANIC, "Failed to initialize CPIO parser");
             KERNEL_PANIC("CPIO Parser", "Failed to initialize CPIO parser");
         }
-
-        cpio_parse(cpio_callback_function, nullptr);
-        qemu_printf(QEMU_DRV, QEMU_OK, "CPIO archive parsed");
     }
 }
 
-[[noreturn]] void kernel_entry(uint32_t, struct multiboot_info *mbi) {
+[[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *mbi) {
+    if (magic != 0x2BADB002) {
+        disable_interrupts();
+        halt();
+    }
+
     /* Initialize kernel */
-    tick_wait(1); /* Manually freeze the execution for better debugging experience */
     gdt_initialize();
-    tick_wait(1);
     idt_initialize();
-    tick_wait(1);
     pit_initialize(1193, pit_callback);
+
+    /* Parse multiboot */
+    auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi, mbi->flags,
+                multiboot_mods_count);
+
     memory_initialize(mbi);
     initialize_cpu_features();
 
-    /* Parse multiboot */
-    // auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
-    // qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi, mbi->flags,
-    //             multiboot_mods_count);
+    // Parse CPIO later
+    cpio_parse(cpio_callback_function, nullptr);
 
     /* Kernel level drivers */
     ps2_initialize();

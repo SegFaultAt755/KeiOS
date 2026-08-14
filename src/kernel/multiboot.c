@@ -22,8 +22,8 @@ uint32_t multiboot_parse_modules(struct multiboot_info *mbi, multiboot_module_ca
 
         if (callback) {
             struct multiboot_parsed_module parsed;
-            parsed.start_addr = (const void *)(uintptr_t)mod->mod_start;
-            parsed.end_addr = (const void *)(uintptr_t)mod->mod_end;
+            parsed.start_addr = (const void *)(uintptr_t)mod->mod_start + 0xC0000000;
+            parsed.end_addr = (const void *)(uintptr_t)mod->mod_end + 0xC0000000;
             parsed.size = (size_t)(mod->mod_end - mod->mod_start);
             parsed.cmdline = mod->cmdline ? (const char *)(uintptr_t)mod->cmdline : "";
 

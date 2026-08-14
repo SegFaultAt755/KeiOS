@@ -54,6 +54,7 @@ higher:
     push eax
     xor ebp, ebp
 
+    cli
     extern kernel_entry
     call kernel_entry
 
