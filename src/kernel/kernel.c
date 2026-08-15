@@ -15,6 +15,7 @@
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "kernel/shell/shell.h"
+#include "kernel/userspace/enter.h"
 
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/features.h"
@@ -34,6 +35,7 @@
 #include <stdint.h>
 
 uint8_t *exec_init = nullptr;
+uint32_t exec_init_size = 0;
 
 static inline void pit_callback(struct registers *) {
     pit_ticks += 1;
@@ -52,6 +54,7 @@ void cpio_callback_function(const char *name, [[maybe_unused]] struct cpio_heade
     const char *exec_name = "bin/test_c_bin.bin"; /* Akward dahh name */
     if (strcmp(name, exec_name) == 0) {
         exec_init = (uint8_t *)data;
+        exec_init_size = data_len;
     }
 }
 
@@ -102,13 +105,12 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
     enable_interrupts();
 
     /* Load first user program */
-    if (exec_init == nullptr)
+    if (exec_init == nullptr || exec_init_size == 0)
         KERNEL_PANIC("No initial executable",
                      "Initial executable data pointer is null, maybe failed to parse it from CPIO archive");
 
-    // Setup registers
-    // Long jump
-    
+    execute_init_binary(exec_init, exec_init_size);
+
 #if 0
     /* Initialize graphics */
     auto graphics = graphics_initialize(mbi);
