@@ -44,11 +44,12 @@ static inline void tick_wait(uint32_t ms) {
     pit_ticks += ms;
 }
 
-void cpio_callback_function(
-    const char *name, [[maybe_unused]] struct cpio_header header,
-    const uint8_t *data, [[maybe_unused]] size_t data_len, [[maybe_unused]] void *user_context
-) {
-    const char *exec_name = "bin/main.elf";
+void cpio_callback_function(const char *name, [[maybe_unused]] struct cpio_header header, const uint8_t *data,
+                            [[maybe_unused]] size_t data_len, [[maybe_unused]] void *user_context) {
+    if (data_len != 0) /* Skip directories */
+        qemu_printf(QEMU_KERN, QEMU_INFO, "[CPIO] Found a file: (name: %s, size: %d)", name, data_len);
+    
+    const char *exec_name = "bin/test_c_bin.bin"; /* Akward dahh name */
     if (strcmp(name, exec_name) == 0) {
         exec_init = (uint8_t *)data;
     }
@@ -102,8 +103,12 @@ static void module_callback(struct multiboot_parsed_module *mod, uint32_t index,
 
     /* Load first user program */
     if (exec_init == nullptr)
-        KERNEL_PANIC("No initial executable", "Initial executable data pointer is null, maybe failed to parse it from CPIO archive");
+        KERNEL_PANIC("No initial executable",
+                     "Initial executable data pointer is null, maybe failed to parse it from CPIO archive");
 
+    // Setup registers
+    // Long jump
+    
 #if 0
     /* Initialize graphics */
     auto graphics = graphics_initialize(mbi);
