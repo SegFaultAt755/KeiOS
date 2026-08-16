@@ -1,3 +1,6 @@
+; SPDX-License-Identifier: GPLv3
+; Copyright (C) 2026 KeiOS Developers
+
 global jump_to_user
 
 jump_to_user:

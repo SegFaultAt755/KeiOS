@@ -7,5 +7,5 @@
 #include "drivers/sleep.h"
 #include "drivers/pit.h"
 
-void pit_callback(struct registers *);
+void pit_cb(struct registers *regs);
 void tick_wait(uint32_t ms);

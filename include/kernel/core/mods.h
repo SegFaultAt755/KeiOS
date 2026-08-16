@@ -4,5 +4,6 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "kernel/multiboot.h"
+#include <stdint.h>
 
-void memory_initialize(struct multiboot_info *mbi);
+void mod_cb(struct multiboot_parsed_module *mod, uint32_t idx, void *ctx);

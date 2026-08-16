@@ -6,11 +6,15 @@
 #include <stdint.h>
 #include "kernel/multiboot.h"
 
-#define PAGE_SIZE          4096
-#define PAGE_TABLE_ENTRIES 1024
+#define PAGE_SIZE          4096U
+#define PAGE_TABLE_ENTRIES 1024U
+#define PAGE_MASK          (PAGE_SIZE - 1U)
 #define MAX_PHYSICAL_BYTES 0x1000'0000'0ULL /* 4GB */
 
+#define KERNEL_LOAD_ADDR      0x0010'0000U
 #define KERNEL_VIRTUAL_OFFSET 0xC000'0000U
+
+#define KERNEL_PAGE_ALIGN(value) (((value) + PAGE_MASK) & ~PAGE_MASK)
 
 /* Paging flags */
 #define PTE_PRESENT  (1U << 0)   /* Present, is loaded in memory */

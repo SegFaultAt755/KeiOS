@@ -27,10 +27,10 @@
 #error "Unsupported architecture! (i386 is available)"
 #endif
 
-#include "kernel/core/initramfs.h"
-#include "kernel/core/multiboot_modules.h"
-#include "kernel/core/time_handler.h"
-#include "kernel/core/memory_init.h"
+#include "kernel/core/cpio.h"
+#include "kernel/core/mem.h"
+#include "kernel/core/mods.h"
+#include "kernel/core/time.h"
 
 extern uint32_t _kernel_start;
 
@@ -39,36 +39,35 @@ extern uint32_t _kernel_start;
         goto halt;
 
     /* Early initialization */
-    gdt_initialize();
+    gdt_init();
     idt_initialize();
     initialize_cpu_features();
 
     /* Memory */
-    struct multiboot_info *mbi_virtual = mbi;
+    struct multiboot_info *mbi_virt = mbi;
     if ((uintptr_t)mbi < KERNEL_VIRTUAL_OFFSET)
-        mbi_virtual = (struct multiboot_info *)((uintptr_t)mbi + KERNEL_VIRTUAL_OFFSET);
+        mbi_virt = (struct multiboot_info *)((uintptr_t)mbi + KERNEL_VIRTUAL_OFFSET);
 
-    memory_initialize(mbi_virtual);
+    mem_init(mbi_virt);
 
     /* Hardware and drivers */
-    pit_initialize(1193, pit_callback);
+    pit_initialize(1193, pit_cb);
     ps2_initialize();
 
     /* Modules and filesystem */
-    auto multiboot_mods_count = multiboot_parse_modules(mbi_virtual, module_callback, nullptr);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi_virtual, mbi_virtual->flags,
-                multiboot_mods_count);
-    
-    cpio_parse(cpio_callback_function, nullptr);
+    const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
+
+    cpio_parse(cpio_cb, nullptr);
 
     /* Handoff */
     enable_interrupts();
 
     if (exec_init == nullptr || exec_init_size == 0)
-        KERNEL_PANIC("No initial executable",
-                     "Initial executable data pointer is null");
+        KERNEL_PANIC("No initial executable", "Initial executable pointer is null");
 
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Handoff initial executable: (address: %p, size: %d bytes)", exec_init, exec_init_size);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Handing off initial executable: addr=%p size=%u bytes", exec_init,
+                exec_init_size);
     execute_init_binary(exec_init, exec_init_size);
 
     /* Fallback */

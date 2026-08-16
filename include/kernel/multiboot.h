@@ -123,7 +123,7 @@ struct multiboot_parsed_module {
     const char *cmdline;
 };
 
-typedef void (*multiboot_module_callback_t)(struct multiboot_parsed_module *mod, uint32_t index, void *data);
+typedef void (*multiboot_module_callback_t)(struct multiboot_parsed_module *mod, uint32_t idx, void *data);
 
-bool multiboot_has_modules(struct multiboot_info *mbi);
-uint32_t multiboot_parse_modules(struct multiboot_info *mbi, multiboot_module_callback_t callback, void *data);
+[[nodiscard]] bool mb_has_mods(struct multiboot_info *mbi);
+[[nodiscard]] uint32_t mb_parse_mods(struct multiboot_info *mbi, multiboot_module_callback_t cb, void *data);

@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include "kernel/core/time_handler.h"
+#include "kernel/core/time.h"
 
-void pit_callback(struct registers *) {
+void pit_cb([[maybe_unused]] struct registers *regs) {
     pit_ticks += 1;
 }
 

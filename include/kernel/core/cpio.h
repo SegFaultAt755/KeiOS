@@ -10,4 +10,4 @@
 extern uint8_t *exec_init;
 extern uint32_t exec_init_size;
 
-void cpio_callback_function(const char *name, struct cpio_header header, const uint8_t *data, size_t data_len, void *user_context);
+void cpio_cb(const char *name, struct cpio_header hdr, const uint8_t *data, size_t data_len, void *ctx);

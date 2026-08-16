@@ -17,57 +17,54 @@ static void qemu_print(const char *s) {
 }
 
 static void qemu_print_time() {
-    char buf[1024] = {};
-    ksnprintf(buf, sizeof(buf), "[ %lu.%u ] ", (uint64_t)(pit_ticks / 1000), (uint32_t)(pit_ticks % 1000));
-
+    char buf[128] = {};
+    ksnprintf(buf, sizeof(buf), "[ %lu.%03u ] ", (uint64_t)(pit_ticks / 1000), (uint32_t)(pit_ticks % 1000));
     qemu_print(buf);
 }
 
-void qemu_printf(enum qemu_category cat, enum qemu_level level, const char *fmt, ...) {
-    qemu_print_time();
-
+static const char *qemu_cat_name(enum qemu_category cat) {
     switch (cat) {
-    case QEMU_CPU: {
-        qemu_print("[CPU ] ");
-    } break;
-    case QEMU_MEM: {
-        qemu_print("[MEM ] ");
-    } break;
-    case QEMU_ARCH: {
-        qemu_print("[ARCH] ");
-    } break;
-    case QEMU_DRV: {
-        qemu_print("[DRV ] ");
-    } break;
-    case QEMU_KERN: {
-        qemu_print("[KERN] ");
-    } break;
+    case QEMU_CPU:
+        return "[CPU]";
+    case QEMU_MEM:
+        return "[MEM]";
+    case QEMU_ARCH:
+        return "[ARCH]";
+    case QEMU_DRV:
+        return "[DRV]";
+    case QEMU_KERN:
+        return "[KERN]";
     default:
-        break;
+        return "[UNK]";
     }
+}
 
-    switch (level) {
-    case QEMU_OK: {
-        qemu_print("[ OK ] ");
-    } break;
-    case QEMU_INFO: {
-        qemu_print("[INFO] ");
-    } break;
-    case QEMU_WARN: {
-        qemu_print("[WARN] ");
-    } break;
-    case QEMU_ERROR: {
-        qemu_print("[ERR ] ");
-    } break;
-    case QEMU_PANIC: {
-        qemu_print("[PANC] ");
-    } break;
+static const char *qemu_lvl_name(enum qemu_level lvl) {
+    switch (lvl) {
+    case QEMU_OK:
+        return "[OK]";
+    case QEMU_INFO:
+        return "[INFO]";
+    case QEMU_WARN:
+        return "[WARN]";
+    case QEMU_ERROR:
+        return "[ERR]";
+    case QEMU_PANIC:
+        return "[PANIC]";
     default:
-        break;
+        return "[UNK]";
     }
+}
+
+void qemu_printf(enum qemu_category cat, enum qemu_level lvl, const char *fmt, ...) {
+    qemu_print_time();
+    qemu_print(qemu_cat_name(cat));
+    qemu_print(" ");
+    qemu_print(qemu_lvl_name(lvl));
+    qemu_print(" ");
 
     va_list args;
-    va_start(args);
+    va_start(args, fmt);
 
     char buf[1024] = {};
     kvsnprintf(buf, sizeof(buf), fmt, args);
