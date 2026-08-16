@@ -25,12 +25,12 @@ int get_graphics_type(struct multiboot_info *mbi) {
     return GRAPHICS_TYPE_VGA_PALETTE;
 }
 
-int graphics_initialize(struct multiboot_info *mbi) {
+int gfx_init(struct multiboot_info *mbi) {
     auto graphics = get_graphics_type(mbi);
     if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
         /* Initialize VGA text mode */
         vga_init_text();
-        terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+        terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     } else if (graphics == GRAPHICS_TYPE_FRAMEBUFFER) {
         struct display_info info;
         info.flags = mbi->flags;
@@ -63,7 +63,7 @@ int graphics_initialize(struct multiboot_info *mbi) {
 
         info.lfb_addr = (uint32_t *)virt_addr;
 
-        display_initialize(info);
+        display_init(info);
         display_clear(0x00'14'14'14);
     }
 

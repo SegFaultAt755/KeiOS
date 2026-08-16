@@ -32,16 +32,18 @@
 #include "kernel/core/mods.h"
 #include "kernel/core/time.h"
 
+#define MULTIBOOT_MAGIC 0x2BADB002
+
 extern uint32_t _kernel_start;
 
 [[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *mbi) {
-    if (magic != 0x2BADB002)
+    if (magic != MULTIBOOT_MAGIC)
         goto halt;
 
     /* Early initialization */
     gdt_init();
-    idt_initialize();
-    initialize_cpu_features();
+    idt_init();
+    cpu_feat_init();
 
     /* Memory */
     struct multiboot_info *mbi_virt = mbi;
@@ -51,8 +53,8 @@ extern uint32_t _kernel_start;
     mem_init(mbi_virt);
 
     /* Hardware and drivers */
-    pit_initialize(1193, pit_cb);
-    ps2_initialize();
+    pit_init(1193, pit_cb);
+    ps2_init();
 
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);

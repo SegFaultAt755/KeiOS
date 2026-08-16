@@ -21,7 +21,7 @@ static inline void invalidate(uint32_t addr) {
     return (uint32_t *)(0xFFC0'0000U + ((virt_addr >> 10) & 0x003F'FFFCU));
 }
 
-uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) {
+uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
     uint32_t *dir = (uint32_t *)initial_page_dir;
     dir[0] = 0;
     invalidate(0);
@@ -34,7 +34,7 @@ uint32_t vmm_initialize(uint32_t mem_high_point, uint32_t physical_alloc_start) 
     __asm__ volatile("mov %0, %%cr3" ::"r"(physical_dir_addr) : "memory");
 
     /* Initialize physical frame allocation */
-    pmm_initialize(mem_high_point, physical_alloc_start);
+    pmm_init(mem_high_point, physical_alloc_start);
 
     qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: %p)", physical_dir_addr);
     return physical_alloc_start;

@@ -19,6 +19,6 @@ struct heap_segment {
     struct heap_segment *prev;
 };
 
-void heap_initialize(void *start_addr, uint32_t total_size);
+void heap_init(void *start_addr, uint32_t total_size);
 void *kmalloc(uint32_t size);
 void kfree(void *ptr);

@@ -4,7 +4,7 @@
 #include "arch/x86/features.h"
 #include "kernel/qemu.h"
 
-void initialize_cpu_features() {
+void cpu_feat_init() {
     /* Enable legacy x87 fpu */
     uintptr_t cr0_val;
     __asm__ volatile("mov %%cr0, %0" : "=r"(cr0_val));

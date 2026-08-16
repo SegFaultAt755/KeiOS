@@ -8,7 +8,7 @@
 
 uint64_t pit_ticks = 0;
 
-void pit_initialize(uint32_t freq, void (*callback)(struct registers *regs)) {
+void pit_init(uint32_t freq, void (*callback)(struct registers *regs)) {
     intr_handler(IRQ0, callback);
 
     auto divisor = 1'193'180u / freq;

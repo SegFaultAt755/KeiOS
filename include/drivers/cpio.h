@@ -25,7 +25,7 @@ typedef void(*cpio_callback)(
     const uint8_t *data, size_t data_len, void *user_context
 );
 
-int cpio_initialize(struct cpio_info info);
+int cpio_init(struct cpio_info info);
 int cpio_parse(cpio_callback callback, void *user_context);
 
 size_t cpio_get_offset(void);

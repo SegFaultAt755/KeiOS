@@ -31,7 +31,7 @@ pub unsafe fn get_archive() -> Option<&'static mut CpioArchive<'static>> {
 
 // Core FFI exports
 #[unsafe(no_mangle)]
-pub extern "C" fn cpio_initialize(info: CpioInfo) -> i32 {
+pub extern "C" fn cpio_init(info: CpioInfo) -> i32 {
     if info.base_addr.is_null() || info.size == 0 {
         return 1;
     }

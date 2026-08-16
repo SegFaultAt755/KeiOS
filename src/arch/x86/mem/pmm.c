@@ -11,7 +11,7 @@ constexpr size_t TOTAL_PAGES = MAX_PHYSICAL_BYTES / PAGE_SIZE;
 static uint8_t physical_mem_bitmap[TOTAL_PAGES / 8];
 static uint32_t total_frames = 0;
 
-void pmm_initialize(uint64_t mem_high_point, uint32_t physical_alloc_start) {
+void pmm_init(uint64_t mem_high_point, uint32_t physical_alloc_start) {
     auto page_frame_min = ((physical_alloc_start + PAGE_SIZE) - 1) / PAGE_SIZE;
     total_frames = (mem_high_point > MAX_PHYSICAL_BYTES ? MAX_PHYSICAL_BYTES : mem_high_point) / PAGE_SIZE;
 

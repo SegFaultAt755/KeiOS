@@ -5,4 +5,4 @@
 
 #include <stdint.h>
 
-void initialize_cpu_features(void);
+void cpu_feat_init(void);

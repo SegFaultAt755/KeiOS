@@ -146,7 +146,7 @@ static void keyboard_handler([[maybe_unused]] struct registers *regs) {
         key_callback(ascii);
 }
 
-void ps2_initialize() {
+void ps2_init() {
     /* Flush output buffer */
     while (inb(PS2_STATUS_PORT) & 0x01)
         inb(PS2_DATA_PORT);

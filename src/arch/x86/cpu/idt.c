@@ -23,7 +23,7 @@ void idt_set_gate(uint8_t vec, uint32_t isr, uint8_t attribs) {
     entries[vec].reserved = 0;
 }
 
-static void remap_pic() {
+static void pic_remap() {
     struct pic {
         uint16_t port;
         uint8_t val;
@@ -40,7 +40,7 @@ static void remap_pic() {
     qemu_printf(QEMU_CPU, QEMU_OK, "PIC remapped");
 }
 
-static void setup_irq() {
+static void irq_setup() {
     const void *handlers[] = {irq0, irq1, irq2,  irq3,  irq4,  irq5,  irq6,  irq7,
                               irq8, irq9, irq10, irq11, irq12, irq13, irq14, irq15};
 
@@ -50,7 +50,7 @@ static void setup_irq() {
     qemu_printf(QEMU_CPU, QEMU_OK, "IRQ setup");
 }
 
-static void setup_idt() {
+static void idt_setup() {
     const void *handlers[] = {isr0,  isr1,  isr2,  isr3,  isr4,  isr5,  isr6,  isr7,  isr8,  isr9,  isr10,
                               isr11, isr12, isr13, isr14, isr15, isr16, isr17, isr18, isr19, isr20, isr21,
                               isr22, isr23, isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31};
@@ -61,14 +61,14 @@ static void setup_idt() {
     qemu_printf(QEMU_CPU, QEMU_OK, "IDT setup");
 }
 
-void idt_initialize() {
+void idt_init() {
     ptr.base = (uint32_t)&entries[0];
     ptr.limit = (uint16_t)sizeof(entries) - 1;
     memset(&entries, 0, sizeof(entries));
 
-    setup_idt();
-    remap_pic();
-    setup_irq();
+    idt_setup();
+    pic_remap();
+    irq_setup();
 
     __asm__ volatile("lidt %0" : : "m"(ptr));
     qemu_printf(QEMU_CPU, QEMU_OK, "IDT initialized");

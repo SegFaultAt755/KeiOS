@@ -38,4 +38,4 @@ struct [[gnu::packed]] idt_pointer {
 #undef X
 
 void idt_set_gate(uint8_t vec, uint32_t isr, uint8_t attribs);
-void idt_initialize(void);
+void idt_init(void);

@@ -26,7 +26,7 @@ pub unsafe fn get_display() -> Option<&'static mut Display> {
 
 // Core & Shape FFI exports
 #[unsafe(no_mangle)]
-pub extern "C" fn display_initialize(info: DisplayInfo) -> i32 {
+pub extern "C" fn display_init(info: DisplayInfo) -> i32 {
     if info.lfb_addr.is_null() || info.width == 0 || info.height == 0 {
         return 1;
     }

@@ -18,7 +18,7 @@ static inline void heap_set_len_and_flags(struct heap_segment *seg, uint32_t len
     seg->len_flags = (len & HEAP_LEN_MASK) | (is_free ? HEAP_FLAG_FREE : 0);
 }
 
-void heap_initialize(void *start_addr, uint32_t total_size) {
+void heap_init(void *start_addr, uint32_t total_size) {
     auto aligned_addr = HEAP_ALIGN_UP((uint32_t)start_addr, HEAP_ALIGNMENT);
     auto lost_bytes = aligned_addr - (uint32_t)start_addr;
 

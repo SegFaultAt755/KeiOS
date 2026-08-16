@@ -15,7 +15,7 @@ struct display_info {
 };
 
 /* Core operations */
-int  display_initialize(struct display_info info);
+int  display_init(struct display_info info);
 void display_clear(uint32_t color);
 void display_draw_pixel(int32_t x, int32_t y, uint32_t color);
 

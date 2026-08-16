@@ -228,7 +228,7 @@ void shell_key_handler(uint16_t key) {
     }
 }
 
-void shell_initialize() {
+void shell_init() {
     /* Show welcome message */
     kprintf("Welcome to KeiOS %d.%d.%d! ", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));

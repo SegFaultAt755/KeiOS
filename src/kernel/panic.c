@@ -25,7 +25,7 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
     qemu_printf(QEMU_KERN, QEMU_PANIC, "(file: %s, line: %d) reason: %s | description: %s", file, line, reason, desc);
 
     vga_init_text();
-    terminal_initialize((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+    terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     terminal_set_color(vga_entry_color(VGA_8B_RED, VGA_8B_BLACK));
     terminal_clear();
 

@@ -14,7 +14,7 @@ static uint16_t *term_mem = nullptr;
 static uint16_t term_width;
 static uint16_t term_height;
 
-void terminal_initialize(uint16_t *mem, uint16_t width, uint16_t height) {
+void terminal_init(uint16_t *mem, uint16_t width, uint16_t height) {
     term_mem = mem;
     term_width = width;
     term_height = height;

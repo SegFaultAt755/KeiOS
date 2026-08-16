@@ -6,4 +6,4 @@
 #define SHELL_INPUT_BUF_SIZE 256
 #define SHELL_HISTORY_MAX    32
 
-void shell_initialize(void);
+void shell_init(void);

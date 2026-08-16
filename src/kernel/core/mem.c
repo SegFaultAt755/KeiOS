@@ -65,11 +65,11 @@ void mem_init(struct multiboot_info *mbi_virtual) {
                 phys_alloc_start, (uint32_t)mem_high_point);
 
     /* Initialize VMM & PMM */
-    const uint32_t post_paging_free_mem_phys = vmm_initialize((uint32_t)mem_high_point, phys_alloc_start);
+    const uint32_t post_paging_free_mem_phys = vmm_init((uint32_t)mem_high_point, phys_alloc_start);
 
     /* Initialize Heap */
     constexpr uint32_t heap_size = 4'194'304U; /* 4MB initial size */
     const uint32_t post_paging_free_mem_virt = post_paging_free_mem_phys + (uint32_t)&_kernel_start;
 
-    heap_initialize((void *)post_paging_free_mem_virt, heap_size);
+    heap_init((void *)post_paging_free_mem_virt, heap_size);
 }

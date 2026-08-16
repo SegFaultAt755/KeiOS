@@ -13,7 +13,7 @@
         which is working for pc speaker
 */
 
-void sleep_initialize(void);
+void sleep_init(void);
 void sleep(uint16_t ticks);
 void sleep_ms(uint32_t ms);
 void sleep_deinitialize(void);

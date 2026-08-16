@@ -6,7 +6,7 @@
 
 constexpr uint16_t PIT_TICKS_1_MS = 1'193;
 
-void sleep_initialize() {
+void sleep_init() {
     /* Enable the pit channel 2 gate */
     auto val = inb(0x61);
     outb(0x61, (val & 0xFE) | 0x01);

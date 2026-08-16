@@ -55,7 +55,7 @@
 #define MOD_RCTRL    (1U << 5)
 #define MOD_RALT     (1U << 6)
 
-void ps2_initialize(void);
+void ps2_init(void);
 void ps2_disable(void);
 uint8_t ps2_get_modifiers(void);
 void ps2_set_key_callback(void (*cb)(uint16_t));

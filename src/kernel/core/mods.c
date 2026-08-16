@@ -23,7 +23,7 @@ void mod_cb(struct multiboot_parsed_module *mod, uint32_t idx, [[maybe_unused]] 
         info.base_addr = (const uint8_t *)mod_virt_start;
         info.size = mod->size;
 
-        if (cpio_initialize(info) != 0) {
+        if (cpio_init(info) != 0) {
             qemu_printf(QEMU_DRV, QEMU_PANIC, "[CPIO] init failed: parser setup returned an error");
             KERNEL_PANIC("CPIO parser", "Failed to initialize the CPIO parser");
         }
