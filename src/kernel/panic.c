@@ -6,6 +6,7 @@
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
 
+#include "drivers/display.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
@@ -20,10 +21,7 @@
 
 uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
-[[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
-    disable_interrupts();
-    qemu_printf(QEMU_KERN, QEMU_PANIC, "(file: %s, line: %d) reason: %s | description: %s", file, line, reason, desc);
-
+static void display_panic_text(const char *reason, const char *desc, const char *file, uint32_t line) {
     vga_init_text();
     terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     terminal_set_color(vga_entry_color(VGA_8B_RED, VGA_8B_BLACK));
@@ -61,8 +59,23 @@ uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
         terminal_writestring(&buf[i + 1]);
     }
+}
+
+static void display_panic_gfx(const char *reason, const char *desc, const char *file, uint32_t line) {
+    /* Assume that display is already initialized */
+    display_clear(0x00'00'00'FF);
+}
+
+[[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
+    disable_interrupts();
+    qemu_printf(QEMU_KERN, QEMU_PANIC, "(file: %s, line: %d) reason: %s | description: %s", file, line, reason, desc);
+
+    /* Either of both should work */
+    display_panic_text(reason, desc, file, line);
+    display_panic_gfx(reason, desc, file, line);
 
     while (true) {
+        disable_interrupts();
         halt();
     }
 }

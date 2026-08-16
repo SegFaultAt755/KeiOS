@@ -7,5 +7,9 @@ int main(int argc, int *argv) {
         total += argv[i];
     }
 
+#if 0
+    __asm__ volatile ("int $0x80");
+#endif
+
     return total;
 }

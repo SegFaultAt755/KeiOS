@@ -64,7 +64,7 @@ int gfx_init(struct multiboot_info *mbi) {
         info.lfb_addr = (uint32_t *)virt_addr;
 
         display_init(info);
-        display_clear(0x00'14'14'14);
+        display_clear(0x00'00'00'00);
     }
 
     return graphics;

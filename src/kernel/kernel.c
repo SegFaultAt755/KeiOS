@@ -52,21 +52,23 @@ extern uint32_t _kernel_start;
 
     mem_init(mbi_virt);
 
-    /* Hardware and drivers */
-    pit_init(1193, pit_cb);
-    ps2_init();
-
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
     qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
 
     cpio_parse(cpio_cb, nullptr);
 
+    /* Hardware and drivers */
+    pit_init(1193, pit_cb);
+    ps2_init();
+    gfx_init(mbi_virt);
+
     /* Handoff */
     enable_interrupts();
 
     if (exec_init == nullptr || exec_init_size == 0)
-        KERNEL_PANIC("No initial executable", "Initial executable pointer is null");
+        KERNEL_PANIC("No initial executable found or valid",
+                     "Initial executable pointer is null or the executable size equals 0");
 
     qemu_printf(QEMU_KERN, QEMU_INFO, "Handing off initial executable: addr=%p size=%u bytes", exec_init,
                 exec_init_size);
