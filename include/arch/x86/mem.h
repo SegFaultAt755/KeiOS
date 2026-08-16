@@ -10,7 +10,7 @@
 #define PAGE_TABLE_ENTRIES 1024
 #define MAX_PHYSICAL_BYTES 0x1000'0000'0ULL /* 4GB */
 
-#define KERNEL_VIRTUAL_OFFSET 0xC000'0000
+#define KERNEL_VIRTUAL_OFFSET 0xC000'0000U
 
 /* Paging flags */
 #define PTE_PRESENT  (1U << 0)   /* Present, is loaded in memory */
@@ -35,6 +35,3 @@
 
 typedef uint32_t page_table_t[PAGE_TABLE_ENTRIES] [[gnu::aligned(PAGE_SIZE)]];
 typedef uint32_t page_dir_t[PAGE_TABLE_ENTRIES] [[gnu::aligned(PAGE_SIZE)]];
-
-/* Initialization */
-void memory_initialize(struct multiboot_info *mbi);

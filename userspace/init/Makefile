@@ -7,7 +7,7 @@ CFLAGS = -m32 -march=i686 -nostdinc -nostdlib -O2 -Wall -Wextra -Wno-main \
          -fno-exceptions -fno-builtin -nostartfiles -nodefaultlibs -std=c23 -g
 LDFLAGS = -T link.ld -m elf_i386
 
-PROG_NAME = test_c_bin
+PROG_NAME = init
 OUT_DIR ?= ../../bin/userspace/$(PROG_NAME)
 
 default: all

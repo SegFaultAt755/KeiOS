@@ -6,7 +6,6 @@
 #include "drivers/cpio.h"
 #include "drivers/pit.h"
 #include "drivers/ps2.h"
-#include "drivers/sleep.h"
 
 #include "kernel/graphics.h"
 #include "kernel/halt.h"
@@ -28,104 +27,55 @@
 #error "Unsupported architecture! (i386 is available)"
 #endif
 
-#include "libkern/stdio.h"
-#include "libkern/string.h"
+#include "kernel/core/initramfs.h"
+#include "kernel/core/multiboot_modules.h"
+#include "kernel/core/time_handler.h"
+#include "kernel/core/memory_init.h"
 
-#include <stddef.h>
-#include <stdint.h>
-
-uint8_t *exec_init = nullptr;
-uint32_t exec_init_size = 0;
-
-static inline void pit_callback(struct registers *) {
-    pit_ticks += 1;
-}
-
-static inline void tick_wait(uint32_t ms) {
-    sleep_ms(ms);
-    pit_ticks += ms;
-}
-
-void cpio_callback_function(const char *name, [[maybe_unused]] struct cpio_header header, const uint8_t *data,
-                            [[maybe_unused]] size_t data_len, [[maybe_unused]] void *user_context) {
-    if (data_len != 0) /* Skip directories */
-        qemu_printf(QEMU_KERN, QEMU_INFO, "[CPIO] Found a file: (name: %s, size: %d)", name, data_len);
-    
-    const char *exec_name = "bin/test_c_bin.bin"; /* Akward dahh name */
-    if (strcmp(name, exec_name) == 0) {
-        exec_init = (uint8_t *)data;
-        exec_init_size = data_len;
-    }
-}
-
-static void module_callback(struct multiboot_parsed_module *mod, uint32_t index, void *) {
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Module %u: (start=%p, size=%u bytes, cmd='%s')", index, mod->start_addr,
-                mod->size, mod->cmdline);
-
-    /* Parse CPIO */
-    const char *initramfs_cmd = "initramfs";
-    if (strcmp(mod->cmdline, initramfs_cmd) == 0) {
-        struct cpio_info info;
-        info.base_addr = (const uint8_t *)mod->start_addr;
-        info.size = mod->size;
-
-        if (cpio_initialize(info) != 0) { /* Important to work properly */
-            qemu_printf(QEMU_DRV, QEMU_PANIC, "Failed to initialize CPIO parser");
-            KERNEL_PANIC("CPIO Parser", "Failed to initialize CPIO parser");
-        }
-    }
-}
+extern uint32_t _kernel_start;
 
 [[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *mbi) {
-    if (magic != 0x2BADB002) {
-        disable_interrupts();
-        halt();
-    }
+    if (magic != 0x2BADB002)
+        goto halt;
 
-    /* Initialize kernel */
+    /* Early initialization */
     gdt_initialize();
     idt_initialize();
-    pit_initialize(1193, pit_callback);
-
-    /* Parse multiboot */
-    auto multiboot_mods_count = multiboot_parse_modules(mbi, module_callback, nullptr);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi, mbi->flags,
-                multiboot_mods_count);
-
-    memory_initialize(mbi);
     initialize_cpu_features();
 
-    /* Parse CPIO */
-    cpio_parse(cpio_callback_function, nullptr);
+    /* Memory */
+    struct multiboot_info *mbi_virtual = mbi;
+    if ((uintptr_t)mbi < KERNEL_VIRTUAL_OFFSET)
+        mbi_virtual = (struct multiboot_info *)((uintptr_t)mbi + KERNEL_VIRTUAL_OFFSET);
 
-    /* Kernel level drivers */
+    memory_initialize(mbi_virtual);
+
+    /* Hardware and drivers */
+    pit_initialize(1193, pit_callback);
     ps2_initialize();
 
-    /* Enabling interrupts */
+    /* Modules and filesystem */
+    auto multiboot_mods_count = multiboot_parse_modules(mbi_virtual, module_callback, nullptr);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Multiboot info: (address: %p, flags: %d, count: %d)", mbi_virtual, mbi_virtual->flags,
+                multiboot_mods_count);
+    
+    cpio_parse(cpio_callback_function, nullptr);
+
+    /* Handoff */
     enable_interrupts();
 
-    /* Load first user program */
     if (exec_init == nullptr || exec_init_size == 0)
         KERNEL_PANIC("No initial executable",
-                     "Initial executable data pointer is null, maybe failed to parse it from CPIO archive");
+                     "Initial executable data pointer is null");
 
+    qemu_printf(QEMU_KERN, QEMU_INFO, "Handoff initial executable: (address: %p, size: %d bytes)", exec_init, exec_init_size);
     execute_init_binary(exec_init, exec_init_size);
 
-#if 0
-    /* Initialize graphics */
-    auto graphics = graphics_initialize(mbi);
-
-    /* Initialize user space */
-    if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
-        shell_initialize();
-    }
-#endif
-
-    /* Infinite loop to prevent CPU fault */
+    /* Fallback */
     goto halt;
 halt:
     while (true) {
-        enable_interrupts();
+        disable_interrupts();
         halt();
     }
 }
