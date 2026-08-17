@@ -2,15 +2,17 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "kernel/reboot.h"
+#include "kernel/halt.h"
+#include "kernel/interrupts.h"
 
-void reboot() {
+[[noreturn]] void reboot() {
     /* Gracefully shutdown components */
     /* None yet */
 
     reboot_raw();
 }
 
-void reboot_raw() {
+[[noreturn]] void reboot_raw() {
     /* Try via keyboard controller */
     outb(0x64, 0xFE);
 
@@ -31,4 +33,9 @@ void reboot_raw() {
     } null_idt = {0, 0};
 
     __asm__ volatile("lidt %0; int3" : : "m"(null_idt));
+
+    while (true) {
+        disable_interrupts();
+        halt();
+    }
 }

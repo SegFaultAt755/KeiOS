@@ -5,4 +5,9 @@
 
 #include <stdint.h>
 
-void syscall_handler(void);
+struct syscall_registers {
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+};
+
+void syscall_stub(void);
+void syscall_handler(struct syscall_registers *regs);

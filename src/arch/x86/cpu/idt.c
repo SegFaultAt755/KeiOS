@@ -71,7 +71,7 @@ void idt_init() {
     pic_remap();
     irq_setup();
 
-    idt_set_gate(128, (uint32_t)syscall_handler, 0xEE);
+    idt_set_gate(128, (uint32_t)syscall_stub, 0xEE);
 
     __asm__ volatile("lidt %0" : : "m"(ptr));
     qemu_printf(QEMU_CPU, QEMU_OK, "IDT initialized");
