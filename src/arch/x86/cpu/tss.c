@@ -11,13 +11,14 @@ static struct tss_entry tss;
 
 void write_tss(uint16_t ss0, uint32_t esp0) {
     auto base = (uint32_t)&tss;
-    auto limit = base + sizeof(struct tss_entry);
+    auto limit = sizeof(struct tss_entry) - 1;
 
-    gdt_set_gate(5, base, limit, 0xE9, 0x0);
+    gdt_set_gate(5, base, limit, 0x89, 0x0);
     memset(&tss, 0, sizeof(struct tss_entry));
 
     tss.ss0 = ss0;
     tss.esp0 = esp0;
     tss.cs = 0x08U | 0x3U;
     tss.ss = tss.ds = tss.es = tss.fs = tss.gs = 0x10U | 0x3U;
+    tss.iomap = sizeof(struct tss_entry);
 }

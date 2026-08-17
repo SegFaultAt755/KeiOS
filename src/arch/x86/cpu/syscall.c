@@ -8,7 +8,7 @@
 static uint32_t parse_codes(struct syscall_registers *regs) {
 #define X(n)                                                                                                           \
     if (regs->eax == n)                                                                                                \
-        syscall_table_##n(regs);
+        return syscall_table_##n(regs);
     SYSCALL_TABLE_LIST
 #undef X
 

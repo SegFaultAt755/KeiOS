@@ -8,6 +8,7 @@
 #include "kernel/qemu.h"
 
 constexpr size_t GDT_ENTRY_COUNT = 6;
+uint8_t kernel_stack[8192];
 
 static struct gdt_entry gdt_entries[GDT_ENTRY_COUNT];
 static struct gdt_pointer gdt_ptr;
@@ -37,7 +38,7 @@ void gdt_init() {
     gdt_set_gate(2, 0, 0x000F'FFFFU, 0x92, 0xCF);
     gdt_set_gate(3, 0, 0x000F'FFFFU, 0xFA, 0xCF);
     gdt_set_gate(4, 0, 0x000F'FFFFU, 0xF2, 0xCF);
-    write_tss(0x10, 0x0);
+    write_tss(0x10, (uint32_t)&kernel_stack + 8192);
 
     gdt_flush((uint32_t)&gdt_ptr);
     tss_flush();
