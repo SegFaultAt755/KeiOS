@@ -27,7 +27,7 @@ _Target: Establish stable Ring 0 memory, interrupt handling, and basic in kernel
 - [X] **VMM:** Page directory manipulation, recursive mapping at `0xFFFFF000`, `kmalloc`/`kfree` dynamic allocator
 - [X] **IDT & Exceptions:** Catch Page Faults (`#PF`), General Protection Faults (`#GP`), and remap PIC interrupts
 - [X] **In Kernel Display Driver:** Static Ring 0 display driver
-- [ ] **TTY:** Early shell for input/output verification
+- [X] **TTY:** Early shell for input/output verification
 
 ---
 
@@ -35,15 +35,16 @@ _Target: Establish stable Ring 0 memory, interrupt handling, and basic in kernel
 
 _Target: Parse Ramdisk binaries, load ELF32 programs, and drop CPU privileges to Ring 3_
 
-- [ ] **Initrd Parsing:** Parse Multiboot module tags (TAR/raw module) to locate program binaries in RAM
-- [ ] **ELF32 Loader:** Parse headers and map code/data segments into user virtual space
-- [ ] **GDT & TSS:** Configure Ring 3 code/data selectors and TSS for kernel stack switching
-- [ ] **User Mode Switch:** Build initial kernel stack frame (`SS`, `ESP`, `EFLAGS`, `CS`, `EIP`) and jump to Ring 3 via `IRET`
-- [ ] **System Calls & IPC Engine:** Implement `int 0x80` entry point and short message passing / shared memory primitives
+- [X] **Initrd Parsing:** Parse Multiboot module tags (TAR/raw module) to locate program binaries in RAM
+- [X] **ELF32 Loader:** Parse headers and map code/data segments into user virtual space
+- [X] **GDT & TSS:** Configure Ring 3 code/data selectors and TSS for kernel stack switching
+- [X] **User Mode Switch:** Build initial kernel stack frame (`SS`, `ESP`, `EFLAGS`, `CS`, `EIP`) and jump to Ring 3 via `IRET`
+- [X] **System Calls:** Implement `int 0x80` entry point
+- [ ] **IPC Engine:** Short message passing / shared memory primitives
 
 ---
 
-## Ring 3 Driver Servers & User TTY `[PLANNED]`
+## Ring 3 Driver Servers & User TTY `[IN PROGRESS]`
 
 _Target: Move drivers out of Ring 0 into isolated user-space services communicating via IPC_
 
