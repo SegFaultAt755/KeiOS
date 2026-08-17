@@ -13,7 +13,7 @@ void mod_cb(struct multiboot_parsed_module *mod, uint32_t idx, [[maybe_unused]] 
     const uint32_t mod_virt_start = (uint32_t)mod->start_addr;
     const char *cmdline_virt = (const char *)mod->cmdline;
 
-    qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] module %u: vaddr=%p size=%u cmd='%s'", idx, (void *)mod_virt_start,
+    qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] Module %u: vaddr=%p size=%u cmd='%s'", idx, (void *)mod_virt_start,
                 mod->size, cmdline_virt);
 
     /* Parse the initramfs payload */
@@ -23,9 +23,7 @@ void mod_cb(struct multiboot_parsed_module *mod, uint32_t idx, [[maybe_unused]] 
         info.base_addr = (const uint8_t *)mod_virt_start;
         info.size = mod->size;
 
-        if (cpio_init(info) != 0) {
-            qemu_printf(QEMU_DRV, QEMU_PANIC, "[CPIO] init failed: parser setup returned an error");
+        if (cpio_init(info) != 0)
             KERNEL_PANIC("CPIO parser", "Failed to initialize the CPIO parser");
-        }
     }
 }

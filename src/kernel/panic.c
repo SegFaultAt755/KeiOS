@@ -22,8 +22,6 @@
 uintptr_t __stack_chk_guard = (uintptr_t)COMPILE_TIME_SEED;
 
 static void display_panic_text(const char *reason, const char *desc, const char *file, uint32_t line) {
-    vga_init_text();
-    terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     terminal_set_color(vga_entry_color(VGA_8B_RED, VGA_8B_BLACK));
     terminal_clear();
 
@@ -61,14 +59,16 @@ static void display_panic_text(const char *reason, const char *desc, const char 
     }
 }
 
-static void display_panic_gfx(const char *reason, const char *desc, const char *file, uint32_t line) {
+static void display_panic_gfx([[maybe_unused]] const char *reason, [[maybe_unused]] const char *desc,
+                              [[maybe_unused]] const char *file, [[maybe_unused]] uint32_t line) {
     /* Assume that display is already initialized */
     display_clear(0x00'00'00'FF);
 }
 
 [[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
     disable_interrupts();
-    qemu_printf(QEMU_KERN, QEMU_PANIC, "(file: %s, line: %d) reason: %s | description: %s", file, line, reason, desc);
+    qemu_printf(QEMU_KERN, QEMU_PANIC, "Kernel panic: %s (description: %s, file: %s, line: %d)", reason, desc, file,
+                line);
 
     /* Either of both should work */
     display_panic_text(reason, desc, file, line);

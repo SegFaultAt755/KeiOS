@@ -63,8 +63,12 @@ int gfx_init(struct multiboot_info *mbi) {
 
         info.lfb_addr = (uint32_t *)virt_addr;
 
+        const uint32_t BG = 0x00'00'00'00;
         display_init(info);
-        display_clear(0x00'00'00'00);
+        display_clear(BG);
+
+        qemu_printf(QEMU_DRV, QEMU_OK, "Linear framebuffer initialized: (bg: 0x%x, flags: %d, width: %d, height: %d)",
+                    BG, info.flags, info.width, info.height);
     }
 
     return graphics;

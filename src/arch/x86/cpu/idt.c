@@ -2,6 +2,7 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "arch/x86/idt.h"
+#include "arch/x86/syscall.h"
 
 #include "kernel/qemu.h"
 #include "libkern/memory.h"
@@ -17,7 +18,7 @@ static struct idt_pointer ptr;
 void idt_set_gate(uint8_t vec, uint32_t isr, uint8_t attribs) {
     entries[vec].offset_low = isr & 0xFFFFU;
     entries[vec].offset_high = (isr >> 16) & 0xFFFFU;
-    entries[vec].attribs = attribs | 0x60U;
+    entries[vec].attribs = attribs;
 
     entries[vec].segment_sel = 0x08U;
     entries[vec].reserved = 0;
@@ -45,7 +46,7 @@ static void irq_setup() {
                               irq8, irq9, irq10, irq11, irq12, irq13, irq14, irq15};
 
     for (auto i = 0; i < 16; i++)
-        idt_set_gate(i + 32, (uint32_t)handlers[i], 0x8E);
+        idt_set_gate(i + 32, (uint32_t)handlers[i], 0xEE);
 
     qemu_printf(QEMU_CPU, QEMU_OK, "IRQ setup");
 }
@@ -56,7 +57,7 @@ static void idt_setup() {
                               isr22, isr23, isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31};
 
     for (auto i = 0; i < 32; i++)
-        idt_set_gate(i, (uint32_t)handlers[i], 0x8E);
+        idt_set_gate(i, (uint32_t)handlers[i], 0xEE);
 
     qemu_printf(QEMU_CPU, QEMU_OK, "IDT setup");
 }
@@ -69,6 +70,8 @@ void idt_init() {
     idt_setup();
     pic_remap();
     irq_setup();
+
+    idt_set_gate(128, (uint32_t)syscall_handler, 0xEE);
 
     __asm__ volatile("lidt %0" : : "m"(ptr));
     qemu_printf(QEMU_CPU, QEMU_OK, "IDT initialized");

@@ -54,7 +54,7 @@ extern uint32_t _kernel_start;
 
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] Info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
 
     cpio_parse(cpio_cb, nullptr);
 

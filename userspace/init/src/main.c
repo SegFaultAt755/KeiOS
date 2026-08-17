@@ -1,15 +1,11 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-int main(int argc, int *argv) {
-    int total = 0;
-    for (int i = 0; i < argc; i++) {
-        total += argv[i];
-    }
+typedef unsigned long int uint;
 
-#if 0
-    __asm__ volatile ("int $0x80");
-#endif
+extern uint syscall(uint eax, uint ebx);
 
-    return total;
+int main([[maybe_unused]] int argc, [[maybe_unused]] int *argv) {
+    uint result = syscall(0, 0);
+    return result;
 }

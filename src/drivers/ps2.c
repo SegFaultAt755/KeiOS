@@ -186,7 +186,7 @@ void ps2_init() {
 
     /* Register IRQ1 handler */
     intr_handler(IRQ1, keyboard_handler);
-    qemu_printf(QEMU_DRV, QEMU_OK, "PS/2 Keyboard initialized");
+    qemu_printf(QEMU_DRV, QEMU_OK, "PS/2 keyboard initialized");
 }
 
 void ps2_disable() {
