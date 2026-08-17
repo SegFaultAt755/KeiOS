@@ -53,6 +53,7 @@ RUST_LIBS   := $(patsubst %, $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a, $
 
 # Source and object resolution
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+USER_SUBDIRS := $(dir $(wildcard $(USER_DIR)/*/Makefile))
 
 C_SRCS   := $(call rwildcard,$(SRC_DIR),*.c)
 ASM_SRCS := $(call rwildcard,$(SRC_DIR),*.asm)
@@ -116,8 +117,10 @@ endif
 userspace:
 	@echo ">>> [USER] Building userspace programs..."
 	@$(call MKDIR,$(FS_DIR)/bin)
-	@for dir in $(wildcard $(USER_DIR)/*/); do \
-		$(MAKE) -C $$dir --no-print-directory OUT_DIR=$(CURDIR)/$(BIN_DIR)/$$dir; \
+	@for dir in $(USER_SUBDIRS); do \
+		$(MAKE) -C $$dir --no-print-directory \
+			OUT_DIR=$(CURDIR)/$(BIN_DIR)/$$dir \
+			INCLUDE=$(CURDIR)/$(USER_DIR)/stdlib; \
 		find $(CURDIR)/$(BIN_DIR)/$$dir -maxdepth 1 -type f \
 			\( -name "*.elf" -o -name "*.bin" -o -name "*.com" -o -name "*.exe" \) \
 			-exec cp {} $(FS_DIR)/bin/ \; 2>/dev/null || true; \

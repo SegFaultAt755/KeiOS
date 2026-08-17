@@ -2,28 +2,40 @@ AS = nasm
 CC = gcc
 LD = ld
 
-ASFLAGS = -f elf32
-CFLAGS = -m32 -march=i686 -nostdinc -nostdlib -O2 -Wall -Wextra -Wno-main \
-         -fno-exceptions -fno-builtin -nostartfiles -nodefaultlibs -std=c23 -g -fno-pic -fno-pie
-LDFLAGS = -T link.ld -m elf_i386 -no-pie
-
 PROG_NAME = init
-OUT_DIR ?= ../../bin/userspace/$(PROG_NAME)
+SRC_DIRS  ?= src ../stdlib
+OUT_DIR   ?= ../../bin/userspace/$(PROG_NAME)
+INCLUDE   ?= stdlib
 
-default: all
-all: bc basm biasm
-	@mkdir -p $(OUT_DIR)/src
-	@echo ">>> [CC/AS] User-space compiling: program '$(PROG_NAME)'"
-	@$(LD) $(LDFLAGS) -o $(OUT_DIR)/$(PROG_NAME).bin $(OUT_DIR)/src/entry.o $(OUT_DIR)/src/syscall.o $(OUT_DIR)/src/main.o
+INC_FLAGS := $(addprefix -I,$(INCLUDE))
+ASFLAGS = -f elf32
+CFLAGS = -m32 -march=i686 -nostdlib -O2 -Wall -Wextra \
+         -fno-exceptions -fno-builtin -nostartfiles -std=c23 -fno-pic -fno-pie $(INC_FLAGS)
+LDFLAGS = -T link.ld -m elf_i386
 
-basm: src/entry.asm 
-	@mkdir -p $(OUT_DIR)/src
-	@$(AS) $(ASFLAGS) src/entry.asm -o $(OUT_DIR)/src/entry.o
+C_SRCS   := $(shell find $(SRC_DIRS) -type f -name '*.c')
+ASM_SRCS := $(shell find $(SRC_DIRS) -type f -name '*.asm')
 
-biasm: src/syscall.asm 
-	@mkdir -p $(OUT_DIR)/src
-	@$(AS) $(ASFLAGS) src/syscall.asm -o $(OUT_DIR)/src/syscall.o
+C_OBJS   := $(patsubst %.c,$(OUT_DIR)/%.o,$(C_SRCS))
+ASM_OBJS := $(patsubst %.asm,$(OUT_DIR)/%.o,$(ASM_SRCS))
+ALL_OBJS := $(ASM_OBJS) $(C_OBJS)
 
-bc: src/main.c
-	@mkdir -p $(OUT_DIR)/src
-	@$(CC) $(CFLAGS) -c src/main.c -o $(OUT_DIR)/src/main.o
+.PHONY: all clean
+
+all: $(ALL_OBJS)
+	@mkdir -p $(OUT_DIR)
+	@echo ">>> [LD]  Linking program '$(PROG_NAME)'"
+	@$(LD) $(LDFLAGS) -o $(OUT_DIR)/$(PROG_NAME).bin $(ALL_OBJS)
+
+$(OUT_DIR)/%.o: %.asm
+	@echo ">>> [AS]  Assembling: $(PROG_NAME)/$<"
+	@mkdir -p $(dir $@)
+	@$(AS) $(ASFLAGS) $< -o $@
+
+$(OUT_DIR)/%.o: %.c
+	@echo ">>> [CC]  Compiling: $(PROG_NAME)/$<"
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	@rm -rf $(OUT_DIR)
