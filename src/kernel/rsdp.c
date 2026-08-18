@@ -5,7 +5,7 @@
 #include "libkern/memory.h"
 #include <stdint.h>
 
-uintptr_t find_rsdp_addr(void) {
+uint32_t *find_rsdp_addr(void) {
     uintptr_t start_addr = 0x000E0000;
     uintptr_t end_addr = 0x000FFFFF;
 
@@ -19,9 +19,9 @@ uintptr_t find_rsdp_addr(void) {
                 sum += ((uint8_t *)p)[i];
 
             if (sum == 0)
-                return addr;
+                return (uint32_t *)addr;
         }
     }
 
-    return 0;
+    return nullptr;
 }

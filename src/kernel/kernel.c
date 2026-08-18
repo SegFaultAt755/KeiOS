@@ -43,8 +43,8 @@
     idt_init();
     cpu_feat_init();
 
-    uintptr_t rsdp_addr = find_rsdp_addr();
-    if (rsdp_addr == 0)
+    uint32_t *rsdp_addr = find_rsdp_addr();
+    if (rsdp_addr == nullptr)
         qemu_printf(QEMU_KERN, QEMU_ERROR, "Failed to find RSDP start address");
     else
         qemu_printf(QEMU_KERN, QEMU_OK, "RSDP start address found at %p", rsdp_addr);
@@ -56,14 +56,21 @@
 
     mem_init(mbi_virt);
 
-    if (rsdp_addr != 0)
-        pmm_reserve_phys(rsdp_addr, 20);
+    uint32_t *rsdp_addr_virt = rsdp_addr;
+    if ((uintptr_t)rsdp_addr < KERNEL_VIRTUAL_OFFSET)
+        rsdp_addr_virt = (uint32_t *)((uintptr_t)rsdp_addr + KERNEL_VIRTUAL_OFFSET);
 
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
     qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] Info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
 
     cpio_parse(cpio_cb, nullptr);
+
+    /* Iterate through RSDP */
+    for (uint8_t i = 0; i < 5; i++) {
+        uint32_t val = rsdp_addr_virt[i];
+        qemu_printf(QEMU_KERN, QEMU_OK, "[RSDP] Flag [%d]: 0x%x", i+1, val);
+    }
 
     /* Hardware and drivers */
     pit_init(1193, pit_cb);

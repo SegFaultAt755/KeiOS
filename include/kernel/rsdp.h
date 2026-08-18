@@ -8,4 +8,4 @@
 #define RSDP_SIGNATURE "RSD PTR "
 #define RSDP_SIGNATURE_LEN 8
 
-uintptr_t find_rsdp_addr(void);
+uint32_t *find_rsdp_addr(void);
