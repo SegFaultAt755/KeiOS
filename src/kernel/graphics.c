@@ -9,6 +9,8 @@
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/mem.h"
 #include "arch/x86/vmm.h"
+#else
+#error "Unsupported architecture! (i386 is available)"
 #endif
 
 #include "kernel/multiboot.h"

@@ -3,7 +3,11 @@
 
 #include "kernel/multiboot.h"
 
-#define HIGHER_HALF_OFFSET 0xC000'0000U
+#if defined(__i386__) || defined(_M_IX86)
+#include "arch/x86/mem.h"
+#else
+#error "Unsupported architecture! (i386 is available)"
+#endif
 
 [[nodiscard]] bool mb_has_mods(struct multiboot_info *mbi) {
     if (!mbi)
@@ -17,27 +21,27 @@
     if (!mbi)
         return 0;
 
-    if ((uintptr_t)mbi < HIGHER_HALF_OFFSET) {
-        mbi = (struct multiboot_info *)((uintptr_t)mbi + HIGHER_HALF_OFFSET);
+    if ((uintptr_t)mbi < KERNEL_VIRTUAL_OFFSET) {
+        mbi = (struct multiboot_info *)((uintptr_t)mbi + KERNEL_VIRTUAL_OFFSET);
     }
 
     if (!mb_has_mods(mbi) || mbi->mods_count == 0)
         return 0;
 
     /* Translate physical mods_addr array to higher-half virtual address */
-    auto mods = (struct multiboot_module *)((uintptr_t)mbi->mods_addr + HIGHER_HALF_OFFSET);
+    auto mods = (struct multiboot_module *)((uintptr_t)mbi->mods_addr + KERNEL_VIRTUAL_OFFSET);
 
     for (auto i = 0u; i < mbi->mods_count; i++) {
         auto mod = &mods[i];
 
         if (cb) {
             struct multiboot_parsed_module parsed;
-            parsed.start_addr = (const void *)((uintptr_t)mod->mod_start + HIGHER_HALF_OFFSET);
-            parsed.end_addr = (const void *)((uintptr_t)mod->mod_end + HIGHER_HALF_OFFSET);
+            parsed.start_addr = (const void *)((uintptr_t)mod->mod_start + KERNEL_VIRTUAL_OFFSET);
+            parsed.end_addr = (const void *)((uintptr_t)mod->mod_end + KERNEL_VIRTUAL_OFFSET);
             parsed.size = (size_t)(mod->mod_end - mod->mod_start);
 
             /* Translate physical cmdline pointer to higher-half virtual address */
-            parsed.cmdline = mod->cmdline ? (const char *)((uintptr_t)mod->cmdline + HIGHER_HALF_OFFSET) : "";
+            parsed.cmdline = mod->cmdline ? (const char *)((uintptr_t)mod->cmdline + KERNEL_VIRTUAL_OFFSET) : "";
 
             cb(&parsed, i, data);
         }

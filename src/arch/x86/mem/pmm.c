@@ -45,3 +45,15 @@ void pmm_free_frame(uint32_t frame_addr) {
     if (frame < total_frames)
         physical_mem_bitmap[frame / 8] &= ~(1U << (frame % 8));
 }
+
+void pmm_reserve_phys(uint32_t phys_addr, uint32_t size) {
+    if (size == 0)
+        return;
+
+    uint32_t start_frame = phys_addr / PAGE_SIZE;
+    uint32_t end_frame = (phys_addr + size - 1) / PAGE_SIZE;
+
+    for (uint32_t i = start_frame; i <= end_frame; i++)
+        if (i < total_frames)
+            physical_mem_bitmap[i / 8] |= (1U << (i % 8));
+}

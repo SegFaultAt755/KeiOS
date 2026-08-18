@@ -13,6 +13,7 @@
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
+#include "kernel/rsdp.h"
 #include "kernel/shell/shell.h"
 #include "kernel/userspace/enter.h"
 
@@ -23,6 +24,7 @@
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
 #include "arch/x86/vmm.h"
+#include "arch/x86/pmm.h"
 #else
 #error "Unsupported architecture! (i386 is available)"
 #endif
@@ -32,12 +34,8 @@
 #include "kernel/core/mods.h"
 #include "kernel/core/time.h"
 
-#define MULTIBOOT_MAGIC 0x2BADB002
-
-extern uint32_t _kernel_start;
-
 [[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *mbi) {
-    if (magic != MULTIBOOT_MAGIC)
+    if (magic != 0x2BADB002)
         goto halt;
 
     /* Early initialization */
@@ -45,12 +43,21 @@ extern uint32_t _kernel_start;
     idt_init();
     cpu_feat_init();
 
+    uintptr_t rsdp_addr = find_rsdp_addr();
+    if (rsdp_addr == 0)
+        qemu_printf(QEMU_KERN, QEMU_ERROR, "Failed to find RSDP start address");
+    else
+        qemu_printf(QEMU_KERN, QEMU_OK, "RSDP start address found at %p", rsdp_addr);
+
     /* Memory */
     struct multiboot_info *mbi_virt = mbi;
     if ((uintptr_t)mbi < KERNEL_VIRTUAL_OFFSET)
         mbi_virt = (struct multiboot_info *)((uintptr_t)mbi + KERNEL_VIRTUAL_OFFSET);
 
     mem_init(mbi_virt);
+
+    if (rsdp_addr != 0)
+        pmm_reserve_phys(rsdp_addr, 20);
 
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
