@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="220" viewBox="0 0 470 210">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#581C87"/>
+      <stop offset="100%" stop-color="#0D1117"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#bgGlow)" rx="6" />
+
+  <text font-family="'Courier New', Courier, monospace" font-size="12" xml:space="preserve">
+    <tspan x="15" y="25" fill="#581C87">       ▄▄ ▄          ▄▄ ▄                 ▄▄ ▄          ▄▄ ▄ </tspan>
+    <tspan x="15" y="40" fill="#7E22CE">     ▄▄▀▀ ██       ▄▄██ ██  ▄▄ ▄        ▄▄██ ██       ▄▄▀▀ ▓▓</tspan>
+    <tspan x="15" y="55" fill="#9333EA">    ▄█▀ ▄  ▀     ▄▄▀▀██ ██  ██░██     ▄▄▀▀██ ██     ▄▄▀▀ ▄  ▀</tspan>
+    <tspan x="15" y="70" fill="#C084FC">▄▄ ▄██▄▄█ █▄   ▄▄▀▀  ██ ██  ██ █▓   ▄▄▀▀▄ ██ ██   ▄▄▀▀ ▄▄█ █▄</tspan>
+    <tspan x="15" y="85" fill="#E9D5FF">██▒ █████ ██  ▄█▀ ▄▓ ██ ██  ██ ▓▓  ▄█▀▄▓▀ ██ ██  ▄█▀ ▄▄███ ██</tspan>
+    <tspan x="15" y="100" fill="#E9D5FF">██▄▄▀▀ ██ ██  ██ ▓▀  ██ ██  ██ ▓█  ██ ▄▀  ██ ██  ██▄▄▀▀ ██ ██</tspan>
+    <tspan x="15" y="115" fill="#C084FC">██▀▀▄▓ ██ ██  ██ ▒ ▄▄▀▀ ██  ██ █▓  ██ █▓  ██ ██  ██▀▀▄▓ ██ ██</tspan>
+    <tspan x="15" y="130" fill="#C084FC">██▄▀█▀ ██ ██  ██ ▄▄▀▀ ▄  ▀  ██ ▓▒  ██ ██  ██ ██  ▀▀▄▀▀  ██ ██</tspan>
+    <tspan x="15" y="145" fill="#9333EA">██ █▄  █▀ ██  ██▄▀▀ ▄▄▀ █▄  ██ ▒▒  ██ █▓ ▄█▀ ██        ▄█▀ ██</tspan>
+    <tspan x="15" y="160" fill="#7E22CE">██ ▓▓  ▀ ▄▒▀  ██▀ ▄▄▀▀ ▄▒▀  ██ ▒▒  ██ ▓▄▄▀▀ ▄▒▀  ▄█ ▒▄▄▀▀ ▄▒▀</tspan>
+    <tspan x="15" y="175" fill="#7E22CE">██ ▒▒         ██▄▄▀▀ ▄█▀    ▀▀ ▄▄  ██▄▄▀▀ ▄█▀    ██▄▄▀▀ ▄█▀</tspan>
+    <tspan x="15" y="190" fill="#581C87">██ ▒▒         ██▀▀ ▄█▀        ▀▀   ██▀▀ ▄█▀      ██▀▀ ▄█▀</tspan>
+  </text>
+</svg>

@@ -1,8 +1,12 @@
-# KeiOS
+<div align="center">
 
-![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green) ![Experimental](https://img.shields.io/badge/status-experimental-orange) ![In Development](https://img.shields.io/badge/status-in--development-yellow)
+![KEIOS-BANNER](./keios-banner.svg)
 
-> 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
+![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue?logo=intel&logoColor=white) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green?logo=opensourceinitiative&logoColor=white)
+
+### 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
+
+</div>
 
 ---
 
