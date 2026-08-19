@@ -10,9 +10,10 @@
 
 # 🗺️ Table of Contents
 
-|||
-| :--- | :--- |
+**Select a section link below to navigate directly to it**
+
 | [🎯 Project Vision](#-project-vision) | [🏃 Build and Run](#-build-and-run) |
+| :--- | :--- |
 | [🚀 Key Features](#-key-features) | [⚙️ Compile](#1-compile-the-os) |
 | [📂 Project Structure](#-project-structure) | [🚀 Launch](#2-launch-in-emulator) |
 | [🖥️ Emulating System Environment](#%EF%B8%8F-emulating-system-environment) | [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls) |
