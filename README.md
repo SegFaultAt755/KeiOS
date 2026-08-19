@@ -2,29 +2,23 @@
 
 ![KEIOS-BANNER](./keios-banner.svg)
 
-![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue?logo=intel&logoColor=white) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green?logo=opensourceinitiative&logoColor=white)
+![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue?logo=intel&logoColor=white) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green?logo=opensourceinitiative&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-1.95-orange?logo=rust) ![C23](https://img.shields.io/badge/C23-Standard-blue?logo=c)
 
 ### 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
 
-</div>
-
 ---
 
-## 🗺️ Table of Contents
+# 🗺️ Table of Contents
 
-- [🎯 Project Vision](#-project-vision)
-- [🚀 Key Features](#-key-features)
-- [📂 Project Structure](#-project-structure)
-- [🖥️ Emulating System Environment](#%EF%B8%8F-emulating-system-environment)
-- [🛠️ Prerequisites](#%EF%B8%8F-prerequisites)
-  - [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian)
-  - [🪟 Windows (WSL2 / Docker)](#-windows-wsl2--docker)
-- [🏃 Build and Run](#-build-and-run)
-  - [⚙️ Compile](#1-compile-the-os)
-  - [🚀 Launch](#2-launch-in-emulator)
-  - [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls)
-- [💬 Final Words](#-final-words)
-- [📄 License](#-license)
+|||
+| :--- | :--- |
+| [🎯 Project Vision](#-project-vision) | [🏃 Build and Run](#-build-and-run) |
+| [🚀 Key Features](#-key-features) | [⚙️ Compile](#1-compile-the-os) |
+| [📂 Project Structure](#-project-structure) | [🚀 Launch](#2-launch-in-emulator) |
+| [🖥️ Emulating System Environment](#%EF%B8%8F-emulating-system-environment) | [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls) |
+| [🛠️ Prerequisites](#%EF%B8%8F-prerequisites) | [💬 Final Words](#-final-words) |
+| [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian) | [📄 License](#-license) |
+| [🪟 Windows (WSL2 / Docker)](#-windows-wsl2--docker) | |
 
 ---
 
@@ -44,6 +38,8 @@ The primary goal of KeiOS is to serve as an experimental lab environment. Its st
 ---
 
 ## 📂 Project Structure
+
+</div>
 
 ```txt
 KeiOS/
