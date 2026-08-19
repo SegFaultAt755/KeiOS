@@ -40,8 +40,6 @@ The primary goal of KeiOS is to serve as an experimental lab environment. Its st
 
 ## 📂 Project Structure
 
-</div>
-
 ```txt
 KeiOS/
 ├── bin/                                # Compiled binary artifacts
@@ -299,3 +297,5 @@ Then re-clone the repository or fix individual files using `dos2unix`
 ## 📄 License
 
 This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the `LICENSE.md` file for more details
+
+</div>
