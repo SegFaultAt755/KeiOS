@@ -382,6 +382,6 @@ Then re-clone the repository or fix individual files using `dos2unix`
 
 # 📄 License
 
-This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the `LICENSE.md` file for more details
-
 </div>
+
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the `LICENSE.md` file for more details
