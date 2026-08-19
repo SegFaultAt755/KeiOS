@@ -8,4 +8,21 @@
 #define RSDP_SIGNATURE "RSD PTR "
 #define RSDP_SIGNATURE_LEN 8
 
+struct [[gnu::packed]] rsdp {
+    char signature[8];
+    uint8_t checksum;
+    char oem_id[6];
+    uint8_t revision;
+    uint32_t rsdt_address;
+};
+
+struct [[gnu::packed]] rsdp20 {
+    struct rsdp first_part;
+    uint32_t length;
+    uint64_t xsdt_address;
+    uint8_t extended_checksum;
+    uint8_t reserved[3];
+};
+
 uint32_t *find_rsdp_addr(void);
+void parse_rsdp(uint32_t *rsdp_addr);

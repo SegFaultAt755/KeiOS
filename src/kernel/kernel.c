@@ -23,8 +23,8 @@
 #include "arch/x86/idt.h"
 #include "arch/x86/isr.h"
 #include "arch/x86/mem.h"
-#include "arch/x86/vmm.h"
 #include "arch/x86/pmm.h"
+#include "arch/x86/vmm.h"
 #else
 #error "Unsupported architecture! (i386 is available)"
 #endif
@@ -60,6 +60,8 @@
     if ((uintptr_t)rsdp_addr < KERNEL_VIRTUAL_OFFSET)
         rsdp_addr_virt = (uint32_t *)((uintptr_t)rsdp_addr + KERNEL_VIRTUAL_OFFSET);
 
+    parse_rsdp(rsdp_addr_virt);
+
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
     qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] Info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
@@ -69,7 +71,7 @@
     /* Iterate through RSDP */
     for (uint8_t i = 0; i < 5; i++) {
         uint32_t val = rsdp_addr_virt[i];
-        qemu_printf(QEMU_KERN, QEMU_OK, "[RSDP] Flag [%d]: 0x%x", i+1, val);
+        qemu_printf(QEMU_KERN, QEMU_OK, "[RSDP] Flag [%d]: 0x%x", i + 1, val);
     }
 
     /* Hardware and drivers */
