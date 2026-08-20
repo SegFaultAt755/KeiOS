@@ -4,6 +4,12 @@
 #include "kernel/acpi.h"
 #include "libkern/string.h"
 
+#if defined(__i386__) || defined(_M_IX86)
+#include "arch/x86/mem.h"
+#else
+#error "Unsupported architecture! (i386 is available)"
+#endif
+
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
     int pointer_size = is_xsdt ? 8 : 4;
     int entries = (table->length - sizeof(struct acpi_header)) / pointer_size;
@@ -17,12 +23,15 @@ struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
         else
             phys_addr = *(uint32_t *)(pointer_array + i * 4);
 
-        /* TODO: Map phys_addr to vmem */
-        struct acpi_header *table = (struct acpi_header *)phys_addr;
+        struct acpi_header *table = (struct acpi_header *)(phys_addr + KERNEL_VIRTUAL_OFFSET);
 
         if (strncmp(table->signature, "FACP", 4) == 0)
             return table;
     }
 
     return nullptr;
+}
+
+void enable_acpi_mode([[maybe_unused]] struct fadt *fadt) {
+    /* TODO: Implement */
 }

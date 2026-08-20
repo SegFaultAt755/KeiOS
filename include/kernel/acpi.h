@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#define ACPI_SCI_EN (1 << 0)
+
 struct [[gnu::packed]] acpi_header {
     char signature[4];
     uint32_t length;
@@ -17,4 +19,25 @@ struct [[gnu::packed]] acpi_header {
     uint32_t creator_revision;
 };
 
+struct fadt {
+    struct acpi_header header;
+    uint32_t firmware_ctrl;
+    uint32_t dsdt;
+    uint8_t  reserved1;
+    uint8_t  preferred_pm_profile;
+    uint16_t sci_int;            /* System Control Interrupt vector */
+    uint32_t smi_cmd;            /* SMI Command Port */
+    uint8_t  acpi_enable;        /* Value to write to smi_cmd to enable ACPI */
+    uint8_t  acpi_disable;       /* Value to write to smi_cmd to disable ACPI */
+    uint8_t  s4bios_req;
+    uint8_t  pstate_cnt;
+    uint32_t pm1a_evt_blk;       /* PM1a Event Block I/O port */
+    uint32_t pm1b_evt_blk;       /* PM1b Event Block I/O port */
+    uint32_t pm1a_cnt_blk;       /* PM1a Control Block I/O port */
+    uint32_t pm1b_cnt_blk;       /* PM1b Control Block I/O port */
+    uint32_t pm2_cnt_blk;
+    uint32_t pm_tmr_blk;         /* ACPI Power Management Timer port */
+};
+
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt);
+void enable_acpi_mode(struct fadt *fadt);

@@ -25,4 +25,3 @@ struct [[gnu::packed]] rsdp20 {
 };
 
 uint32_t *find_rsdp_addr(void);
-void parse_rsdp(uint32_t *rsdp_addr);

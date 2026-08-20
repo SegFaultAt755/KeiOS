@@ -14,6 +14,7 @@
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "kernel/rsdp.h"
+#include "kernel/acpi.h"
 #include "kernel/shell/shell.h"
 #include "kernel/userspace/enter.h"
 
@@ -45,10 +46,12 @@
 
     uint32_t *rsdp_addr = find_rsdp_addr();
     if (rsdp_addr == nullptr)
-        qemu_printf(QEMU_KERN, QEMU_ERROR, "Failed to find RSDP start address");
+        KERNEL_PANIC("Failed to find RSDP start address", "Incompatible device or BIOS failed to load data onto memory");
     else
         qemu_printf(QEMU_KERN, QEMU_OK, "RSDP start address found at %p", rsdp_addr);
 
+    struct rsdp *rsdp = (struct rsdp *)((uintptr_t)rsdp_addr + KERNEL_VIRTUAL_OFFSET);
+    
     /* Memory */
     struct multiboot_info *mbi_virt = mbi;
     if ((uintptr_t)mbi < KERNEL_VIRTUAL_OFFSET)
@@ -56,23 +59,34 @@
 
     mem_init(mbi_virt);
 
-    uint32_t *rsdp_addr_virt = rsdp_addr;
-    if ((uintptr_t)rsdp_addr < KERNEL_VIRTUAL_OFFSET)
-        rsdp_addr_virt = (uint32_t *)((uintptr_t)rsdp_addr + KERNEL_VIRTUAL_OFFSET);
+    /* Determine XSDT or RSDT */
+    bool is_xsdt = (rsdp->revision >= 2);
+    uintptr_t root_phys_addr = 0;
 
-    parse_rsdp(rsdp_addr_virt);
+    if (is_xsdt) {
+        struct rsdp20 *rsdp20 = (struct rsdp20 *)rsdp;
+        root_phys_addr = (uintptr_t)rsdp20->xsdt_address + KERNEL_VIRTUAL_OFFSET;
+    } else {
+        root_phys_addr = (uintptr_t)rsdp->rsdt_address + KERNEL_VIRTUAL_OFFSET;
+    }
+
+    /* Map root table into virtual memory */
+    struct acpi_header *root_table = (struct acpi_header *)root_phys_addr;
+
+    struct acpi_header *fadt_header = find_fadt(root_table, is_xsdt);
+    if (!fadt_header)
+        KERNEL_PANIC("Failed to find FACP signature in root table", "Invalid root table from RSPD");
+
+    struct fadt *fadt = (struct fadt *)fadt_header;
+    enable_acpi_mode(fadt);
+
+    qemu_printf(QEMU_KERN, QEMU_OK, "ACPI enabled");
 
     /* Modules and filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
     qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] Info: addr=%p flags=%u count=%u", mbi_virt, mbi_virt->flags, mod_count);
 
     cpio_parse(cpio_cb, nullptr);
-
-    /* Iterate through RSDP */
-    for (uint8_t i = 0; i < 5; i++) {
-        uint32_t val = rsdp_addr_virt[i];
-        qemu_printf(QEMU_KERN, QEMU_OK, "[RSDP] Flag [%d]: 0x%x", i + 1, val);
-    }
 
     /* Hardware and drivers */
     pit_init(1193, pit_cb);
