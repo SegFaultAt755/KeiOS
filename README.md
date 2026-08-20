@@ -12,6 +12,8 @@
 
 </div>
 
+<div align="center">
+
 **Select a section link below to navigate directly to it**
 
 | [🎯 Project Vision](#-project-vision) | [🏃 Build and Run](#-build-and-run) |
@@ -22,6 +24,8 @@
 | [🛠️ Prerequisites](#%EF%B8%8F-prerequisites) | [💬 Final Words](#-final-words) |
 | [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian) | [📄 License](#-license) |
 | [🪟 Windows (WSL2 / Docker)](#-windows-wsl2--docker) | |
+
+</div>
 
 ---
 
@@ -101,12 +105,16 @@ KeiOS/
 
 To accurately reproduce the performance, bottlenecks, and hardware constraints of early-2010s netbooks (such as the classic ASUS Eee PC or Acer Aspire One), the virtual machine configuration is intentionally restricted. The profiles below are tailored for **QEMU** and **VirtualBox** to replicate the baseline environment of a first-generation Intel Atom device:
 
+<div align="center">
+
 | **Component** | **Specification** | **Emulation Target**                  |
 | ------------- | ----------------- | ------------------------------------- |
 | **CPU**       | 1 vCPU            | Mimics a single-core Intel Atom       |
 | **Memory**    | 4GB RAM           | Standard capacity for Windows XP      |
 | **Boot mode** | SeaBios           | Legacy boot environment               |
 | **Storage**   | 8GB HDD           | Replicates early low-capacity storage |
+
+</div>
 
 ---
 
