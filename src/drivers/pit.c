@@ -17,7 +17,7 @@ void pit_init(uint32_t freq, void (*callback)(struct registers *regs)) {
     auto l = (uint8_t)(divisor & 0xFF);
     auto h = (uint8_t)((divisor >> 8) & 0xFF);
 
-    /* Send the frequency divisor */
+    /* Send the frequency divisor to the PIT */
     outb(0x40, l);
     outb(0x40, h);
 

@@ -23,7 +23,7 @@ struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
         else
             phys_addr = *(uint32_t *)(pointer_array + i * 4);
 
-        struct acpi_header *table = (struct acpi_header *)(phys_addr + KERNEL_VIRTUAL_OFFSET);
+        struct acpi_header *table = (struct acpi_header *)ADD_KERNEL_OFFSET(phys_addr);
 
         if (strncmp(table->signature, "FACP", 4) == 0)
             return table;
@@ -33,5 +33,5 @@ struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
 }
 
 void enable_acpi_mode([[maybe_unused]] struct fadt *fadt) {
-    /* TODO: Implement */
+    /* TODO: Implement ACPI shutdown support */
 }

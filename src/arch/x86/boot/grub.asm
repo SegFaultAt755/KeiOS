@@ -1,7 +1,7 @@
 ; SPDX-License-Identifier: GPLv3
 ; Copyright (C) 2026 KeiOS Developers
 
-; Declare constants
+; Define constants used by the boot code
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
 MBUSEGFX equ  1 << 2
@@ -9,7 +9,7 @@ MBFLAGS  equ  MBALIGN | MEMINFO
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
 
-; Declare multiboot header
+; Define the Multiboot header
 section .multiboot
 align 4
 	dd MAGIC
@@ -22,7 +22,7 @@ align 4
     dd 768
     dd 32
 
-; Align the stack
+; Align the stack before entering C code
 section .bss
     align 16
 stack_bottom:

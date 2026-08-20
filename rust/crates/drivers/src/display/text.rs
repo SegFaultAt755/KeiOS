@@ -3,7 +3,7 @@ use super::display::Display;
 // SPDX-License-Identifier: GPLv3
 // Copyright (C) 2026 KeiOS Developers
 
-/* ASCII characters from 32-127 (include space and exclude DEL) */
+/* ASCII characters 32 through 126, including space and excluding DEL */
 #[allow(unused)]
 type Resolution = u16;
 

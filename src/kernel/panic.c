@@ -61,7 +61,7 @@ static void display_panic_text(const char *reason, const char *desc, const char 
 
 static void display_panic_gfx([[maybe_unused]] const char *reason, [[maybe_unused]] const char *desc,
                               [[maybe_unused]] const char *file, [[maybe_unused]] uint32_t line) {
-    /* Assume that display is already initialized */
+    /* The display should already be initialized */
     display_clear(0x00'00'00'FF);
 }
 
@@ -70,7 +70,7 @@ static void display_panic_gfx([[maybe_unused]] const char *reason, [[maybe_unuse
     qemu_printf(QEMU_KERN, QEMU_PANIC, "Kernel panic: %s (description: %s, file: %s, line: %d)", reason, desc, file,
                 line);
 
-    /* Either of both should work */
+    /* Either method should work */
     display_panic_text(reason, desc, file, line);
     display_panic_gfx(reason, desc, file, line);
 

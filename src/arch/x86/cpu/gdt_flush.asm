@@ -7,7 +7,7 @@ gdt_flush:
     mov eax, [esp+4]
     lgdt [eax]
 
-    ; Update registers
+    ; Load the new segment registers
     mov ax, 0x10
     mov ds, ax
     mov es, ax

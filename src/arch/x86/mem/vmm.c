@@ -26,7 +26,7 @@ uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
     dir[0] = 0;
     invalidate(0);
 
-    /* Recursive page directory mapping */
+    /* Map the page directory into itself for recursive access */
     auto physical_dir_addr = (uint32_t)dir - KERNEL_VIRTUAL_OFFSET;
     dir[1023] = (physical_dir_addr & PDE_FRAME) | PDE_PRESENT | PDE_RW;
     invalidate(KERNEL_VIRTUAL_OFFSET);
@@ -43,7 +43,7 @@ uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
 [[nodiscard]] bool vmm_map_page(uint32_t virt_addr, uint32_t phys_addr, uint32_t flags) {
     uint32_t *pde = get_pde(virt_addr);
 
-    /* Check if the page table exists, if not, allocate a physical frame for it */
+    /* If the page table does not exist, allocate a physical frame for it */
     if (!(*pde & PDE_PRESENT)) {
         auto new_table_phys = pmm_alloc_frame();
         if (new_table_phys == 0)

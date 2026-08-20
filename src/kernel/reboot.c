@@ -6,27 +6,24 @@
 #include "kernel/interrupts.h"
 
 [[noreturn]] void reboot() {
-    /* Gracefully shutdown components */
-    /* None yet */
+    /* Shut down available components gracefully */
+    /* No component shutdown is needed yet */
 
     reboot_raw();
 }
 
 [[noreturn]] void reboot_raw() {
-    /* Try via keyboard controller */
+    /* Try to reboot through the keyboard controller */
     outb(0x64, 0xFE);
 
-    /* Try via PCI register */
+    /* Try to reboot through the PCI reset register */
     outb(0xCF9, 0x0E);
 
-    /* Perform a warm restart (preserves memory and cache) */
-    /* outb(0xCF9, 0x06); */
-
-    /* Try via fast reset */
+    /* Try the fast reset method */
     auto val = inb(0x92);
     outb(0x92, val | 0x01);
 
-    /* Final option */
+    /* Use the final reset method */
     struct [[gnu::packed]] {
         uint16_t limit;
         uint32_t base;

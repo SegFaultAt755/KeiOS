@@ -16,7 +16,7 @@ void mod_cb(struct multiboot_parsed_module *mod, uint32_t idx, [[maybe_unused]] 
     qemu_printf(QEMU_KERN, QEMU_INFO, "[MB] Module %u: vaddr=%p size=%u cmd='%s'", idx, (void *)mod_virt_start,
                 mod->size, cmdline_virt);
 
-    /* Parse the initramfs payload */
+    /* Parse the initramfs data */
     static const char initramfs_cmd[] = "initramfs";
     if (strcmp(cmdline_virt, initramfs_cmd) == 0) {
         struct cpio_info info;

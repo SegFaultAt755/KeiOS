@@ -50,7 +50,7 @@ int gfx_init(struct multiboot_info *mbi) {
 
         auto map_success = true;
 
-        /* Loop through the entire size of the framebuffer and map it page by page */
+        /* Map the entire framebuffer one page at a time */
         for (auto offset = 0u; offset < fbo_size; offset += PAGE_SIZE) {
             if (!vmm_map_page(virt_addr + offset, phys_addr + offset, PTE_PRESENT | PTE_RW | PTE_PWT)) {
                 map_success = false;

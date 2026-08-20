@@ -24,7 +24,7 @@ pub unsafe fn get_display() -> Option<&'static mut Display> {
     (*raw_ptr).as_mut()
 }
 
-// Core & Shape FFI exports
+// Core and shape functions exported through the C FFI
 #[unsafe(no_mangle)]
 pub extern "C" fn display_init(info: DisplayInfo) -> i32 {
     if info.lfb_addr.is_null() || info.width == 0 || info.height == 0 {
@@ -83,7 +83,7 @@ pub extern "C" fn display_fill_rect(x: i32, y: i32, width: u32, height: u32, col
     }
 }
 
-// Getters
+// Functions that read display state
 #[unsafe(no_mangle)]
 pub extern "C" fn display_get_width() -> u32 {
     unsafe { get_display().map(|d| d.width()).unwrap_or(0) }
@@ -136,7 +136,7 @@ pub extern "C" fn display_get_pixel(x: i32, y: i32, out_color: *mut u32) -> i32 
     }
 }
 
-// Setters
+// Functions that change display state
 #[unsafe(no_mangle)]
 pub extern "C" fn display_set_lfb_addr(new_lfb: *mut u32) {
     if new_lfb.is_null() {

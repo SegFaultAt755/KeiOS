@@ -29,7 +29,7 @@ void *memmove(void *dest, const void *src, size_t n) {
     if (d == s)
         return dest;
 
-    /* Check for overlap */
+    /* Check whether the memory ranges overlap */
     if (d > s && d < s + n) {
         d += n;
         s += n;

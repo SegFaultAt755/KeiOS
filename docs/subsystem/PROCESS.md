@@ -53,13 +53,13 @@ enum task_state {
 };
 
 struct task {
-    uint32_t pid;             /* Unique process ID */
+    uint32_t pid;             /* Unique process identifier */
     task_state state;         /* Current execution state */
-    page_dir_t *page_dir;     /* Physical address of task cr3 directory */
-    uint32_t kernel_stack;    /* Base pointer to kernel stack (tss esp0) */
-    uint32_t user_stack;      /* Base pointer to user stack (ring 3) */
-    struct registers context; /* Saved registers during context switch */
-    struct task *next;        /* Link to next task in scheduler queue */
+    page_dir_t *page_dir;     /* Physical address of the task's CR3 directory */
+    uint32_t kernel_stack;    /* Base of the kernel stack (TSS ESP0) */
+    uint32_t user_stack;      /* Base of the user stack (ring 3) */
+    struct registers context; /* Registers saved during a context switch */
+    struct task *next;        /* Link to the next task in the scheduler queue */
 };
 `````
 

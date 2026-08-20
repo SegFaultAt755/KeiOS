@@ -14,7 +14,7 @@ uint32_t *find_rsdp_addr(void) {
         char *p = (char *)addr;
 
         if (memcmp(p, RSDP_SIGNATURE, RSDP_SIGNATURE_LEN) == 0) {
-            /* Verify checksum before accepting the structure */
+            /* Verify the checksum before accepting this structure */
             uint8_t sum = 0;
             for (size_t i = 0; i < 20; i++)
                 sum += ((uint8_t *)p)[i];

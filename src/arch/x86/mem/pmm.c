@@ -15,14 +15,14 @@ void pmm_init(uint64_t mem_high_point, uint32_t physical_alloc_start) {
     auto page_frame_min = ((physical_alloc_start + PAGE_SIZE) - 1) / PAGE_SIZE;
     total_frames = (mem_high_point > MAX_PHYSICAL_BYTES ? MAX_PHYSICAL_BYTES : mem_high_point) / PAGE_SIZE;
 
-    /* Mark everything as free initially */
+    /* Mark all pages as free at first */
     memset(physical_mem_bitmap, 0, sizeof(physical_mem_bitmap));
 
-    /* Mark unusable high memory past detected ram as allocated */
+    /* Mark high memory beyond detected RAM as unavailable */
     for (auto i = total_frames; i < TOTAL_PAGES; i++)
         physical_mem_bitmap[i / 8] |= (1U << (i % 8));
 
-    /* Protect kernel, modules, lower memory structures from being overwritten */
+    /* Protect the kernel, modules, and low-memory structures from being overwritten */
     for (auto i = 0u; i < page_frame_min; i++)
         physical_mem_bitmap[i / 8] |= (1U << (i % 8));
 
@@ -37,7 +37,7 @@ void pmm_init(uint64_t mem_high_point, uint32_t physical_alloc_start) {
         }
     }
 
-    return 0; /* Out of memory */
+    return 0; /* No free memory is available */
 }
 
 void pmm_free_frame(uint32_t frame_addr) {

@@ -18,23 +18,23 @@
 extern void jump_to_user(struct user_program_regs *, uint32_t);
 
 void execute_init_binary(void *cpio_binary, uint32_t binary_size) {
-    /* Map user space memory */
+    /* Map memory for user space */
     uint32_t num_pages = (binary_size + PAGE_SIZE - 1) / PAGE_SIZE;
     for (uint32_t i = 0; i < num_pages; i++) {
-        uint32_t vaddr = i * PAGE_SIZE; /* Starts exactly at 0 */
+        uint32_t vaddr = i * PAGE_SIZE; /* Start at virtual address 0 */
         uint32_t phys = pmm_alloc_frame();
         vmm_map_page(vaddr, phys, PTE_PRESENT | PTE_RW | PTE_USER);
     }
 
-    /* Copy a init binary to 0 */
+    /* Copy the init program to virtual address 0 */
     memcpy((void *)0, cpio_binary, binary_size);
 
-    /* Allocation and map userspace stack */
+    /* Allocate and map the user-space stack */
     uint32_t stack_phys = pmm_alloc_frame();
     uint32_t stack_bottom_vaddr = KERNEL_VIRTUAL_OFFSET - PAGE_SIZE;
     vmm_map_page(stack_bottom_vaddr, stack_phys, PTE_PRESENT | PTE_RW | PTE_USER);
 
-    /* Configure regs and jump */
+    /* Set the registers and jump to user space */
     struct user_program_regs regs;
     regs.eip = 0x0;
     regs.cs = USER_CS;

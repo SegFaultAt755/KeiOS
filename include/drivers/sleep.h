@@ -7,10 +7,10 @@
 
 /*
     Note:
-        Using sleep or sleep_ms takes 100% CPU usage, that means everything is stopped until they return
-        Better to use PIT in most of situations.
-        Functions sleep_initialize and sleep_deinitialize are optional, they enable and disable channel 2
-        which is working for pc speaker
+        sleep and sleep_ms use 100% CPU time, so other work stops until they return.
+        Use the PIT directly in most situations.
+        sleep_init and sleep_deinitialize are optional. They enable and disable channel 2,
+        which drives the PC speaker
 */
 
 void sleep_init(void);

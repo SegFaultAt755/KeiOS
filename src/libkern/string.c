@@ -73,7 +73,7 @@ char *strtok(char *str, const char *delim) {
     if (!next)
         return nullptr;
 
-    /* Skip leading delimiters */
+    /* Skip delimiters at the start of the string */
     while (*next) {
         auto d = delim;
         bool is_delim = false;
@@ -96,7 +96,7 @@ char *strtok(char *str, const char *delim) {
 
     auto token = next;
 
-    /* Find end of token */
+    /* Find the end of the current token */
     while (*next) {
         auto d = delim;
         while (*d) {
@@ -169,7 +169,7 @@ void itoa(int val, char *buf, int base) {
 
     buf[i] = '\0';
 
-    /* Reverse */
+    /* Reverse the string */
     for (int j = 0; j < i / 2; j++) {
         char tmp = buf[j];
         buf[j] = buf[i - 1 - j];
@@ -190,16 +190,16 @@ int uvalue_to_str(char *buf, unsigned long long int val, int base, int min_w, bo
         }
     }
 
-    /* Apply zero padding */
+    /* Add leading zeroes when padding is requested */
     while (i < min_w && i < 32 && zpad)
         buf[i++] = '0';
 
-    /* Reverse the buffer */
+    /* Reverse the output buffer */
     for (int j = 0; j < i / 2; j++) {
         char tmp = buf[j];
         buf[j] = buf[i - 1 - j];
         buf[i - 1 - j] = tmp;
     }
 
-    return i; /* Returns length of the string */
+    return i; /* Return the string length */
 }

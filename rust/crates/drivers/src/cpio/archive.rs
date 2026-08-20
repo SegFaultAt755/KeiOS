@@ -25,7 +25,7 @@ impl<'a> CpioArchive<'a> {
         Self { data, offset: 0 }
     }
 
-    // Getters
+    // Functions that read archive state
     #[inline]
     pub fn offset(&self) -> usize {
         self.offset
@@ -41,7 +41,7 @@ impl<'a> CpioArchive<'a> {
         self.data.as_ptr()
     }
 
-    // Setters
+    // Functions that change archive state
     pub fn set_offset(&mut self, new_offset: usize) {
         if new_offset <= self.data.len() {
             self.offset = new_offset;
@@ -55,7 +55,7 @@ impl<'a> CpioArchive<'a> {
         }
     }
 
-    // Navigation operations
+    // Functions that move through archive entries
     #[inline]
     fn align_to_4(&self, val: usize) -> usize {
         (val + 3) & !3

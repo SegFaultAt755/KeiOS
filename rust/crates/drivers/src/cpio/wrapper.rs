@@ -29,7 +29,7 @@ pub unsafe fn get_archive() -> Option<&'static mut CpioArchive<'static>> {
     (*raw_ptr).as_mut()
 }
 
-// Core FFI exports
+// Core functions exported through the C FFI
 #[unsafe(no_mangle)]
 pub extern "C" fn cpio_init(info: CpioInfo) -> i32 {
     if info.base_addr.is_null() || info.size == 0 {
@@ -67,7 +67,7 @@ pub extern "C" fn cpio_parse(callback: CpioCallback, user_context: *mut c_void) 
     1
 }
 
-// Getters
+// Functions that read archive state
 #[unsafe(no_mangle)]
 pub extern "C" fn cpio_get_offset() -> usize {
     unsafe { get_archive().map(|a| a.offset()).unwrap_or(0) }
@@ -87,7 +87,7 @@ pub extern "C" fn cpio_get_base_addr() -> *const u8 {
     }
 }
 
-// Setters
+// Functions that change archive state
 #[unsafe(no_mangle)]
 pub extern "C" fn cpio_set_offset(new_offset: usize) {
     unsafe {

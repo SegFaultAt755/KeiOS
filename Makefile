@@ -3,16 +3,16 @@
 
 SHELL := /bin/sh
 
-# Toolchain configuration
+# Configure the toolchain
 TOOLCHAIN_PREFIX ?= i686-elf-
 AS := nasm
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
 
-# Load custom configuration
+# Load the custom configuration
 -include config.mk
 
-# Directory configuration
+# Define project directories
 BIN_DIR  := bin
 ISO_DIR  := keios
 INC_DIR  := include
@@ -20,18 +20,18 @@ SRC_DIR  := src
 FS_DIR   := rootfs
 USER_DIR := userspace
 
-# Target files
+# Define build output files
 LDSCRIPT  := linker.ld
 KERNEL    := keios.elf
 CPIO      := initramfs.cpio
 ISO_IMAGE := keios.iso
 
-# Custom preprocessor defines
+# Define custom preprocessor symbols
 ifneq ($(strip $(D)),)
     CUSTOM_DEFINES := $(foreach def,$(D),-D$(def))
 endif
 
-# Build flags
+# Define compiler and linker flags
 ASFLAGS ?= -f elf32 $(CUSTOM_DEFINES)
 CFLAGS  ?= -m32 -march=i686 -ffreestanding -nostdlib -O2 -Wall -Wextra \
            -fno-exceptions -g -std=c23 -I $(INC_DIR) -MMD -MP $(CUSTOM_DEFINES)
@@ -39,19 +39,20 @@ LDFLAGS ?= -m elf_i386 -static -z noexecstack -T $(LDSCRIPT)
 
 bin/libkern/math.o: CFLAGS += -msse
 
-# Standard POSIX File Utilities
+# Define standard POSIX file utilities
+# It still exists lol. I tried to add Windows support
 MKDIR = mkdir -p $1
 RM_RF = rm -rf $1
 RM_F  = rm -f $1
 CP    = cp $1 $2
 
-# Rust configuration
+# Configure the Rust build
 RUST_TARGET := i686-unknown-none
 RUST_DIR    := rust
 RUST_CRATES := drivers
 RUST_LIBS   := $(patsubst %, $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a, $(RUST_CRATES))
 
-# Source and object resolution
+# Find source files and map them to object files
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 USER_SUBDIRS := $(dir $(wildcard $(USER_DIR)/*/Makefile))
 
@@ -64,7 +65,7 @@ ASM_OBJS := $(patsubst $(SRC_DIR)/%.asm, $(BIN_DIR)/%.o, $(ASM_SRCS))
 OBJS := $(C_OBJS) $(ASM_OBJS) $(RUST_LIBS)
 DEPS := $(C_OBJS:.o=.d) $(ASM_OBJS:.o=.d)
 
-# Build rules
+# Define build rules
 .PHONY: all clean config help userspace FORCE_RUST
 
 all: $(ISO_IMAGE)
@@ -99,7 +100,7 @@ $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a: FORCE_RUST
 	@echo ">>> [RS]  Compiling Rust crate: $*"
 	@cd $(RUST_DIR) && cargo build --release -p $*
 
-# Generate a local configuration
+# Generate a local configuration file
 config:
 ifeq ($(wildcard config.mk),)
 	@echo ">>> Generating default config.mk..."

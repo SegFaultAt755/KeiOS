@@ -10,7 +10,7 @@ pub trait ShapeEngine {
 }
 
 impl ShapeEngine for Display {
-    // Draw a line using Bresenham algorithm
+    // Draw a line with the Bresenham algorithm
     fn draw_line(&mut self, mut x0: i32, mut y0: i32, x1: i32, y1: i32, color: Color) {
         let dx = (x1 - x0).abs();
         let dy = -(y1 - y0).abs();
@@ -36,7 +36,7 @@ impl ShapeEngine for Display {
         }
     }
 
-    // Draw a rectangle outline
+    // Draw the outline of a rectangle
     fn draw_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color) {
         let w = width as i32;
         let h = height as i32;
@@ -46,7 +46,7 @@ impl ShapeEngine for Display {
         self.draw_line(x + w - 1, y, x + w - 1, y + h - 1, color);
     }
 
-    // Draw a fill rectangle
+    // Draw a filled rectangle
     fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color) {
         for row in 0..height as i32 {
             for col in 0..width as i32 {

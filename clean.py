@@ -16,7 +16,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("KeiOS-Cleaner")
 
-# Never delete these even if matched by gitignore patterns
+# Never delete these files, even when a .gitignore pattern matches them
 PROTECTED_EXTENSIONS = {".md", ".txt", ".cfg", ".py", ".c", ".asm", ".h", ".ld", ".mk"}
 PROTECTED_DIRS = {".obsidian", ".vscode", ".git", "src", "include", "rootfs"}
 
@@ -37,7 +37,7 @@ def parse_gitignore_patterns(gitignore_path: Path) -> list[str]:
     with open(gitignore_path, "r", encoding="utf-8") as f:
         for line in f:
             clean_line = line.strip()
-            # Ignore empty lines, comments, and explicitly protected directories
+            # Ignore empty lines, comments, and protected directories
             if (
                 not clean_line
                 or clean_line.startswith("#")
@@ -110,7 +110,7 @@ def main() -> None:
 
     workspace_root = Path(__file__).parent.resolve()
 
-    # Execute Makefile clean rule
+    # Run the Makefile clean rule
     if not args.skip_make:
         make_cmd = get_make_command()
         logger.info(f"Executing '{make_cmd} clean'...")
@@ -122,10 +122,10 @@ def main() -> None:
             except subprocess.CalledProcessError as err:
                 logger.error(f"Make clean failed: {err.stderr.decode().strip()}")
 
-    # Clean defined artifacts from .gitignore
+    # Remove the artifacts listed in .gitignore
     clean_gitignore_artifacts(workspace_root, args.dry_run)
 
-    # Explicitly target disk and logs
+    # Remove disk images and logs explicitly
     if not args.skip_disk and args.disk_file.exists():
         safe_delete(args.disk_file, args.dry_run)
 

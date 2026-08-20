@@ -5,7 +5,7 @@
 #include "kernel/qemu.h"
 
 void cpu_feat_init() {
-    /* Enable legacy x87 fpu */
+    /* Enable the legacy x87 floating-point unit */
     uintptr_t cr0_val;
     __asm__ volatile("mov %%cr0, %0" : "=r"(cr0_val));
 

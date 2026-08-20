@@ -39,7 +39,14 @@ class ToolchainManager:
     @classmethod
     def build(cls, target: str, make_args: list[str]) -> None:
         make_cmd = cls.get_make_command()
-        cmd = [make_cmd, target] + make_args
+        has_jobs_flag = any(
+            arg == "-j"
+            or arg.startswith("-j")
+            or arg == "--jobs"
+            or arg.startswith("--jobs=")
+            for arg in make_args
+        )
+        cmd = [make_cmd, target] + ([] if has_jobs_flag else ["-j"]) + make_args
         logger.info(f"Building project: {' '.join(cmd)}")
         try:
             subprocess.run(cmd, check=True)
@@ -57,7 +64,7 @@ class QemuRunner:
         self.qemu_bin = f"qemu-system-{args.arch}"
 
     def ensure_disk(self) -> None:
-        # Create qcow2 virtual hard drive
+        # Create the QCOW2 virtual hard drive
         if self.args.disk_file.is_file():
             return
 

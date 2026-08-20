@@ -42,7 +42,7 @@ static void show_banner() {
 
     for (auto row = 0; row < 5; row++) {
         for (auto col = 0; banner[row][col] != '\0'; col++) {
-            /* Calculate the diagonal rainbow color */
+            /* Calculate the color along the diagonal rainbow */
             auto color_idx = (row + col) % 5;
             auto color = vga_entry_color(rainbow[color_idx], TERMINAL_DEFAULT_BG);
 
@@ -132,7 +132,7 @@ static void shell_set_current_line(const char *str) {
 
 void shell_key_handler(uint16_t key) {
     if (key == '\n') {
-        /* Move visual cursor to the very end of line before printing newline */
+        /* Move the visible cursor to the end of the line before printing a newline */
         while (input_pos < input_len) {
             terminal_cursor_right();
             input_pos++;
@@ -146,7 +146,7 @@ void shell_key_handler(uint16_t key) {
             strcpy(history_buffer[save_idx], input_buffer);
 
             history_count++;
-            history_index = history_count; /* Reset navigation index to newest */
+            history_index = history_count; /* Reset navigation to the newest entry */
 
             shell_execute(input_buffer);
         }
@@ -157,24 +157,24 @@ void shell_key_handler(uint16_t key) {
 
     } else if (key == '\b') {
         if (input_pos > 0) {
-            /* Shift buffer left to erase character at input_pos - 1 */
+            /* Shift the buffer left to erase the character before the cursor */
             for (auto i = input_pos - 1; i < input_len; i++)
                 input_buffer[i] = input_buffer[i + 1];
 
             input_pos--;
             input_len--;
 
-            /* Step cursor left once to begin redrawing from deletion point */
+            /* Move the cursor left to the point where the character was deleted */
             terminal_cursor_left();
 
-            /* Redraw tail of the string */
+            /* Redraw the rest of the string */
             for (auto i = input_pos; i < input_len; i++)
                 terminal_putchar(input_buffer[i]);
 
-            /* Overwrite old trailing character on screen with a whitespace */
+            /* Overwrite the old trailing character with a space */
             terminal_putchar(' ');
 
-            /* Return visual cursor back to the deletion point */
+            /* Move the visible cursor back to the deletion point */
             for (auto i = input_pos; i <= input_len; i++)
                 terminal_cursor_left();
         }
@@ -209,7 +209,7 @@ void shell_key_handler(uint16_t key) {
         }
 
     } else if (key >= 32 && key <= 126 && input_len < SHELL_INPUT_BUF_SIZE - 1) {
-        /* Shift buffer right from input_pos to make room for insertion */
+        /* Shift the buffer right from the cursor to make room for the new character */
         for (auto i = input_len; i > input_pos; i--)
             input_buffer[i] = input_buffer[i - 1];
 
@@ -218,18 +218,18 @@ void shell_key_handler(uint16_t key) {
         input_pos++;
         input_buffer[input_len] = '\0';
 
-        /* Redraw from inserted character to end of string */
+        /* Redraw from the inserted character to the end of the string */
         for (auto i = input_pos - 1; i < input_len; i++)
             terminal_putchar(input_buffer[i]);
 
-        /* Return visual cursor back to insertion position */
+        /* Move the visible cursor back to the insertion position */
         for (auto i = input_len; i > input_pos; i--)
             terminal_cursor_left();
     }
 }
 
 void shell_init() {
-    /* Show welcome message */
+    /* Show the welcome message */
     kprintf("Welcome to KeiOS %d.%d.%d! ", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     terminal_set_color(vga_entry_color(VGA_8B_LIGHT_RED, TERMINAL_DEFAULT_BG));
     kprintf("<3\n");

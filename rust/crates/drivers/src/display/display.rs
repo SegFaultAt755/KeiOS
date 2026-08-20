@@ -37,7 +37,7 @@ impl Display {
         }
     }
 
-    // Getters
+    // Functions that read display state
     #[inline]
     pub fn width(&self) -> u32 {
         self.width
@@ -67,7 +67,7 @@ impl Display {
         self.lfb
     }
 
-    // Setters
+    // Functions that change display state
     pub unsafe fn set_framebuffer(&mut self, new_lfb: *mut u32) {
         self.lfb = new_lfb;
     }
@@ -78,7 +78,7 @@ impl Display {
         self.pitch = pitch;
     }
 
-    // Rendering operations
+    // Functions that draw on the display
     #[inline]
     pub fn draw_pixel(&mut self, x: i32, y: i32, color: Color) {
         if x < 0 || y < 0 || x as u32 >= self.width || y as u32 >= self.height {

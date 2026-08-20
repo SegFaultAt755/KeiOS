@@ -18,7 +18,7 @@ impl<'a> CpioEntry<'a> {
         Self { header, name, data }
     }
 
-    // Getters
+    // Functions that read entry data
     #[inline]
     pub fn header(&self) -> CpioHeader {
         self.header

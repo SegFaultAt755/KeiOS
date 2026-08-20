@@ -7,7 +7,7 @@
 #include "kernel/qemu.h"
 #include "libkern/stdio.h"
 
-/* Scancode Set 1 (unshifted) */
+/* Scancode set 1 without the Shift key */
 constexpr static char sc1_unshifted[128] = {
     0,   0,   '1', '2', '3', '4', '5',  '6', '7', '8', '9', '0', '-', '=', '\b', 0,   'q', 'w', 'e',  'r', 't', 'y',
     'u', 'i', 'o', 'p', '[', ']', '\n', 0,   'a', 's', 'd', 'f', 'g', 'h', 'j',  'k', 'l', ';', '\'', '`', 0,   '\\',
@@ -16,7 +16,7 @@ constexpr static char sc1_unshifted[128] = {
     0,   0,   0,   0,   0,   0,   0,    0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,   0,    0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,    0,   0,   0,   0,   0,   0,   0,   0,    0,   0};
 
-/* Scancode Set 1 (shifted) */
+/* Scancode set 1 with the Shift key */
 constexpr static char sc1_shifted[128] = {
     0,   0,   '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0,   0,   'Q', 'W', 'E', 'R', 'T', 'Y',
     'U', 'I', 'O', 'P', '{', '}', 0,   0,   'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0,   '|',
@@ -73,21 +73,21 @@ static void clear_modifiers(uint8_t scancode) {
 static void keyboard_handler([[maybe_unused]] struct registers *regs) {
     auto scancode = inb(PS2_DATA_PORT);
 
-    /* Discard error bytes from controller */
+    /* Discard error bytes returned by the controller */
     if (scancode == 0x00 || scancode == 0xE1)
         return;
 
-    /* Extended scancode prefix — discard, next IRQ gets the real byte */
+    /* Ignore the extended scancode prefix; the next interrupt has the real byte */
     if (scancode == SC_EXTENDED) {
         extended_prefix = true;
         return;
     }
 
-    /* Handle extended scancodes (arrows, Right Ctrl/Alt, etc.) */
+    /* Handle extended scancodes such as arrows and the right Ctrl or Alt keys */
     if (extended_prefix) {
         extended_prefix = false;
         if (scancode & 0x80) {
-            /* Extended break code — clear extended modifiers */
+            /* Clear extended modifiers when an extended key is released */
             switch (scancode) {
             case 0x9D:
                 modifier_state &= ~MOD_RCTRL;
@@ -97,7 +97,7 @@ static void keyboard_handler([[maybe_unused]] struct registers *regs) {
                 break;
             }
         } else {
-            /* Extended make code — handle arrow keys and modifiers */
+            /* Handle arrow keys and modifiers when an extended key is pressed */
             switch (scancode) {
             case SC_EXT_UP:
                 if (key_callback)
@@ -126,16 +126,16 @@ static void keyboard_handler([[maybe_unused]] struct registers *regs) {
         return;
     }
 
-    /* Break code (key release) */
+    /* A break code means that a key was released */
     if (scancode & 0x80) {
         clear_modifiers(scancode);
         return;
     }
 
-    /* Make code (key press) */
+    /* A make code means that a key was pressed */
     update_modifiers(scancode);
 
-    /* Determine if shift is active for this key */
+    /* Check whether Shift is active for this key */
     bool shift = (modifier_state & (MOD_LSHIFT | MOD_RSHIFT)) != 0;
     if (is_letter(scancode) && (modifier_state & MOD_CAPSLOCK))
         shift = !shift;
@@ -147,44 +147,44 @@ static void keyboard_handler([[maybe_unused]] struct registers *regs) {
 }
 
 void ps2_init() {
-    /* Flush output buffer */
+    /* Flush the output buffer */
     while (inb(PS2_STATUS_PORT) & 0x01)
         inb(PS2_DATA_PORT);
 
-    /* Disable keyboard */
+    /* Disable the keyboard */
     outb(PS2_STATUS_PORT, PS2_CMD_DISABLE_KBD);
     waitb(1);
 
-    /* Read config byte */
+    /* Read the controller configuration byte */
     outb(PS2_STATUS_PORT, PS2_CMD_READ_CONFIG);
     waitb(1);
     auto cfg = inb(PS2_DATA_PORT);
 
-    /* Enable IRQ1, disable mouse IRQ */
+    /* Enable IRQ1 and disable the mouse interrupt */
     cfg = (cfg | PS2_CFG_IRQ1_ENABLED) & ~PS2_CFG_MOUSE_IRQ;
     outb(PS2_STATUS_PORT, PS2_CMD_WRITE_CONFIG);
     waitb(1);
     outb(PS2_DATA_PORT, cfg);
 
-    /* Controller self-test */
+    /* Run the controller self-test */
     outb(PS2_STATUS_PORT, PS2_CMD_SELF_TEST);
     waitb(1);
     auto result = inb(PS2_DATA_PORT);
     if (result != 0x55)
         qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 controller self-test result: %p | must be 0x55", result);
 
-    /* Interface test */
+    /* Test the keyboard interface */
     outb(PS2_STATUS_PORT, PS2_CMD_IF_TEST);
     waitb(1);
     result = inb(PS2_DATA_PORT);
     if (result != 0)
         qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 interface self-test result: %d | must be 0", result);
 
-    /* Enable keyboard */
+    /* Enable the keyboard */
     outb(PS2_STATUS_PORT, PS2_CMD_ENABLE_KBD);
     waitb(1);
 
-    /* Register IRQ1 handler */
+    /* Register the IRQ1 handler */
     intr_handler(IRQ1, keyboard_handler);
     qemu_printf(QEMU_DRV, QEMU_OK, "PS/2 keyboard initialized");
 }

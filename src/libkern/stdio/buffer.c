@@ -27,15 +27,15 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
             bool zpad = false;
             int min_w = 0;
 
-            /* Check for zero padding */
+            /* Check whether zero padding was requested */
             if (fmt[i] == '0') {
                 zpad = true;
                 i++;
             }
 
-            /* Parse minimum width independently of zero padding */
+            /* Parse the minimum width separately from zero padding */
             while (fmt[i] >= '0' && fmt[i] <= '9') {
-                /* Prevent integer overflow during width parsing */
+                /* Prevent integer overflow while parsing the width */
                 if (min_w < 10000) {
                     min_w = min_w * 10 + (fmt[i] - '0');
                 }
@@ -49,7 +49,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                 min_w = (int)sizeof(buf_num) - 2;
             }
 
-            /* Length modifier parsing */
+            /* Parse the length modifier. */
             enum {
                 LEN_DEFAULT,
                 LEN_LONG
@@ -113,7 +113,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
             case 'f': {
                 auto val = va_arg(args, double);
 
-                /* Check for NaN */
+                /* Check for a not-a-number value */
                 if (val != val) {
                     constexpr char nan_str[] = "NaN";
                     for (int k = 0; nan_str[k] != '\0'; k++)
@@ -126,7 +126,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                     val = -val;
                 }
 
-                /* Rounding adjustment for 6 decimal places precision */
+                /* Adjust rounding for a precision of 6 decimal places */
                 val += 0.0000005;
                 auto ipart = (unsigned long long int)val;
                 auto fpart = val - (double)ipart;
@@ -137,7 +137,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                 for (int k = 0; k < len; k++)
                     EMIT_CHAR(buf_num[k]);
 
-                /* Place the decimal point */
+                /* Add the decimal point */
                 EMIT_CHAR('.');
 
                 /* Format the fractional part */
@@ -164,7 +164,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
                 continue;
             }
 
-            /* Copy formatted numerical buffers over safely */
+            /* Copy the formatted number buffers without overrunning them */
             for (int k = 0; k < len; k++)
                 EMIT_CHAR(buf_num[k]);
         } else {
@@ -172,7 +172,7 @@ int kvsnprintf(char *buf, size_t size, const char *fmt, va_list args) {
         }
     }
 
-    /* Ensure null termination */
+    /* Ensure that the string ends with a null character */
     if (buf != NULL && size > 0) {
         size_t term_idx = (buf_idx < size) ? buf_idx : (size - 1);
         buf[term_idx] = '\0';

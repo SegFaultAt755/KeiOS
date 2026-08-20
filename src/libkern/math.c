@@ -22,7 +22,7 @@ float sqrtf(float n) {
 }
 
 float sinf(float n) {
-    /* Range formula: n = n - (2*PI) * round(n / (2*PI)) */
+    /* Reduce n with this formula: n = n - (2 * PI) * round(n / (2 * PI)) */
     const float two_pi = 2.0f * PI;
     auto quotients = (int)(n / two_pi);
     n = n - (quotients * two_pi);
@@ -32,24 +32,24 @@ float sinf(float n) {
     if (n < -PI)
         n += two_pi;
 
-    /* Bring n into the tightest Taylor window: sin(PI - x) = sin(x) */
+    /* Reduce n to the smallest Taylor-series range: sin(PI - x) = sin(x) */
     if (n > PI / 2.0f)
         n = PI - n;
     else if (n < -PI / 2.0f)
         n = -PI - n;
 
-    /* 7th degree Taylor series */
+    /* Use a seventh-degree Taylor series */
     auto n2 = n * n;
     auto term = n;
     auto sum = n;
 
-    term = -term * n2 / 6.0f; /* -n^3 / 3! */
+    term = -term * n2 / 6.0f; /* Add the -n^3 / 3! term */
     sum += term;
 
-    term = -term * n2 / 20.0f; /* +n^5 / 5! */
+    term = -term * n2 / 20.0f; /* Add the +n^5 / 5! term */
     sum += term;
 
-    term = -term * n2 / 42.0f; /* -n^7 / 7! */
+    term = -term * n2 / 42.0f; /* Add the -n^7 / 7! term */
     sum += term;
 
     return sum;

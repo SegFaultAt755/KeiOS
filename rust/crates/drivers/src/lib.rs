@@ -9,11 +9,11 @@ extern crate alloc;
 use core::alloc::{GlobalAlloc, Layout};
 use core::panic::PanicInfo;
 
-// Modules
+// Rust modules used by the drivers crate
 pub mod cpio;
 pub mod display;
 
-// External C kernel functions
+// Functions provided by the C kernel
 unsafe extern "C" {
     fn runtime_panic(reason: *const i8, desc: *const i8, file: *const i8, line: u32);
 
@@ -21,7 +21,7 @@ unsafe extern "C" {
     fn kfree(ptr: *mut u8);
 }
 
-// Heap allocator integration
+// Connect Rust allocations to the kernel heap
 struct KernelAllocator;
 
 unsafe impl GlobalAlloc for KernelAllocator {
@@ -41,7 +41,7 @@ static ALLOCATOR: KernelAllocator = KernelAllocator;
 #[alloc_error_handler]
 fn alloc_error_handler(_layout: Layout) -> ! {
     unsafe {
-        // Making dynamic error messages here will cause a recursive panic loop
+        // Building a dynamic error message here would trigger another panic
         runtime_panic(
             c"Kernel heap exhaustion".as_ptr() as *const i8,
             c"kmalloc failed to allocate requested layout size".as_ptr() as *const i8,
@@ -56,9 +56,9 @@ fn alloc_error_handler(_layout: Layout) -> ! {
 fn panic(info: &PanicInfo) -> ! {
     #[allow(deprecated)]
     let msg = match info.payload().downcast_ref::<&str>() {
-        Some(s) => s, // Use custom string if provided
+        Some(s) => s, // Use the custom message when one was provided
         None => match info.message().as_str() {
-            // Otherwise try standard panic message
+            // Otherwise, use the standard panic message
             Some(s) => s,
             None => "Rust runtime exception occurred",
         },
@@ -66,9 +66,9 @@ fn panic(info: &PanicInfo) -> ! {
 
     let mut c_buffer = [0u8; 128];
     let bytes = msg.as_bytes();
-    let len = core::cmp::min(bytes.len(), c_buffer.len() - 1); // Cap length to save room for '\0'
+    let len = core::cmp::min(bytes.len(), c_buffer.len() - 1); // Leave room for the final '\0'
 
-    // Copy bytes into the buffer and add the null terminator
+    // Copy the bytes into the buffer and add the null terminator
     c_buffer[..len].copy_from_slice(&bytes[..len]);
     c_buffer[len] = b'\0';
 

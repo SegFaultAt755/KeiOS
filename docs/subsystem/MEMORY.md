@@ -89,7 +89,7 @@ The kernel heap resides in higher half virtual memory starting at `0xC014B000`
 - **Header Structure:**
 `````c
 struct heap_segment {
-    uint32_t len_flags; /* Length upper 28 bits, flags lower 4 bits */
+    uint32_t len_flags; /* Upper 28 bits store the length; lower 4 bits store flags */
     struct heap_segment *next;
     struct heap_segment *prev;
 };

@@ -83,7 +83,7 @@ void kfree(void *ptr) {
     struct heap_segment *segment = (struct heap_segment *)((uint32_t)ptr - sizeof(struct heap_segment));
     heap_set_len_and_flags(segment, heap_get_len(segment), true);
 
-    /* Merge forward */
+    /* Merge with the next free block */
     if (segment->next != nullptr && heap_is_free(segment->next)) {
         auto merged_len = heap_get_len(segment) + sizeof(struct heap_segment) + heap_get_len(segment->next);
         heap_set_len_and_flags(segment, merged_len, true);
@@ -92,7 +92,7 @@ void kfree(void *ptr) {
             segment->next->prev = segment;
     }
 
-    /* Merge backward */
+    /* Merge with the previous free block */
     if (segment->prev != nullptr && heap_is_free(segment->prev)) {
         auto merged_len = heap_get_len(segment->prev) + sizeof(struct heap_segment) + heap_get_len(segment);
         heap_set_len_and_flags(segment->prev, merged_len, true);
