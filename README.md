@@ -3,6 +3,7 @@
 ![KEIOS-BANNER](./keios-banner.svg)
 
 ![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue?logo=intel&logoColor=white) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green?logo=opensourceinitiative&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-1.95-orange?logo=rust) ![C23](https://img.shields.io/badge/C23-Standard-blue?logo=c)
+
 ![Build](https://img.shields.io/badge/Build-Passing-green) ![Runtime](https://img.shields.io/badge/Runtime-Kernel%20Panic-red)
 
 ### 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
