@@ -44,6 +44,7 @@
     idt_init();
     cpu_feat_init();
 
+#if 0
     uint32_t *rsdp_addr = find_rsdp_addr();
     if (rsdp_addr == nullptr)
         KERNEL_PANIC("Failed to find RSDP start address",
@@ -52,6 +53,7 @@
         qemu_printf(QEMU_KERN, QEMU_OK, "RSDP start address found at %p", rsdp_addr);
 
     struct rsdp *rsdp = (struct rsdp *)ADD_KERNEL_OFFSET((uintptr_t)rsdp_addr);
+#endif
 
     /* Initialize memory management */
     struct multiboot_info *mbi_virt = mbi;
@@ -60,6 +62,7 @@
 
     mem_init(mbi_virt);
 
+#if 0
     /* Determine whether ACPI uses an XSDT or an RSDT */
     bool is_xsdt = (rsdp->revision >= 2);
     uintptr_t root_phys_addr = 0;
@@ -82,6 +85,7 @@
     enable_acpi_mode(fadt);
 
     qemu_printf(QEMU_KERN, QEMU_OK, "ACPI enabled");
+#endif
 
     /* Load kernel modules and initialize the filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
