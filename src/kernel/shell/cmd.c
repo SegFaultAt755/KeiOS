@@ -11,6 +11,7 @@
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/reboot.h"
+#include "kernel/shutdown.h"
 
 #include "libkern/bcd.h"
 #include "libkern/stdio.h"
@@ -27,6 +28,7 @@ void cmd_help() {
     kprintf("\tcolor     Change terminal text color (1-15 or name)\n");
     kprintf("\tdatetime  Show current date and time\n");
     kprintf("\treboot    Reboot the system\n");
+    kprintf("\tshutdown  Shutdown the system\n");
     kprintf("\thalt      Halt the CPU\n");
 }
 
@@ -151,11 +153,11 @@ void cmd_datetime() {
 void cmd_reboot() {
     kprintf("Rebooting...\n");
     reboot();
+}
 
-    while (true) {
-        disable_interrupts();
-        halt();
-    }
+void cmd_shutdown() {
+    kprintf("Shuting down...\n");
+    shutdown();
 }
 
 void cmd_halt() {

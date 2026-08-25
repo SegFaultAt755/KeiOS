@@ -60,7 +60,9 @@
 
     mem_init(mbi_virt);
 
-    acpi_init(rsdp);
+    struct fadt fadt = acpi_init(rsdp);
+    qemu_printf(QEMU_KERN, QEMU_INFO, "[FADT] Info: (pm1a_cnt_blk: 0x%x, pm1b_cnt_blk: 0x%x)", fadt.pm1a_cnt_blk,
+                fadt.pm1b_cnt_blk);
 
     /* Load kernel modules and initialize the filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);
@@ -76,6 +78,7 @@
     /* Transfer control to the user-space stage */
     enable_interrupts();
 
+#if 0
     if (exec_init == nullptr || exec_init_size == 0)
         KERNEL_PANIC("No initial executable found or valid",
                      "Initial executable pointer is null or the executable size equals 0");
@@ -83,12 +86,15 @@
     qemu_printf(QEMU_KERN, QEMU_INFO, "Handing off initial executable: addr=%p size=%u bytes", exec_init,
                 exec_init_size);
     execute_init_binary(exec_init, exec_init_size);
+#endif
+
+    shell_init();
 
     /* Fallback for unhandled errors */
     goto halt;
 halt:
     while (true) {
-        disable_interrupts();
+        // disable_interrupts();
         halt();
     }
 }

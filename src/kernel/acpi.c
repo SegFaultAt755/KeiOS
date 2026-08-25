@@ -41,7 +41,8 @@ void enable_acpi_mode([[maybe_unused]] struct fadt *fadt) {
     /* TODO: Implement ACPI shutdown support */
 }
 
-void acpi_init(struct rsdp *rsdp) {
+[[no_discard]]
+struct fadt acpi_init(struct rsdp *rsdp) {
     /* Determine whether ACPI uses an XSDT or an RSDT */
     bool is_xsdt = (rsdp->revision >= 2);
     uintptr_t root_phys_addr = 0;
@@ -67,4 +68,5 @@ void acpi_init(struct rsdp *rsdp) {
     enable_acpi_mode(fadt);
 
     qemu_printf(QEMU_KERN, QEMU_OK, "ACPI enabled");
+    return *fadt;
 }

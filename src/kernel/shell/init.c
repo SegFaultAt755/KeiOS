@@ -20,10 +20,12 @@ static int history_count = 0;
 static int history_index = -1;
 
 static const struct builtin_cmd builtins[] = {
-    {"help", cmd_help, nullptr},         {"clear", cmd_clear, nullptr},   {"echo", nullptr, cmd_echo},
-    {"ver", cmd_ver, nullptr},           {"uptime", cmd_uptime, nullptr}, {"meminfo", cmd_meminfo, nullptr},
-    {"reboot", cmd_reboot, nullptr},     {"halt", cmd_halt, nullptr},     {"color", nullptr, cmd_color},
-    {"datetime", cmd_datetime, nullptr}, {nullptr, nullptr, nullptr},
+    {"help", cmd_help, nullptr},         {"clear", cmd_clear, nullptr},       {"echo", nullptr, cmd_echo},
+    {"ver", cmd_ver, nullptr},           {"uptime", cmd_uptime, nullptr},     {"meminfo", cmd_meminfo, nullptr},
+    {"reboot", cmd_reboot, nullptr},     {"halt", cmd_halt, nullptr},         {"color", nullptr, cmd_color},
+    {"datetime", cmd_datetime, nullptr}, {"shutdown", cmd_shutdown, nullptr},
+
+    {nullptr, nullptr, nullptr},
 };
 
 static void shell_print_prompt() {

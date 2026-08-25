@@ -16,6 +16,7 @@ void cmd_ver(void);
 void cmd_uptime(void);
 void cmd_meminfo(void);
 void cmd_reboot(void);
+void cmd_shutdown(void);
 void cmd_halt(void);
 void cmd_color(const char *args);
 void cmd_datetime(void);
