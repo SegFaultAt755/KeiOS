@@ -15,6 +15,7 @@
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "kernel/rsdp.h"
+#include "kernel/shutdown.h"
 #include "kernel/shell/shell.h"
 #include "kernel/userspace/enter.h"
 
@@ -61,8 +62,10 @@
     mem_init(mbi_virt);
 
     struct fadt fadt = acpi_init(rsdp);
-    qemu_printf(QEMU_KERN, QEMU_INFO, "[FADT] Info: (pm1a_cnt_blk: 0x%x, pm1b_cnt_blk: 0x%x)", fadt.pm1a_cnt_blk,
-                fadt.pm1b_cnt_blk);
+    global_fadt = &fadt;
+
+    qemu_printf(QEMU_KERN, QEMU_INFO, "[FADT] Info: (pm1a_cnt_blk: 0x%x, pm1b_cnt_blk: 0x%x)", global_fadt->pm1a_cnt_blk,
+                global_fadt->pm1b_cnt_blk);
 
     /* Load kernel modules and initialize the filesystem */
     const uint32_t mod_count = mb_parse_mods(mbi_virt, mod_cb, nullptr);

@@ -38,10 +38,14 @@ struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
 }
 
 void enable_acpi_mode([[maybe_unused]] struct fadt *fadt) {
-    /* TODO: Implement ACPI shutdown support */
+    fadt->acpi_enable &= (1 << 0);
+
+    if ((fadt->acpi_enable & (1 << 0)) != 0)
+        qemu_printf(QEMU_KERN, QEMU_INFO, "[ACPI] Enabled successfully");
+    else
+        qemu_printf(QEMU_KERN, QEMU_WARN, "[ACPI] Failed to enable");
 }
 
-[[no_discard]]
 struct fadt acpi_init(struct rsdp *rsdp) {
     /* Determine whether ACPI uses an XSDT or an RSDT */
     bool is_xsdt = (rsdp->revision >= 2);
@@ -67,6 +71,5 @@ struct fadt acpi_init(struct rsdp *rsdp) {
     struct fadt *fadt = (struct fadt *)fadt_header;
     enable_acpi_mode(fadt);
 
-    qemu_printf(QEMU_KERN, QEMU_OK, "ACPI enabled");
     return *fadt;
 }

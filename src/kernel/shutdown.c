@@ -4,6 +4,9 @@
 #include "kernel/shutdown.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
+#include "kernel/panic.h"
+
+struct fadt *global_fadt = nullptr;
 
 [[noreturn]] void shutdown() {
     /* Shut down available components gracefully */
@@ -13,6 +16,11 @@
 }
 
 [[noreturn]] void shutdown_raw() {
+    if (!global_fadt)
+        KERNEL_PANIC("FADT pointer equals null",
+                     "Shutdown happens before FADT was found or FADT is invalid structure");
+
+    
 
     while (true) {
         disable_interrupts();
