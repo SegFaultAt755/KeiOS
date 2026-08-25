@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+struct rsdp;
+
 #define ACPI_SCI_EN (1 << 0)
 
 struct [[gnu::packed]] acpi_header {
@@ -41,3 +43,4 @@ struct fadt {
 
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt);
 void enable_acpi_mode(struct fadt *fadt);
+void acpi_init(struct rsdp *rsdp);
