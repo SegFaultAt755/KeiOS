@@ -43,4 +43,4 @@ struct fadt {
 
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt);
 void enable_acpi_mode(struct fadt *fadt);
-struct fadt acpi_init(struct rsdp *rsdp);
+struct fadt *acpi_init(struct rsdp *rsdp);

@@ -6,6 +6,7 @@
 #include "kernel/qemu.h"
 #include "kernel/rsdp.h"
 #include "libkern/string.h"
+#include "libkern/stdio.h"
 
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/mem.h"
@@ -37,16 +38,25 @@ struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
     return nullptr;
 }
 
-void enable_acpi_mode([[maybe_unused]] struct fadt *fadt) {
-    fadt->acpi_enable &= (1 << 0);
+void enable_acpi_mode(struct fadt *fadt) {
+    if ((inw(fadt->pm1a_cnt_blk) & 1) == 1) {
+        qemu_printf(QEMU_KERN, QEMU_INFO, "ACPI is already enabled by firmware");
+        return;
+    }
 
-    if ((fadt->acpi_enable & (1 << 0)) != 0)
-        qemu_printf(QEMU_KERN, QEMU_INFO, "[ACPI] Enabled successfully");
-    else
-        qemu_printf(QEMU_KERN, QEMU_WARN, "[ACPI] Failed to enable");
+    if (fadt->smi_cmd == 0) {
+        qemu_printf(QEMU_KERN, QEMU_WARN, "Firmware doesn\'t support SMI");
+        return; 
+    }
+
+    outb(fadt->smi_cmd, fadt->acpi_enable);
+
+    /* Wait until the SCI_EN bit is set to 1 */
+    while ((inw(fadt->pm1a_cnt_blk) & 1) == 0) {}
 }
 
-struct fadt acpi_init(struct rsdp *rsdp) {
+[[no_discard]]
+struct fadt *acpi_init(struct rsdp *rsdp) {
     /* Determine whether ACPI uses an XSDT or an RSDT */
     bool is_xsdt = (rsdp->revision >= 2);
     uintptr_t root_phys_addr = 0;
@@ -68,8 +78,5 @@ struct fadt acpi_init(struct rsdp *rsdp) {
     if (!fadt_header)
         KERNEL_PANIC("Failed to find FACP signature in root table", "Invalid root table from RSPD");
 
-    struct fadt *fadt = (struct fadt *)fadt_header;
-    enable_acpi_mode(fadt);
-
-    return *fadt;
+    return (struct fadt *)fadt_header;
 }

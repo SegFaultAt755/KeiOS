@@ -61,8 +61,8 @@
 
     mem_init(mbi_virt);
 
-    struct fadt fadt = acpi_init(rsdp);
-    global_fadt = &fadt;
+    global_fadt = acpi_init(rsdp);
+    enable_acpi_mode(global_fadt);
 
     qemu_printf(QEMU_KERN, QEMU_INFO, "[FADT] Info: (pm1a_cnt_blk: 0x%x, pm1b_cnt_blk: 0x%x)", global_fadt->pm1a_cnt_blk,
                 global_fadt->pm1b_cnt_blk);
