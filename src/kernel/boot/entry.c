@@ -5,6 +5,7 @@
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
+#include "kernel/panic.h"
 #include "kernel/rsdp.h"
 #include "kernel/shell/shell.h"
 
@@ -26,8 +27,15 @@ extern void boot_init_cpio_filesystem(void);
 extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
 
 [[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *mbi) {
-    if (magic != 0x2BADB002)
-        goto halt;
+    if (magic != 0x2BADB002) {
+        KERNEL_PANIC("Invalid multiboot magic number", "Bootloader did not provide valid multiboot magic - kernel must "
+                                                       "be loaded by GRUB2 or compatible bootloader");
+    }
+
+    if (mbi == nullptr) {
+        KERNEL_PANIC("Multiboot info structure missing",
+                     "Bootloader did not provide multiboot information structure pointer");
+    }
 
     /* Early CPU subsystem setup */
     boot_init_early_cpu();
@@ -53,7 +61,6 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
     enable_interrupts();
     shell_init();
 
-    /* Fallback for unhandled errors */
 halt:
     while (true) {
         halt();

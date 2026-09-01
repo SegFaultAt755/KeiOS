@@ -26,17 +26,24 @@ struct rsdp *boot_init_rsdp(void) {
     return (struct rsdp *)ADD_KERNEL_OFFSET((uintptr_t)rsdp_addr);
 }
 
-/* ============================================================================
- * ACPI System Initialization
- * ============================================================================ */
-
 /**
  * Initialize ACPI subsystem (FADT and DSDT).
  * Must be called after memory management is initialized.
  */
 void boot_init_acpi_system(struct rsdp *rsdp) {
+    KERNEL_ASSERT(rsdp != nullptr, "Invalid RSDP pointer",
+                  "boot_init_acpi_system called with NULL RSDP - RSDP initialization failed");
+
     global_fadt = acpi_init(rsdp);
+
+    KERNEL_ASSERT(global_fadt != nullptr, "FADT initialization failed",
+                  "acpi_init returned NULL FADT - ACPI table parsing failed or FADT not found");
+
     global_dsdt = parse_dsdt(global_fadt);
+
+    KERNEL_ASSERT(global_dsdt != nullptr, "DSDT parsing failed",
+                  "parse_dsdt returned NULL DSDT - ACPI DSDT table not found or corrupted");
+
     enable_acpi_mode(global_fadt);
 
     qemu_printf(QEMU_KERN, QEMU_INFO, "[FADT] Power management: pm1a_cnt_blk=0x%x pm1b_cnt_blk=0x%x",

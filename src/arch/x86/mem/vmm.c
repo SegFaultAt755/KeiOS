@@ -4,6 +4,7 @@
 #include "arch/x86/vmm.h"
 #include "arch/x86/mem.h"
 #include "arch/x86/pmm.h"
+#include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "libkern/memory.h"
 
@@ -46,8 +47,6 @@ uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
     /* If the page table does not exist, allocate a physical frame for it */
     if (!(*pde & PDE_PRESENT)) {
         auto new_table_phys = pmm_alloc_frame();
-        if (new_table_phys == 0)
-            return false;
 
         *pde = (new_table_phys & PDE_FRAME) | PDE_PRESENT | PDE_RW | (flags & PDE_USER);
 

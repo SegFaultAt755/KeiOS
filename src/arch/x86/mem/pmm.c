@@ -3,6 +3,7 @@
 
 #include "arch/x86/pmm.h"
 #include "arch/x86/mem.h"
+#include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "libkern/memory.h"
 
@@ -37,7 +38,8 @@ void pmm_init(uint64_t mem_high_point, uint32_t physical_alloc_start) {
         }
     }
 
-    return 0; /* No free memory is available */
+    /* Physical memory exhausted */
+    KERNEL_PANIC("Physical memory exhaustion", "pmm_alloc_frame failed - no free physical page frames available");
 }
 
 void pmm_free_frame(uint32_t frame_addr) {
@@ -53,7 +55,7 @@ void pmm_reserve_phys(uint32_t phys_addr, uint32_t size) {
     uint32_t start_frame = phys_addr / PAGE_SIZE;
     uint32_t end_frame = (phys_addr + size - 1) / PAGE_SIZE;
 
-    for (uint32_t i = start_frame; i <= end_frame; i++)
-        if (i < total_frames)
-            physical_mem_bitmap[i / 8] |= (1U << (i % 8));
+    /* Silently skip frames beyond detected memory - firmware tables may exist there */
+    for (uint32_t i = start_frame; i <= end_frame && i < total_frames; i++)
+        physical_mem_bitmap[i / 8] |= (1U << (i % 8));
 }
