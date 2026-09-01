@@ -49,6 +49,10 @@ struct [[gnu::packed]] dsdt {
 extern struct fadt *global_fadt;
 extern struct dsdt *global_dsdt;
 
+#define ACPI_SLP_EN (1 << 13)
+
+void acpi_shutdown(struct fadt *fadt, struct dsdt *dsdt);
+
 struct dsdt *parse_dsdt(struct fadt *fadt);
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt);
 void enable_acpi_mode(struct fadt *fadt);

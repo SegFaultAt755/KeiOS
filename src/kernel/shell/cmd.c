@@ -156,7 +156,7 @@ void cmd_reboot() {
 }
 
 void cmd_shutdown() {
-    kprintf("Shuting down...\n");
+    kprintf("Shutting down...\n");
     shutdown();
 }
 

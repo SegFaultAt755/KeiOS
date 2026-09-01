@@ -19,7 +19,7 @@
         KERNEL_PANIC("FADT pointer equals null",
                      "Shutdown happens before FADT was found or FADT is invalid structure");
 
-    
+    acpi_shutdown(global_fadt, global_dsdt);
 
     while (true) {
         disable_interrupts();
