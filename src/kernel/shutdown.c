@@ -2,10 +2,10 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "kernel/shutdown.h"
+#include "kernel/acpi.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/panic.h"
-#include "kernel/acpi.h"
 
 [[noreturn]] void shutdown() {
     /* Shut down available components gracefully */
@@ -16,8 +16,7 @@
 
 [[noreturn]] void shutdown_raw() {
     if (!global_fadt)
-        KERNEL_PANIC("FADT pointer equals null",
-                     "Shutdown happens before FADT was found or FADT is invalid structure");
+        KERNEL_PANIC("FADT pointer equals null", "Shutdown happens before FADT was found or FADT is invalid structure");
 
     acpi_shutdown(global_fadt, global_dsdt);
 
