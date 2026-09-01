@@ -5,8 +5,7 @@
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/panic.h"
-
-struct fadt *global_fadt = nullptr;
+#include "kernel/acpi.h"
 
 [[noreturn]] void shutdown() {
     /* Shut down available components gracefully */

@@ -16,6 +16,9 @@
 #error "Unsupported architecture! (i386 is available)"
 #endif
 
+struct fadt *global_fadt = nullptr;
+struct dsdt *global_dsdt = nullptr;
+
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
     int pointer_size = is_xsdt ? 8 : 4;
     int entries = (table->length - sizeof(struct acpi_header)) / pointer_size;
@@ -53,6 +56,27 @@ void enable_acpi_mode(struct fadt *fadt) {
 
     /* Wait until the SCI_EN bit is set to 1 */
     while ((inw(fadt->pm1a_cnt_blk) & 1) == 0) {}
+}
+
+[[nodiscard]]
+struct dsdt *parse_dsdt(struct fadt *fadt) {
+    if (!fadt || fadt->dsdt == 0) {
+        KERNEL_PANIC("Invalid FADT pointer or DSDT physical address", "DSDT Initialization Failed");
+    }
+
+    uintptr_t dsdt_phys_addr = (uintptr_t)fadt->dsdt;
+
+    /* Reserve physical memory and map header into kernel virtual address space */
+    pmm_reserve_phys(dsdt_phys_addr, sizeof(struct acpi_header));
+    vmm_map_page((uint32_t)ADD_KERNEL_OFFSET(dsdt_phys_addr), (uint32_t)dsdt_phys_addr, PTE_PRESENT | PTE_RW | PDE_PWT);
+
+    struct dsdt *dsdt_table = (struct dsdt *)ADD_KERNEL_OFFSET(dsdt_phys_addr);
+
+    if (strncmp(dsdt_table->header.signature, "DSDT", 4) != 0) {
+        KERNEL_PANIC("Failed to find DSDT signature in header", "Invalid DSDT table from FADT");
+    }
+
+    return dsdt_table;
 }
 
 [[no_discard]]

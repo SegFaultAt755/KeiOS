@@ -62,6 +62,7 @@
     mem_init(mbi_virt);
 
     global_fadt = acpi_init(rsdp);
+    global_dsdt = parse_dsdt(global_fadt);
     enable_acpi_mode(global_fadt);
 
     qemu_printf(QEMU_KERN, QEMU_INFO, "[FADT] Info: (pm1a_cnt_blk: 0x%x, pm1b_cnt_blk: 0x%x)", global_fadt->pm1a_cnt_blk,

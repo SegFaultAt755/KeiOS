@@ -21,7 +21,7 @@ struct [[gnu::packed]] acpi_header {
     uint32_t creator_revision;
 };
 
-struct fadt {
+struct [[gnu::packed]] fadt {
     struct acpi_header header;
     uint32_t firmware_ctrl;
     uint32_t dsdt;
@@ -41,6 +41,15 @@ struct fadt {
     uint32_t pm_tmr_blk;         /* ACPI power-management timer port */
 };
 
+struct [[gnu::packed]] dsdt {
+    struct acpi_header header;
+    uint8_t aml_code[];
+};
+
+extern struct fadt *global_fadt;
+extern struct dsdt *global_dsdt;
+
+struct dsdt *parse_dsdt(struct fadt *fadt);
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt);
 void enable_acpi_mode(struct fadt *fadt);
 struct fadt *acpi_init(struct rsdp *rsdp);
