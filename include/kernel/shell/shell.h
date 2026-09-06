@@ -7,3 +7,4 @@
 #define SHELL_HISTORY_MAX    32
 
 void shell_init(void);
+void shell_poll_input(void);

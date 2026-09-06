@@ -31,7 +31,7 @@ _Target: Establish stable Ring 0 memory, interrupt handling, and basic in kernel
 
 ---
 
-## Initrd, Monotasking & Ring 3 Transition `[IN PROGRESS]`
+## Initrd, Monotasking & Ring 3 Transition `[COMPLETED]`
 
 _Target: Parse Ramdisk binaries, load ELF32 programs, and drop CPU privileges to Ring 3_
 
@@ -40,7 +40,7 @@ _Target: Parse Ramdisk binaries, load ELF32 programs, and drop CPU privileges to
 - [X] **GDT & TSS:** Configure Ring 3 code/data selectors and TSS for kernel stack switching
 - [X] **User Mode Switch:** Build initial kernel stack frame (`SS`, `ESP`, `EFLAGS`, `CS`, `EIP`) and jump to Ring 3 via `IRET`
 - [X] **System Calls:** Implement `int 0x80` entry point
-- [ ] **IPC Engine:** Short message passing / shared memory primitives
+- [X] **IPC Engine:** Short message passing / shared memory primitives
 
 ---
 

@@ -2,6 +2,7 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
+#include "drivers/display.h"
 #include "kernel/graphics.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
@@ -9,7 +10,6 @@
 #include "kernel/panic.h"
 #include "kernel/rsdp.h"
 #include "kernel/shell/shell.h"
-#include "drivers/display.h"
 
 #if defined(__i386__) || defined(_M_IX86)
 #include "arch/x86/mem.h"
@@ -67,6 +67,8 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
 
 halt:
     while (true) {
+        if (!display_initialized)
+            shell_poll_input();
         halt();
     }
 }

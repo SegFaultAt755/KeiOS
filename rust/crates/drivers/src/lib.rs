@@ -12,6 +12,7 @@ use core::panic::PanicInfo;
 // Rust modules used by the drivers crate
 pub mod cpio;
 pub mod display;
+pub mod ipc;
 
 // Functions provided by the C kernel
 unsafe extern "C" {

@@ -7,8 +7,8 @@
 #include "drivers/vga.h"
 
 #include "drivers/display.h"
-#include "kernel/halt.h"
 #include "kernel/graphics.h"
+#include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
 

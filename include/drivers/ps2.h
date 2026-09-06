@@ -40,7 +40,7 @@
 #define SC_EXT_RCTRL   0x1D
 #define SC_EXT_RALT    0x38
 
-/* Special key codes returned by the callback; these have no ASCII equivalent */
+/* Special key codes returned through IPC; these have no ASCII equivalent */
 #define KEY_UP     0x100
 #define KEY_DOWN   0x101
 #define KEY_LEFT   0x102
@@ -58,4 +58,5 @@
 void ps2_init(void);
 void ps2_disable(void);
 uint8_t ps2_get_modifiers(void);
-void ps2_set_key_callback(void (*cb)(uint16_t));
+void ps2_set_ipc_endpoint(uint32_t endpoint);
+uint32_t ps2_get_ipc_endpoint(void);

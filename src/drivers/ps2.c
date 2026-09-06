@@ -2,8 +2,10 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "drivers/ps2.h"
+#include "drivers/ipc.h"
 
 #include "arch/x86/isr.h"
+#include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "libkern/stdio.h"
 
@@ -27,7 +29,7 @@ constexpr static char sc1_shifted[128] = {
 
 static uint8_t modifier_state = 0;
 static bool extended_prefix = false;
-static void (*key_callback)(uint16_t) = nullptr;
+static uint32_t ipc_endpoint = 0;
 
 static bool is_letter(uint8_t sc) {
     return (sc >= 0x10 && sc <= 0x19) || (sc >= 0x1E && sc <= 0x26) || (sc >= 0x2C && sc <= 0x32);
@@ -70,6 +72,13 @@ static void clear_modifiers(uint8_t scancode) {
     }
 }
 
+static void publish_key(uint16_t key) {
+    KERNEL_ASSERT(ipc_endpoint != 0, "PS/2 IPC endpoint missing",
+                  "Keyboard interrupt received before its IPC endpoint was configured");
+    KERNEL_ASSERT(ipc_send(ipc_endpoint, 0, (const uint8_t *)&key, sizeof(key)) == IPC_OK,
+                  "PS/2 IPC queue failure", "Unable to publish keyboard input to the IPC queue");
+}
+
 static void keyboard_handler([[maybe_unused]] struct registers *regs) {
     auto scancode = inb(PS2_DATA_PORT);
 
@@ -100,20 +109,16 @@ static void keyboard_handler([[maybe_unused]] struct registers *regs) {
             /* Handle arrow keys and modifiers when an extended key is pressed */
             switch (scancode) {
             case SC_EXT_UP:
-                if (key_callback)
-                    key_callback(KEY_UP);
+                publish_key(KEY_UP);
                 break;
             case SC_EXT_DOWN:
-                if (key_callback)
-                    key_callback(KEY_DOWN);
+                publish_key(KEY_DOWN);
                 break;
             case SC_EXT_LEFT:
-                if (key_callback)
-                    key_callback(KEY_LEFT);
+                publish_key(KEY_LEFT);
                 break;
             case SC_EXT_RIGHT:
-                if (key_callback)
-                    key_callback(KEY_RIGHT);
+                publish_key(KEY_RIGHT);
                 break;
             case SC_EXT_RCTRL:
                 modifier_state |= MOD_RCTRL;
@@ -142,8 +147,8 @@ static void keyboard_handler([[maybe_unused]] struct registers *regs) {
 
     auto ascii = shift ? sc1_shifted[scancode] : sc1_unshifted[scancode];
 
-    if (ascii && key_callback)
-        key_callback(ascii);
+    if (ascii)
+        publish_key((uint16_t)ascii);
 }
 
 void ps2_init() {
@@ -170,15 +175,15 @@ void ps2_init() {
     outb(PS2_STATUS_PORT, PS2_CMD_SELF_TEST);
     waitb(1);
     auto result = inb(PS2_DATA_PORT);
-    if (result != 0x55)
-        qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 controller self-test result: %p | must be 0x55", result);
+    KERNEL_ASSERT(result == 0x55, "PS/2 controller self-test failed",
+                  "PS/2 controller did not return the required 0x55 self-test result");
 
     /* Test the keyboard interface */
     outb(PS2_STATUS_PORT, PS2_CMD_IF_TEST);
     waitb(1);
     result = inb(PS2_DATA_PORT);
-    if (result != 0)
-        qemu_printf(QEMU_DRV, QEMU_ERROR, "PS/2 interface self-test result: %d | must be 0", result);
+    KERNEL_ASSERT(result == 0, "PS/2 interface self-test failed",
+                  "PS/2 keyboard interface did not pass its self-test");
 
     /* Enable the keyboard */
     outb(PS2_STATUS_PORT, PS2_CMD_ENABLE_KBD);
@@ -198,6 +203,12 @@ uint8_t ps2_get_modifiers() {
     return modifier_state;
 }
 
-void ps2_set_key_callback(void (*cb)(uint16_t)) {
-    key_callback = cb;
+void ps2_set_ipc_endpoint(uint32_t endpoint) {
+    KERNEL_ASSERT(endpoint != 0, "Invalid PS/2 IPC endpoint", "Cannot configure keyboard IPC with endpoint zero");
+    ipc_endpoint = endpoint;
+}
+
+uint32_t ps2_get_ipc_endpoint(void) {
+    KERNEL_ASSERT(ipc_endpoint != 0, "PS/2 IPC endpoint missing", "Keyboard IPC endpoint was requested before setup");
+    return ipc_endpoint;
 }

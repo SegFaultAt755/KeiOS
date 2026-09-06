@@ -7,7 +7,7 @@
 #include "arch/x86/syscall.h"
 
 #define SYSCALL_TABLE_LIST \
-    X(0) X(1) X(2)
+    X(0) X(1) X(2) X(3) X(4) X(5)
 
 #define X(n) uint32_t syscall_table_##n(struct syscall_registers *regs);
     SYSCALL_TABLE_LIST

@@ -5,7 +5,9 @@
 
 #include "kernel/shell/cmd.h"
 #include "kernel/shell/shell.h"
+#include "kernel/panic.h"
 
+#include "drivers/ipc.h"
 #include "drivers/ps2.h"
 #include "drivers/terminal.h"
 #include "libkern/stdio.h"
@@ -132,7 +134,7 @@ static void shell_set_current_line(const char *str) {
     kprintf("%s", input_buffer);
 }
 
-void shell_key_handler(uint16_t key) {
+static void shell_handle_key(uint16_t key) {
     if (key == '\n') {
         /* Move the visible cursor to the end of the line before printing a newline */
         while (input_pos < input_len) {
@@ -230,6 +232,26 @@ void shell_key_handler(uint16_t key) {
     }
 }
 
+void shell_poll_input() {
+    struct ipc_message message;
+    auto endpoint = ps2_get_ipc_endpoint();
+
+    while (true) {
+        auto result = ipc_receive(endpoint, &message);
+        if (result == IPC_EMPTY)
+            return;
+
+        KERNEL_ASSERT(result == IPC_OK, "Shell IPC receive failed", "Unable to read keyboard input from IPC");
+        KERNEL_ASSERT(message.sender == 0 && (message.length == 1 || message.length == 2),
+                      "Malformed keyboard IPC message", "Keyboard driver sent an invalid message shape");
+
+        uint16_t key = message.data[0];
+        if (message.length == 2)
+            key |= (uint16_t)message.data[1] << 8;
+        shell_handle_key(key);
+    }
+}
+
 void shell_init() {
     /* Show the welcome message */
     kprintf("Welcome to KeiOS %d.%d.%d! ", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
@@ -238,6 +260,5 @@ void shell_init() {
     terminal_set_color(vga_entry_color(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG));
     show_banner();
 
-    ps2_set_key_callback(shell_key_handler);
     shell_print_prompt();
 }
