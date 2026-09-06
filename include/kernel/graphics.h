@@ -9,5 +9,7 @@
 #define GRAPHICS_TYPE_FRAMEBUFFER 1
 #define GRAPHICS_TYPE_TEXT_MODE   0
 
+extern bool display_initialized;
+
 int get_graphics_type(struct multiboot_info *mbi);
 int gfx_init(struct multiboot_info *mbi);

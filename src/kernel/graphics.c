@@ -16,6 +16,8 @@
 #include "kernel/multiboot.h"
 #include "kernel/qemu.h"
 
+bool display_initialized = false;
+
 int get_graphics_type(struct multiboot_info *mbi) {
     if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) {
         if (mbi->framebuffer_type == GRAPHICS_TYPE_FRAMEBUFFER)
@@ -29,8 +31,8 @@ int get_graphics_type(struct multiboot_info *mbi) {
 
 int gfx_init(struct multiboot_info *mbi) {
     auto graphics = get_graphics_type(mbi);
-    if (graphics == GRAPHICS_TYPE_TEXT_MODE) {
-        /* Initialize VGA text mode */
+    if (graphics != GRAPHICS_TYPE_FRAMEBUFFER) {
+        /* Initialize VGA text mode for text and palette boot modes. */
         vga_init_text();
         terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
     } else if (graphics == GRAPHICS_TYPE_FRAMEBUFFER) {
@@ -61,13 +63,14 @@ int gfx_init(struct multiboot_info *mbi) {
         if (!map_success) {
             qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to map linear framebuffer to virtual memory");
             info.lfb_addr = nullptr;
+        } else {
+            info.lfb_addr = (uint32_t *)virt_addr;
         }
 
-        info.lfb_addr = (uint32_t *)virt_addr;
-
         const uint32_t BG = 0x00'00'00'00;
-        display_init(info);
-        display_clear(BG);
+        display_initialized = display_init(info) == 0;
+        if (display_initialized)
+            display_clear(BG);
 
         qemu_printf(QEMU_DRV, QEMU_OK, "Linear framebuffer initialized: (bg: 0x%x, flags: %d, width: %d, height: %d)",
                     BG, info.flags, info.width, info.height);
