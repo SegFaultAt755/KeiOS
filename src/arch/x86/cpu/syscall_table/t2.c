@@ -5,5 +5,11 @@
 #include "kernel/shutdown.h"
 
 [[noreturn]] uint32_t syscall_table_2([[maybe_unused]] struct syscall_registers *regs) {
+    if (regs->ebx != 0)
+        shutdown_raw();
+
     shutdown();
+
+    while (true) {
+    }
 }
