@@ -3,11 +3,6 @@
 
 #include "kernel/core/time.h"
 
-void pit_cb([[maybe_unused]] struct registers *regs) {
+void pit_callback([[maybe_unused]] struct registers *regs) {
     pit_ticks += 1;
-}
-
-void tick_wait(uint32_t ms) {
-    sleep_ms(ms);
-    pit_ticks += ms;
 }

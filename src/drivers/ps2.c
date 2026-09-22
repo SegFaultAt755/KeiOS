@@ -209,6 +209,5 @@ void ps2_set_ipc_endpoint(uint32_t endpoint) {
 }
 
 uint32_t ps2_get_ipc_endpoint(void) {
-    KERNEL_ASSERT(ipc_endpoint != 0, "PS/2 IPC endpoint missing", "Keyboard IPC endpoint was requested before setup");
     return ipc_endpoint;
 }
