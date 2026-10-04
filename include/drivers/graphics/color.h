@@ -16,9 +16,9 @@ struct color32 {
 
 static inline struct color32 gen_color32(uint32_t c) {
     return (struct color32){
-        .a = c & 0xff << 24,
-        .r = c & 0xff << 16,
-        .g = c & 0xff << 8,
+        .a = (uint8_t)(c >> 24),
+        .r = (uint8_t)(c >> 16),
+        .g = (uint8_t)(c >> 8),
         .b = c & 0xff
     };
 }

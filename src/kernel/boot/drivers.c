@@ -25,8 +25,7 @@ void boot_init_hardware_drivers(struct multiboot_info *mbi_virt) {
                   "Unable to allocate the PS/2 keyboard IPC endpoint");
 
     auto gfx_endpoint = ipc_endpoint_create();
-    KERNEL_ASSERT(gfx_endpoint != 0, "IPC endpoint allocation failed",
-                  "Unable to allocate the GFX IPC endpoint");
+    KERNEL_ASSERT(gfx_endpoint != 0, "IPC endpoint allocation failed", "Unable to allocate the GFX IPC endpoint");
 
     pit_init(1193, pit_callback);
 

@@ -3,9 +3,9 @@
 
 #include "config.h"
 
+#include "kernel/panic.h"
 #include "kernel/shell/cmd.h"
 #include "kernel/shell/shell.h"
-#include "kernel/panic.h"
 
 #include "drivers/ipc.h"
 #include "drivers/ps2.h"

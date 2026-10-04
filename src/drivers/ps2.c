@@ -75,8 +75,8 @@ static void clear_modifiers(uint8_t scancode) {
 static void publish_key(uint16_t key) {
     KERNEL_ASSERT(ipc_endpoint != 0, "PS/2 IPC endpoint missing",
                   "Keyboard interrupt received before its IPC endpoint was configured");
-    KERNEL_ASSERT(ipc_send(ipc_endpoint, 0, (const uint8_t *)&key, sizeof(key)) == IPC_OK,
-                  "PS/2 IPC queue failure", "Unable to publish keyboard input to the IPC queue");
+    KERNEL_ASSERT(ipc_send(ipc_endpoint, 0, (const uint8_t *)&key, sizeof(key)) == IPC_OK, "PS/2 IPC queue failure",
+                  "Unable to publish keyboard input to the IPC queue");
 }
 
 static void keyboard_handler([[maybe_unused]] struct registers *regs) {
@@ -182,8 +182,7 @@ void ps2_init() {
     outb(PS2_STATUS_PORT, PS2_CMD_IF_TEST);
     waitb(1);
     result = inb(PS2_DATA_PORT);
-    KERNEL_ASSERT(result == 0, "PS/2 interface self-test failed",
-                  "PS/2 keyboard interface did not pass its self-test");
+    KERNEL_ASSERT(result == 0, "PS/2 interface self-test failed", "PS/2 keyboard interface did not pass its self-test");
 
     /* Enable the keyboard */
     outb(PS2_STATUS_PORT, PS2_CMD_ENABLE_KBD);

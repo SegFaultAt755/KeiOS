@@ -6,7 +6,6 @@
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
 
-#include "drivers/display.h"
 #include "kernel/graphics.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
@@ -62,7 +61,7 @@ static void display_panic_text(const char *reason, const char *desc, const char 
 
 static void display_panic_gfx([[maybe_unused]] const char *reason, [[maybe_unused]] const char *desc,
                               [[maybe_unused]] const char *file, [[maybe_unused]] uint32_t line) {
-    display_clear(0x00'00'00'FF);
+    gfx_clear(gen_color32(0x00'00'00'FF));
 }
 
 [[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
@@ -70,7 +69,7 @@ static void display_panic_gfx([[maybe_unused]] const char *reason, [[maybe_unuse
     qemu_printf(QEMU_KERN, QEMU_PANIC, "Kernel panic: %s (description: %s, file: %s, line: %d)", reason, desc, file,
                 line);
 
-    if (display_initialized) {
+    if (gfx_initialized) {
         display_panic_gfx(reason, desc, file, line);
     } else {
         vga_init_text();

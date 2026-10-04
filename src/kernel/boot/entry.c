@@ -3,13 +3,13 @@
 
 #include "config.h"
 #include "drivers/display.h"
+#include "drivers/graphics/color.h"
 #include "kernel/graphics.h"
-#include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
-#include "kernel/rsdp.h"
 #include "kernel/qemu.h"
+#include "kernel/rsdp.h"
 #include "kernel/shell/shell.h"
 
 #if defined(__i386__) || defined(_M_IX86)
@@ -18,9 +18,9 @@
 #error "Unsupported architecture! (i386 is available)"
 #endif
 
-#include "kernel/userspace/enter.h"
-#include "kernel/core/mem.h"
 #include "kernel/core/cpio.h"
+#include "kernel/core/mem.h"
+#include "kernel/userspace/enter.h"
 
 /* Forward declarations for boot initialization functions */
 extern void boot_init_early_cpu(void);
@@ -64,11 +64,6 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
 
     /* Enable interrupts and start the shell */
     enable_interrupts();
-#if 0
-    if (!display_initialized) {
-        shell_init();
-    }
-#endif
 
     if (exec_init == nullptr || exec_init_size == 0)
         KERNEL_PANIC("No initial executable found or valid",
@@ -78,12 +73,13 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
                 exec_init_size);
     execute_init_binary(exec_init, exec_init_size);
 
-halt:
+fallback:
+    if (!gfx_initialized) {
+        shell_init();
+    } else {
+        gfx_fill_rect(gen_color32(0xFFFF00FF), 0, 0, 100, 100);
+    }
+
     while (true) {
-#if 0
-        if (!display_initialized)
-            shell_poll_input();
-#endif
-            halt();
     }
 }
