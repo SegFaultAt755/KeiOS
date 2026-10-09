@@ -4,7 +4,9 @@
 
 ![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue?logo=intel&logoColor=white) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green?logo=opensourceinitiative&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-1.95-orange?logo=rust) ![C23](https://img.shields.io/badge/C23-Standard-blue?logo=c)
 
-![Build](https://img.shields.io/badge/Build-Failing-red) ![Runtime](https://img.shields.io/badge/Runtime-Undefined-black)
+<!-- healthcheck:badges:start -->
+![Clippy](https://img.shields.io/badge/Clippy-Failing-red) ![Tests](https://img.shields.io/badge/Tests-Undefined-black) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+<!-- healthcheck:badges:end -->
 
 ### 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
 
@@ -214,6 +216,20 @@ For **automatically building** and **running** the project, execute the `run.py`
 
 ```bash
 python run.py
+```
+
+`run.py` delegates compilation to `build.py` before starting QEMU. To build
+without starting QEMU, run:
+
+```bash
+python build.py
+```
+
+Make variables can be passed inline to either script, for example:
+
+```bash
+python run.py D=DEBUG
+python build.py D=DEBUG
 ```
 
 You can also pass the `--help` flag to view available usage options:

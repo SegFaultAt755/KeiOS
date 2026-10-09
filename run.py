@@ -3,11 +3,11 @@
 
 import argparse
 import logging
-import platform
-import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,45 +17,20 @@ logging.basicConfig(
 logger = logging.getLogger("KeiOS-Runner")
 
 
-class ToolchainManager:
-    @staticmethod
-    def get_make_command() -> str:
-        if platform.system() == "Windows":
-            for cmd in ["make", "mingw32-make", "muke.bat"]:
-                if shutil.which(cmd):
-                    return cmd
-        return "make"
+def build_project(target: str, clean: bool, make_args: list[str]) -> None:
+    build_script = ROOT / "build.py"
+    command = [sys.executable, str(build_script), "--make-target", target]
+    if clean:
+        command.append("--clean-build")
+    command.extend(make_args)
 
-    @classmethod
-    def clean_build(cls) -> None:
-        logger.info("Executing clean build pipeline...")
-        clean_script = Path(__file__).parent / "clean.py"
-        try:
-            subprocess.run([sys.executable, str(clean_script)], check=True)
-        except subprocess.CalledProcessError as err:
-            logger.error(f"Clean step failed with exit code {err.returncode}")
-            sys.exit(err.returncode)
-
-    @classmethod
-    def build(cls, target: str, make_args: list[str]) -> None:
-        make_cmd = cls.get_make_command()
-        has_jobs_flag = any(
-            arg == "-j"
-            or arg.startswith("-j")
-            or arg == "--jobs"
-            or arg.startswith("--jobs=")
-            for arg in make_args
-        )
-        cmd = [make_cmd, target] + ([] if has_jobs_flag else ["-j"]) + make_args
-        logger.info(f"Building project: {' '.join(cmd)}")
-        try:
-            subprocess.run(cmd, check=True)
-        except FileNotFoundError:
-            logger.critical(f"Build tool '{make_cmd}' not found in PATH.")
-            sys.exit(1)
-        except subprocess.CalledProcessError as err:
-            logger.error(f"Build failed with exit code {err.returncode}")
-            sys.exit(err.returncode)
+    try:
+        subprocess.run(command, cwd=ROOT, check=True)
+    except FileNotFoundError:
+        logger.critical("Python interpreter '%s' could not be run.", sys.executable)
+        sys.exit(1)
+    except subprocess.CalledProcessError as error:
+        sys.exit(error.returncode)
 
 
 class QemuRunner:
@@ -83,6 +58,7 @@ class QemuRunner:
                 ],
                 check=True,
                 capture_output=True,
+                cwd=ROOT,
             )
         except FileNotFoundError:
             logger.critical(
@@ -90,7 +66,7 @@ class QemuRunner:
             )
             sys.exit(1)
         except subprocess.CalledProcessError as err:
-            logger.error(f"Failed to create disk image: {err.stderr.decode().strip()}")
+            logger.error("Failed to create disk image: %s", err.stderr.decode().strip())
             sys.exit(err.returncode)
 
     def launch(self) -> None:
@@ -129,31 +105,31 @@ class QemuRunner:
         else:
             cmd.extend(["-vga", "std"])
 
-        logger.info(f"Launching virtual machine ({self.qemu_bin})...")
+        logger.info("Launching virtual machine (%s)...", self.qemu_bin)
         try:
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, cwd=ROOT)
         except KeyboardInterrupt:
             logger.info("QEMU terminated by user.")
         except FileNotFoundError:
-            logger.critical(f"QEMU binary '{self.qemu_bin}' not found.")
+            logger.critical("QEMU binary '%s' not found.", self.qemu_bin)
             sys.exit(1)
         except subprocess.CalledProcessError as err:
-            logger.error(f"QEMU execution terminated with code {err.returncode}")
+            logger.error("QEMU execution terminated with code %s", err.returncode)
             sys.exit(err.returncode)
 
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build and Execution Manager for KeiOS."
+        description="Run KeiOS in QEMU, building it when needed."
     )
     parser.add_argument(
         "--disk-file",
         type=Path,
-        default=Path("disk.qcow2"),
+        default=ROOT / "disk.qcow2",
         help="Path to QEMU disk image",
     )
     parser.add_argument(
-        "--iso-file", type=Path, default=Path("keios.iso"), help="Path to bootable ISO"
+        "--iso-file", type=Path, default=ROOT / "keios.iso", help="Path to bootable ISO"
     )
     parser.add_argument(
         "--disk-size", default="8G", help="Virtual disk capacity (e.g., 8G, 512M)"
@@ -168,7 +144,7 @@ def parse_arguments() -> argparse.Namespace:
         "--make-args",
         nargs=argparse.REMAINDER,
         default=[],
-        help="Additional arguments passed to Make (e.g., --make-args D=DEBUG)",
+        help="Additional arguments passed to Make (or pass them inline)",
     )
     parser.add_argument(
         "--clean-build", action="store_true", help="Run clean.py before compiling"
@@ -180,17 +156,16 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--headless", action="store_true", help="Run QEMU without GUI (ideal for CI/CD)"
     )
-    return parser.parse_args()
+    args, inline_make_args = parser.parse_known_args()
+    args.make_args = inline_make_args + args.make_args
+    return args
 
 
 def main() -> None:
     args = parse_arguments()
 
-    if args.clean_build and not args.skip_build:
-        ToolchainManager.clean_build()
-
     if not args.skip_build:
-        ToolchainManager.build(args.make_target, args.make_args)
+        build_project(args.make_target, args.clean_build, args.make_args)
     else:
         logger.info("Skipping build phase (--skip-build active).")
 
