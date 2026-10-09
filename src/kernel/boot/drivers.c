@@ -1,12 +1,12 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include "drivers/ipc.h"
-#include "drivers/pit.h"
 #include "drivers/ps2.h"
 #include "kernel/graphics.h"
+#include "kernel/ipc.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
+#include "kernel/pit.h"
 
 #include "kernel/core/time.h"
 

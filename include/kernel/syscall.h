@@ -4,6 +4,5 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include <stdint.h>
-#include "kernel/pit.h"
 
-void pit_callback(struct registers *regs);
+uint32_t syscall(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx);

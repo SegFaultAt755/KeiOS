@@ -5,8 +5,8 @@
 
 #include "config.h"
 #include "drivers/cmos.h"
-#include "drivers/pit.h"
 #include "drivers/terminal.h"
+#include "kernel/pit.h"
 
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"

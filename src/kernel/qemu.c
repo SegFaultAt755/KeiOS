@@ -5,7 +5,7 @@
 
 #include "config.h"
 #include "drivers/cmos.h"
-#include "drivers/pit.h"
+#include "kernel/pit.h"
 #include "libkern/bcd.h"
 #include "libkern/string.h"
 

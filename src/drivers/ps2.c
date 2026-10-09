@@ -2,9 +2,9 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "drivers/ps2.h"
-#include "drivers/ipc.h"
 
 #include "arch/x86/isr.h"
+#include "kernel/ipc.h"
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "libkern/stdio.h"

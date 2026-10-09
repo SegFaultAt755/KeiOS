@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include "drivers/pit.h"
+#include "kernel/pit.h"
 
 #include "kernel/qemu.h"
 #include "libkern/stdio.h"

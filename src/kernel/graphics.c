@@ -4,8 +4,8 @@
 #include "kernel/graphics.h"
 
 #include "drivers/graphics/framebuffer.h"
-#include "drivers/ipc.h"
 #include "drivers/terminal.h"
+#include "kernel/ipc.h"
 #include "libkern/memory.h"
 
 #include "kernel/multiboot.h"

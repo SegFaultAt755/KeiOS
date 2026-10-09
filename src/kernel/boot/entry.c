@@ -2,8 +2,8 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
-#include "drivers/display.h"
 #include "drivers/graphics/color.h"
+#include "kernel/framebuffer.h"
 #include "kernel/graphics.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
@@ -73,7 +73,6 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
                 exec_init_size);
     execute_init_binary(exec_init, exec_init_size);
 
-fallback:
     if (!gfx_initialized) {
         shell_init();
     } else {
