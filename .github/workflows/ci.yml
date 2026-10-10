@@ -33,7 +33,19 @@ jobs:
             grub-pc-bin \
             xorriso \
             mtools \
-            cpio
+            cpio \
+            file
+
+      - name: Install i686-elf toolchain
+        run: |
+          if sudo apt-get install -y gcc-i686-elf binutils-i686-elf; then
+            echo "TOOLCHAIN_PREFIX=i686-elf-" >> "$GITHUB_ENV"
+          else
+            echo "::warning::i686-elf packages are unavailable; falling back to host gcc -m32 and ld -m elf_i386."
+            echo "TOOLCHAIN_PREFIX=" >> "$GITHUB_ENV"
+            printf 'int main(void) { return 0; }\n' | gcc -m32 -ffreestanding -nostdlib -x c -c -o /tmp/keios-gcc-m32-check.o -
+            ld -m elf_i386 --version
+          fi
 
       - name: Install Rust nightly
         uses: dtolnay/rust-toolchain@nightly
@@ -42,7 +54,9 @@ jobs:
 
       - name: Show toolchain versions
         run: |
-          gcc --version
+          "${TOOLCHAIN_PREFIX}gcc" --version
+          "${TOOLCHAIN_PREFIX}as" --version
+          "${TOOLCHAIN_PREFIX}ld" --version
           nasm -v
           cargo --version
           rustc --version
@@ -50,7 +64,7 @@ jobs:
 
       - name: Build project with build.py
         run: |
-          python3 build.py --clean-build
+          python3 build.py --clean-build "TOOLCHAIN_PREFIX=$TOOLCHAIN_PREFIX"
 
       - name: Run project healthcheck
         run: |
