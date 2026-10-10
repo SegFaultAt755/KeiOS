@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     name: Build KeiOS
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
 
     steps:
@@ -26,7 +26,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
-            gcc-multilib \
+            gcc-15-multilib \
             nasm \
             binutils \
             grub-common \
@@ -36,16 +36,11 @@ jobs:
             cpio \
             file
 
-      - name: Install i686-elf toolchain
+      - name: Verify GCC C23 and multilib support
         run: |
-          if sudo apt-get install -y gcc-i686-elf binutils-i686-elf; then
-            echo "TOOLCHAIN_PREFIX=i686-elf-" >> "$GITHUB_ENV"
-          else
-            echo "::warning::i686-elf packages are unavailable; falling back to host gcc -m32 and ld -m elf_i386."
-            echo "TOOLCHAIN_PREFIX=" >> "$GITHUB_ENV"
-            printf 'int main(void) { return 0; }\n' | gcc -m32 -ffreestanding -nostdlib -x c -c -o /tmp/keios-gcc-m32-check.o -
-            ld -m elf_i386 --version
-          fi
+          echo "TOOLCHAIN_PREFIX=" >> "$GITHUB_ENV"
+          printf 'int main(void) { return 0; }\n' | gcc-15 -std=c23 -m32 -ffreestanding -nostdlib -x c -c -o /tmp/keios-gcc-m32-check.o -
+          ld -m elf_i386 --version
 
       - name: Install Rust nightly
         uses: dtolnay/rust-toolchain@nightly
@@ -54,7 +49,7 @@ jobs:
 
       - name: Show toolchain versions
         run: |
-          "${TOOLCHAIN_PREFIX}gcc" --version
+          gcc-15 --version
           "${TOOLCHAIN_PREFIX}as" --version
           "${TOOLCHAIN_PREFIX}ld" --version
           nasm -v
@@ -64,7 +59,7 @@ jobs:
 
       - name: Build project with build.py
         run: |
-          python3 build.py --clean-build "TOOLCHAIN_PREFIX=$TOOLCHAIN_PREFIX"
+          python3 build.py --clean-build "TOOLCHAIN_PREFIX=$TOOLCHAIN_PREFIX" "CC=gcc-15"
 
       - name: Run project healthcheck
         run: |
