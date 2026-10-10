@@ -112,7 +112,7 @@ pub extern "C" fn ipc_endpoint_create() -> u32 {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn ipc_send(endpoint: u32, sender: u32, data: *const u8, length: usize) -> i32 {
+pub unsafe extern "C" fn ipc_send(endpoint: u32, sender: u32, data: *const u8, length: usize) -> i32 {
     if length > IPC_MAX_PAYLOAD || (length != 0 && data.is_null()) {
         return IPC_INVALID;
     }
@@ -140,7 +140,7 @@ pub extern "C" fn ipc_send(endpoint: u32, sender: u32, data: *const u8, length: 
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn ipc_receive(endpoint: u32, message: *mut IpcMessage) -> i32 {
+pub unsafe extern "C" fn ipc_receive(endpoint: u32, message: *mut IpcMessage) -> i32 {
     if message.is_null() {
         return IPC_INVALID;
     }
