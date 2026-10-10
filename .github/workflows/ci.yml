@@ -1,0 +1,81 @@
+name: KeiOS CI
+
+# Do healthcheck
+# Build artifacts
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build KeiOS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            gcc-multilib \
+            nasm \
+            binutils \
+            grub-common \
+            grub-pc-bin \
+            xorriso \
+            mtools \
+            cpio
+
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rust-src
+
+      - name: Show toolchain versions
+        run: |
+          gcc --version
+          nasm -v
+          cargo --version
+          rustc --version
+          make --version
+
+      - name: Build project with build.py
+        run: |
+          python3 build.py --clean-build
+
+      - name: Run project healthcheck
+        run: |
+          python3 healthcheck.py
+
+      - name: Validate build outputs
+        run: |
+          test -s keios.elf
+          test -s keios.iso
+          file keios.elf
+          file keios.iso
+          grub-file --is-x86-multiboot keios.elf
+
+      - name: Upload bootable ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: keios-i386-iso
+          path: keios.iso
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload kernel ELF
+        uses: actions/upload-artifact@v4
+        with:
+          name: keios-i386-kernel
+          path: keios.elf
+          if-no-files-found: error
+          retention-days: 7
