@@ -47,6 +47,9 @@ jobs:
         with:
           components: rust-src
 
+      - name: Install Clippy
+        run: rustup component add clippy --toolchain nightly
+
       - name: Show toolchain versions
         run: |
           gcc-15 --version
@@ -67,6 +70,7 @@ jobs:
 
       - name: Validate build outputs
         run: |
+          set -e
           test -s keios.elf
           test -s keios.iso
           file keios.elf

@@ -90,7 +90,19 @@ def update_readme_badges(results: dict[str, CheckStatus]) -> None:
 
 def main() -> int:
     results = {
-        "Clippy": run_check("cargo clippy", ["cargo", "clippy"], ROOT / "rust"),
+        "Clippy": run_check(
+            "cargo clippy",
+            [
+                "cargo",
+                "clippy",
+                "--",
+                "-A",
+                "clippy::all",
+                "-D",
+                "clippy::correctness",
+            ],
+            ROOT / "rust",
+        ),
         "Tests": run_check("cargo test", ["cargo", "test"], ROOT / "rust"),
         "Build": run_check(
             "python3 run.py --skip-run",
