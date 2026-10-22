@@ -80,7 +80,8 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
         shell_init();
     } else {
         gfx_fill_rect(gen_color32(0xFFFF00FF), 0, 0, 100, 100);
-        gfx_draw_text(gen_color32(0xFFFFFFFF), 10, 10, "The codebase is messy");
+        gfx_draw_text(gen_color32(0xFFFFFFFF), 10, 10,
+                      " ~!@#$%^&*()<>:\"\'{}\\?/,.-_=+\nqwertyuiopasdfghjklzxcvbnm\nQWERTYUIOPASDFGHJKLZXCVBNM");
     }
 
     while (true) {

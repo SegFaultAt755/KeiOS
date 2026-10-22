@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#define IPC_MAX_PAYLOAD 64
+#define IPC_MAX_PAYLOAD 256
 
 #define IPC_OK      0
 #define IPC_INVALID 1

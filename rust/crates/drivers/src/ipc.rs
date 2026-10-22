@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPLv3
 // Copyright (C) 2026 KeiOS Developers
 
-pub const IPC_MAX_PAYLOAD: usize = 64;
+pub const IPC_MAX_PAYLOAD: usize = 256;
 pub const IPC_QUEUE_CAPACITY: usize = 16;
 pub const IPC_MAX_ENDPOINTS: usize = 32;
 

@@ -4,12 +4,13 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "kernel/multiboot.h"
+#include "kernel/ipc.h"
 #include "drivers/graphics/color.h"
 
 #define GRAPHICS_TYPE_VGA_PALETTE 2
 #define GRAPHICS_TYPE_FRAMEBUFFER 1
 #define GRAPHICS_TYPE_TEXT_MODE   0
-#define GRAPHICS_TEXT_MAX_BYTES   35
+#define GRAPHICS_TEXT_MAX_BYTES   (IPC_MAX_PAYLOAD - 29)
 
 extern bool gfx_initialized;
 
