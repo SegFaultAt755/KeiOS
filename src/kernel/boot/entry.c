@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "drivers/graphics/color.h"
+
 #include "kernel/framebuffer.h"
 #include "kernel/graphics.h"
 #include "kernel/interrupts.h"
@@ -65,6 +66,7 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
     /* Enable interrupts and start the shell */
     enable_interrupts();
 
+#if 0
     if (exec_init == nullptr || exec_init_size == 0)
         KERNEL_PANIC("No initial executable found or valid",
                      "Initial executable pointer is null or the executable size equals 0");
@@ -72,11 +74,13 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
     qemu_printf(QEMU_KERN, QEMU_INFO, "Handing off initial executable: addr=%p size=%u bytes", exec_init,
                 exec_init_size);
     execute_init_binary(exec_init, exec_init_size);
+#endif
 
     if (!gfx_initialized) {
         shell_init();
     } else {
         gfx_fill_rect(gen_color32(0xFFFF00FF), 0, 0, 100, 100);
+        gfx_draw_text(gen_color32(0xFFFFFFFF), 10, 10, "The codebase is messy");
     }
 
     while (true) {

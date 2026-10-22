@@ -3,6 +3,8 @@
 
 use super::display::{Color, Display};
 use super::shapes::ShapeEngine;
+use super::text::TextEngine;
+use core::ffi::CStr;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -81,6 +83,32 @@ pub extern "C" fn display_fill_rect(x: i32, y: i32, width: u32, height: u32, col
             display.fill_rect(x, y, width, height, Color(color));
         }
     }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn display_draw_text_static(
+    x: i32,
+    y: i32,
+    text: *const core::ffi::c_char,
+    color: u32,
+) -> i32 {
+    if text.is_null() {
+        return 1;
+    }
+
+    let text = unsafe { CStr::from_ptr(text) };
+    let Ok(text) = text.to_str() else {
+        return 1;
+    };
+
+    unsafe {
+        if let Some(display) = get_display() {
+            display.draw_text_static(x, y, text, Color(color));
+            return 0;
+        }
+    }
+
+    1
 }
 
 // Functions that read display state

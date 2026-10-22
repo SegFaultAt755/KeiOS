@@ -9,12 +9,14 @@
 #define GRAPHICS_TYPE_VGA_PALETTE 2
 #define GRAPHICS_TYPE_FRAMEBUFFER 1
 #define GRAPHICS_TYPE_TEXT_MODE   0
+#define GRAPHICS_TEXT_MAX_BYTES   35
 
 extern bool gfx_initialized;
 
-int get_graphics_type(struct multiboot_info *mbi);
-int gfx_init(struct multiboot_info *mbi);
+int  get_graphics_type(struct multiboot_info *mbi);
+int  gfx_init(struct multiboot_info *mbi);
 void gfx_set_ipc_endpoint(uint32_t endpoint);
-int gfx_clear(struct color32 color);
-int gfx_draw_pixel(struct color32 color, uint32_t x, uint32_t y);
-int gfx_fill_rect(struct color32 color, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+int  gfx_clear(struct color32 color);
+int  gfx_draw_pixel(struct color32 color, uint32_t x, uint32_t y);
+int  gfx_fill_rect(struct color32 color, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+int  gfx_draw_text(struct color32 color, uint32_t x, uint32_t y, const char *text);

@@ -40,6 +40,10 @@ int framebuffer_init(struct framebuffer_info info) {
     return 0;
 }
 
+uint32_t *framebuffer_get_addr(void) {
+    return framebuffer_ready ? active_framebuffer.addr : nullptr;
+}
+
 void framebuffer_clear(struct color32 c) {
     if (!framebuffer_ready)
         return;

@@ -17,6 +17,7 @@ struct framebuffer_info {
 };
 
 int framebuffer_init(struct framebuffer_info info);
+uint32_t *framebuffer_get_addr(void);
 void framebuffer_clear(struct color32 c);
 void framebuffer_draw_pixel(struct color32 c, uint32_t x, uint32_t y);
 void framebuffer_fill_rect(struct color32 c, uint32_t x, uint32_t y, uint32_t width, uint32_t height);

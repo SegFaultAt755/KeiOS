@@ -1,14 +1,8 @@
-use super::display::Display;
-
 // SPDX-License-Identifier: GPLv3
 // Copyright (C) 2026 KeiOS Developers
 
-/* ASCII characters 32 through 126, including space and excluding DEL */
 #[allow(unused)]
-type Resolution = u16;
-
-#[allow(unused)]
-const STANDARD_FONT: [[Resolution; 16]; 95] = [
+pub const ASCII_FONT_16X16: [[u16; 16]; 95] = [
     // 32: Space
     [
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -485,7 +479,3 @@ const STANDARD_FONT: [[Resolution; 16]; 95] = [
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     ],
 ];
-
-pub trait TextEngine {}
-
-impl TextEngine for Display {}
