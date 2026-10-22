@@ -1,4 +1,4 @@
-use super::fonts::ASCII_FONT_16X16;
+use super::fonts::{ASCII_FONT_DEFAULT, ASCII_FONT_HEIGHT, ASCII_FONT_WIDTH};
 use crate::display::display::{Color, Display};
 
 pub trait TextEngine {
@@ -15,30 +15,32 @@ impl TextEngine for Display {
             match character {
                 '\n' => {
                     cursor_x = x;
-                    cursor_y = cursor_y.saturating_add(16);
+                    cursor_y = cursor_y.saturating_add(ASCII_FONT_HEIGHT as i32);
                 }
                 '\r' => cursor_x = x,
-                '\t' => cursor_x = cursor_x.saturating_add(64),
+                '\t' => {
+                    cursor_x = cursor_x.saturating_add((ASCII_FONT_WIDTH as i32).saturating_mul(4))
+                }
                 character => {
                     let glyph_index = match character {
                         ' '..='~' => character as usize - ' ' as usize,
                         _ => '?' as usize - ' ' as usize,
                     };
-                    let glyph = &ASCII_FONT_16X16[glyph_index];
+                    let glyph = &ASCII_FONT_DEFAULT[glyph_index];
 
-                    for (row, bits) in glyph.iter().enumerate() {
-                        for column in 0..16 {
-                            if bits & (1 << (15 - column)) != 0 {
+                    for (row_index, row_bytes) in glyph.iter().enumerate() {
+                        for column in 0..ASCII_FONT_WIDTH {
+                            if row_bytes[column / 8] & (1 << (7 - column % 8)) != 0 {
                                 self.draw_pixel(
-                                    cursor_x.saturating_add(column),
-                                    cursor_y.saturating_add(row as i32),
+                                    cursor_x.saturating_add(column as i32),
+                                    cursor_y.saturating_add(row_index as i32),
                                     color,
                                 );
                             }
                         }
                     }
 
-                    cursor_x = cursor_x.saturating_add(16);
+                    cursor_x = cursor_x.saturating_add(ASCII_FONT_WIDTH as i32);
                 }
             }
         }

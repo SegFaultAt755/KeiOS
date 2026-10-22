@@ -13,8 +13,13 @@
 /*.log
 /config.mk
 /*.cpio
+/helpers/__pycache__
+
+# Specific files
+/rust/crates/drivers/src/display/text/generated_font.rs
 
 # Documents
 /.obsidian
 /TODO.md
 /FIXME.md
+/plan
