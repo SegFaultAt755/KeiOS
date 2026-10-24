@@ -2,9 +2,6 @@
 
 Concrete correctness and reproducibility issues found during the codebase review.
 
-## Boot and input path
-- **User mode can invoke every exception and IRQ IDT gate.** `idt_init()` installs all exception and remapped IRQ gates with attributes `0xEE` (present, DPL 3), not just the syscall gate at vector 128. Once Ring 3 code runs, software `int` instructions can enter these handlers; many paths panic the whole kernel. Use kernel-only privilege levels for exception/IRQ gates and grant DPL 3 only to intentional syscall gates.
-
 ## Memory mapping and generated inputs
 
 - **ACPI root-table mappings cover only the first page.** `acpi_init()` maps a single page containing the root table header, while `find_fadt()` walks entries across the table's declared length. The FADT pointer is then dereferenced without an explicit mapping/reservation step. Map and validate the complete table ranges before parsing them. `parse_dsdt()` already maps the DSDT pages, but should follow the same checked-range approach.

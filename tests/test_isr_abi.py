@@ -38,6 +38,12 @@ class IsrAbiTests(unittest.TestCase):
         self.assertNotIn("ISR_NOERRCODE 14", stub)
         self.assertNotIn("ISR_NOERRCODE 17", stub)
 
+    def test_idt_privilege_levels_only_allow_kernel_handlers_by_default(self):
+        idt_source = (REPO_ROOT / "src/arch/x86/cpu/idt.c").read_text()
+        self.assertIn("idt_set_gate(i + 32, (uint32_t)handlers[i], 0x8E);", idt_source)
+        self.assertIn("idt_set_gate(i, (uint32_t)handlers[i], 0x8E);", idt_source)
+        self.assertIn("idt_set_gate(128, (uint32_t)syscall_stub, 0xEE);", idt_source)
+
     def test_debug_log_reports_clean_interrupt_setup(self):
         debug_log = (REPO_ROOT / "debug.log").read_text()
         self.assertIn("[CPU] [OK] IDT setup", debug_log)

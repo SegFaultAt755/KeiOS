@@ -46,7 +46,7 @@ static void irq_setup() {
                               irq8, irq9, irq10, irq11, irq12, irq13, irq14, irq15};
 
     for (auto i = 0; i < 16; i++)
-        idt_set_gate(i + 32, (uint32_t)handlers[i], 0xEE);
+        idt_set_gate(i + 32, (uint32_t)handlers[i], 0x8E);
 
     qemu_printf(QEMU_CPU, QEMU_OK, "IRQ setup");
 }
@@ -57,7 +57,7 @@ static void idt_setup() {
                               isr22, isr23, isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31};
 
     for (auto i = 0; i < 32; i++)
-        idt_set_gate(i, (uint32_t)handlers[i], 0xEE);
+        idt_set_gate(i, (uint32_t)handlers[i], 0x8E);
 
     qemu_printf(QEMU_CPU, QEMU_OK, "IDT setup");
 }

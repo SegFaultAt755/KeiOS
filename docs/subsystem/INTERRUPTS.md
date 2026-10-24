@@ -17,15 +17,14 @@ in [SYSCALL.md](./SYSCALL.md).
 | --- | --- |
 | GDT and TSS setup | Present |
 | IDT and exception stubs | Present; the exception frame ABI and page-fault error-code handling were corrected |
-| PIC remapping and IRQ stubs | Present; IRQ privilege attributes need correction |
+| PIC remapping and IRQ stubs | Present; IRQ privilege attributes are kernel-only |
 | PIT and keyboard IRQ paths | Used by the current kernel |
 | Syscall gate and dispatcher | Present; only a small kernel-side table is implemented |
 | Safe exception recovery and user-mode protection | Not established |
 
 ## Known correctness concerns
 
-The IDT still grants DPL 3 to exception and IRQ gates, although only an
-intentional syscall gate should be callable from user mode. Correct these
-privilege checks and test the full exception/interrupt frame before relying on
-diagnostics or enabling untrusted Ring 3 code. More detail is recorded in
-`FIXME.md`.
+The IDT now keeps exception and IRQ gates at kernel privilege level while the
+`int 0x80` syscall gate remains DPL 3. Full user-mode isolation and safe
+exception recovery still need explicit validation before untrusted Ring 3 code
+is enabled.
