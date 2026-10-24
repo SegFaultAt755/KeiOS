@@ -1,0 +1,5 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPLv3
+# Copyright (C) 2026 KeiOS Developers
+
+exec python3 "$(git rev-parse --show-toplevel)/scripts/format_code.py" --staged

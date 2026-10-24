@@ -82,6 +82,18 @@ To ensure your effort aligns with the roadmap and doesn't get wasted:
 
 ## Code Style Guide
 
-* **C23 Style:** Run `clang-format` using the `.clang-format` file in the root directory before committing. Keep it clean, idiomatic C. Don't attempt to mimic C++ object oriented structures
-* **Rust Style:** Run `cargo fmt` to apply standard formatting default rules (no `rustfmt.toml` available yet). Use `cargo clippy` to catch common mistakes
+* **C23 Style:** Use `clang-format` with the root `.clang-format` file. Keep C clean and idiomatic; don't attempt to mimic C++ object-oriented structures.
+* **Rust Style:** Use `cargo fmt` to apply standard formatting defaults (no `rustfmt.toml` is available yet). Use `cargo clippy` to catch common mistakes.
 * **Python Style:** Follow PEP 8 guidelines. Run `black` or `ruff` on all scripting files to guarantee clean formatting
+
+Run `python3 scripts/format_code.py` to format all tracked C and Rust source
+files. To format automatically before each commit, enable the repository hook
+once in your clone:
+
+```sh
+git config --local core.hooksPath .githooks
+```
+
+The hook formats staged C and Rust files. If formatting changes a staged file,
+the commit is stopped so you can review and stage the formatted result before
+retrying.
