@@ -21,7 +21,11 @@
 
 ---
 
+<div align="center">
+
 ## Project at a glance
+
+</div>
 
 KeiOS is an experimental **i386 operating system** combining a freestanding
 C23 kernel with a Rust `no_std` drivers library. Today, it boots through GRUB,
@@ -41,7 +45,13 @@ basic hardware, and presents an interactive kernel shell.
 
 </div>
 
+---
+
+<div align="center">
+
 ## ✨ Current capabilities
+
+</div>
 
 | Area | Available today |
 | --- | --- |
@@ -59,7 +69,13 @@ by the normal boot path. KeiOS does **not** currently run Windows PE or Linux
 executables. Existing low-level facilities are experimental and should not be
 considered production-ready.
 
+---
+
+<div align="center">
+
 ## 🚀 Getting started
+
+</div>
 
 ### Requirements
 
@@ -141,7 +157,13 @@ python3 run.py --disk-file /path/to/keios.qcow2 --disk-size 2G
 
 QEMU diagnostic output is written to `qemu.log` and `debug.log`.
 
+---
+
+<div align="center">
+
 ## 🧰 Helper scripts
+
+</div>
 
 | Script | What it does | Example |
 | --- | --- | --- |
@@ -166,7 +188,13 @@ of the Make build.
 > `--dry-run` to preview cleanup. `make clean` removes build outputs without
 > deleting the disk image or logs.
 
+---
+
+<div align="center">
+
 ## 🗂️ Project structure
+
+</div>
 
 ```text
 include/                  C interfaces and configuration
@@ -180,7 +208,13 @@ build.py / run.py          Build and QEMU wrappers
 clean.py                   Build-artifact cleanup
 ```
 
+---
+
+<div align="center">
+
 ## 📚 Documentation
+
+</div>
 
 <div align="center">
 
