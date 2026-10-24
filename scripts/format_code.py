@@ -10,6 +10,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RUST_MANIFEST = ROOT / "rust" / "Cargo.toml"
+CLANG_FORMAT_CONFIG = ROOT / ".clang-format"
+if not CLANG_FORMAT_CONFIG.exists():
+    CLANG_FORMAT_CONFIG = ROOT / "scripts" / ".clang-format"
 FORMATTABLE_EXTENSIONS = {".c", ".h", ".rs"}
 
 
@@ -59,8 +62,20 @@ def format_files(files: list[str]) -> int:
         if not shutil.which("clang-format"):
             print("error: clang-format is required to format C files", file=sys.stderr)
             return 1
+        if not CLANG_FORMAT_CONFIG.is_file():
+            print(
+                f"error: clang-format config not found at {CLANG_FORMAT_CONFIG}",
+                file=sys.stderr,
+            )
+            return 1
         subprocess.run(
-            ["clang-format", "-i", "--", *c_files],
+            [
+                "clang-format",
+                f"--style=file:{CLANG_FORMAT_CONFIG}",
+                "-i",
+                "--",
+                *c_files,
+            ],
             cwd=ROOT,
             check=True,
         )
