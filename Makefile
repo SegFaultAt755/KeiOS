@@ -66,7 +66,7 @@ OBJS := $(C_OBJS) $(ASM_OBJS) $(RUST_LIBS)
 DEPS := $(C_OBJS:.o=.d) $(ASM_OBJS:.o=.d)
 
 # Define build rules
-.PHONY: all clean config help userspace FORCE_RUST
+.PHONY: all clean config help userspace FORCE_RUST test
 
 all: $(ISO_IMAGE)
 
@@ -143,5 +143,9 @@ help:
 	@echo "    make clean        - Remove build artifacts"
 	@echo "    make config       - Generate a customizable config.mk file"
 	@echo "    make D=\"FLAG=1\"   - Pass custom preprocessor definitions"
+	@echo "    make test         - Run the regression tests"
+
+test:
+	@python3 -m unittest discover -s tests -v
 
 -include $(DEPS)
