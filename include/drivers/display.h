@@ -5,17 +5,9 @@
 
 #include <stdint.h>
 
-struct display_info {
-    uint32_t *lfb_addr;
-    uint32_t  flags;
-    uint32_t  width;
-    uint32_t  height;
-    uint32_t  pitch;
-    uint8_t   bpp;
-};
-
 /* Basic display operations */
-int  display_init(struct display_info info);
+bool display_init(void);
+bool display_is_initialized(void);
 void display_clear(uint32_t color);
 void display_draw_pixel(int32_t x, int32_t y, uint32_t color);
 
@@ -26,21 +18,3 @@ void display_fill_rect(int32_t x, int32_t y, uint32_t width, uint32_t height, ui
 
 /* Draw text using the default 16x16 ASCII font; returns 1 for invalid input or an uninitialized display. */
 int32_t display_draw_text_static(int32_t x, int32_t y, const char *text, uint32_t color);
-
-/* Functions that read display state */
-uint32_t  display_get_width(void);
-uint32_t  display_get_height(void);
-uint32_t  display_get_pitch(void);
-uint8_t   display_get_bpp(void);
-uint32_t  display_get_flags(void);
-uint32_t* display_get_lfb_addr(void);
-
-/**
- * Read a pixel from the framebuffer safely
- * @return 0 on success; 1 if the coordinates are out of bounds or uninitialized
-*/
-int32_t display_get_pixel(int32_t x, int32_t y, uint32_t *out_color);
-
-/* Functions that change display state */
-void display_set_lfb_addr(uint32_t *new_lfb);
-void display_set_resolution(uint32_t width, uint32_t height, uint32_t pitch);

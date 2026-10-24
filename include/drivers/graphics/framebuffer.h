@@ -3,21 +3,12 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
+#include <stdbool.h>
 #include <stdint.h>
-#include "drivers/graphics/color.h"
 
-/* These values are pulled from multiboot info */
-struct framebuffer_info {
-    uint32_t *addr;
-    uint32_t  flags;
-    uint32_t  width;
-    uint32_t  height;
-    uint32_t  pitch;
-    uint8_t   bpp;
-};
+struct multiboot_info;
 
-int framebuffer_init(struct framebuffer_info info);
-uint32_t *framebuffer_get_addr(void);
-void framebuffer_clear(struct color32 c);
-void framebuffer_draw_pixel(struct color32 c, uint32_t x, uint32_t y);
-void framebuffer_fill_rect(struct color32 c, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+int framebuffer_init(const struct multiboot_info *mbi);
+void framebuffer_clear(uint32_t color);
+void framebuffer_draw_pixel(uint32_t color, uint32_t x, uint32_t y);
+void framebuffer_fill_rect(uint32_t color, uint32_t x, uint32_t y, uint32_t width, uint32_t height);

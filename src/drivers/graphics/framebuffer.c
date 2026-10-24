@@ -5,11 +5,32 @@
 
 #include "arch/x86/mem.h"
 #include "arch/x86/vmm.h"
+#include "kernel/multiboot.h"
+
+struct framebuffer_info {
+    uint32_t *addr;
+    uint32_t width;
+    uint32_t height;
+    uint32_t pitch;
+    uint8_t bpp;
+};
 
 static struct framebuffer_info active_framebuffer;
 static bool framebuffer_ready;
 
-int framebuffer_init(struct framebuffer_info info) {
+int framebuffer_init(const struct multiboot_info *mbi) {
+    if (mbi == nullptr || (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) == 0 ||
+        mbi->framebuffer_type != MULTIBOOT_FRAMEBUFFER_TYPE_RGB || mbi->framebuffer_addr > UINT32_MAX)
+        return 1;
+
+    struct framebuffer_info info = {
+        .addr = (uint32_t *)(uintptr_t)mbi->framebuffer_addr,
+        .width = mbi->framebuffer_width,
+        .height = mbi->framebuffer_height,
+        .pitch = mbi->framebuffer_pitch,
+        .bpp = mbi->framebuffer_bpp,
+    };
+
     if (info.addr == nullptr || info.width == 0 || info.height == 0 || info.bpp != 32 || info.pitch == 0 ||
         (info.pitch & 3u) != 0 || info.width > UINT32_MAX / 4 || info.pitch < info.width * 4)
         return 1;
@@ -40,31 +61,26 @@ int framebuffer_init(struct framebuffer_info info) {
     return 0;
 }
 
-uint32_t *framebuffer_get_addr(void) {
-    return framebuffer_ready ? active_framebuffer.addr : nullptr;
-}
-
-void framebuffer_clear(struct color32 c) {
+void framebuffer_clear(uint32_t color) {
     if (!framebuffer_ready)
         return;
 
     volatile uint32_t *pixels = (volatile uint32_t *)active_framebuffer.addr;
-    const uint32_t color = color32_to_int(c);
     const uint32_t pixel_count = (active_framebuffer.pitch / sizeof(uint32_t)) * active_framebuffer.height;
     for (uint32_t index = 0; index < pixel_count; index++)
         pixels[index] = color;
 }
 
-void framebuffer_draw_pixel(struct color32 c, uint32_t x, uint32_t y) {
+void framebuffer_draw_pixel(uint32_t color, uint32_t x, uint32_t y) {
     if (!framebuffer_ready || x >= active_framebuffer.width || y >= active_framebuffer.height)
         return;
 
     const uint32_t stride = active_framebuffer.pitch / sizeof(uint32_t);
     volatile uint32_t *pixels = (volatile uint32_t *)active_framebuffer.addr;
-    pixels[y * stride + x] = color32_to_int(c);
+    pixels[y * stride + x] = color;
 }
 
-void framebuffer_fill_rect(struct color32 c, uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+void framebuffer_fill_rect(uint32_t color, uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
     if (!framebuffer_ready || x >= active_framebuffer.width || y >= active_framebuffer.height || width == 0 ||
         height == 0)
         return;
@@ -75,7 +91,6 @@ void framebuffer_fill_rect(struct color32 c, uint32_t x, uint32_t y, uint32_t wi
         height = active_framebuffer.height - y;
 
     const uint32_t stride = active_framebuffer.pitch / sizeof(uint32_t);
-    const uint32_t color = color32_to_int(c);
     volatile uint32_t *pixels = (volatile uint32_t *)active_framebuffer.addr;
     for (uint32_t row = 0; row < height; row++) {
         volatile uint32_t *destination = pixels + (y + row) * stride + x;

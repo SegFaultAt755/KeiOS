@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPLv3
 // Copyright (C) 2026 KeiOS Developers
 
-use super::wrapper::DisplayInfo;
+unsafe extern "C" {
+    fn framebuffer_clear(color: u32);
+    fn framebuffer_draw_pixel(color: u32, x: u32, y: u32);
+    fn framebuffer_fill_rect(color: u32, x: u32, y: u32, width: u32, height: u32);
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Color(pub u32);
@@ -16,101 +20,33 @@ impl Color {
     }
 }
 
-pub struct Display {
-    lfb: *mut u32,
-    flags: u32,
-    width: u32,
-    height: u32,
-    pitch: u32,
-    bpp: u8,
-}
+pub struct Display;
 
 impl Display {
-    pub fn new(info: DisplayInfo) -> Self {
-        Self {
-            width: info.width,
-            height: info.height,
-            pitch: info.pitch,
-            bpp: info.bpp,
-            flags: info.flags,
-            lfb: info.lfb_addr,
-        }
-    }
-
-    // Functions that read display state
-    #[inline]
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-    #[inline]
-    pub fn height(&self) -> u32 {
-        self.height
-    }
-    #[inline]
-    pub fn dimensions(&self) -> (u32, u32) {
-        (self.width, self.height)
-    }
-    #[inline]
-    pub fn pitch(&self) -> u32 {
-        self.pitch
-    }
-    #[inline]
-    pub fn bpp(&self) -> u8 {
-        self.bpp
-    }
-    #[inline]
-    pub fn flags(&self) -> u32 {
-        self.flags
-    }
-    #[inline]
-    pub fn framebuffer(&self) -> *mut u32 {
-        self.lfb
-    }
-
-    // Functions that change display state
-    pub unsafe fn set_framebuffer(&mut self, new_lfb: *mut u32) {
-        self.lfb = new_lfb;
-    }
-
-    pub fn set_resolution(&mut self, width: u32, height: u32, pitch: u32) {
-        self.width = width;
-        self.height = height;
-        self.pitch = pitch;
-    }
-
-    // Functions that draw on the display
     #[inline]
     pub fn draw_pixel(&mut self, x: i32, y: i32, color: Color) {
-        if x < 0 || y < 0 || x as u32 >= self.width || y as u32 >= self.height {
+        if x < 0 || y < 0 {
             return;
         }
 
         unsafe {
-            let pixels_per_row = (self.pitch / 4) as usize;
-            let offset = (y as usize * pixels_per_row) + x as usize;
-            self.lfb.add(offset).write_volatile(color.0);
-        }
-    }
-
-    #[inline]
-    pub fn get_pixel(&self, x: i32, y: i32) -> Option<Color> {
-        if x < 0 || y < 0 || x as u32 >= self.width || y as u32 >= self.height {
-            return None;
-        }
-
-        unsafe {
-            let pixels_per_row = (self.pitch / 4) as usize;
-            let offset = (y as usize * pixels_per_row) + x as usize;
-            Some(Color(self.lfb.add(offset).read_volatile()))
+            framebuffer_draw_pixel(color.0, x as u32, y as u32);
         }
     }
 
     pub fn clear(&mut self, color: Color) {
-        let count = ((self.pitch / 4) * self.height) as usize;
         unsafe {
-            for i in 0..count {
-                self.lfb.add(i).write_volatile(color.0);
-            }
+            framebuffer_clear(color.0);
+        }
+    }
+
+    pub fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color) {
+        if x < 0 || y < 0 {
+            return;
+        }
+
+        unsafe {
+            framebuffer_fill_rect(color.0, x as u32, y as u32, width, height);
         }
     }
 }

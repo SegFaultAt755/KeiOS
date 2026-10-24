@@ -6,17 +6,6 @@ use super::shapes::ShapeEngine;
 use super::text::TextEngine;
 use core::ffi::CStr;
 
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct DisplayInfo {
-    pub lfb_addr: *mut u32,
-    pub flags: u32,
-    pub width: u32,
-    pub height: u32,
-    pub pitch: u32,
-    pub bpp: u8,
-}
-
 static mut GLOBAL_DISPLAY: Option<Display> = None;
 
 #[inline(always)]
@@ -28,16 +17,18 @@ pub unsafe fn get_display() -> Option<&'static mut Display> {
 
 // Core and shape functions exported through the C FFI
 #[unsafe(no_mangle)]
-pub extern "C" fn display_init(info: DisplayInfo) -> i32 {
-    if info.lfb_addr.is_null() || info.width == 0 || info.height == 0 {
-        return 1;
-    }
-
+pub extern "C" fn display_init() -> bool {
     unsafe {
-        GLOBAL_DISPLAY = Some(Display::new(info));
+        GLOBAL_DISPLAY = Some(Display);
     }
 
-    0
+    true
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn display_is_initialized() -> bool {
+    let raw_ptr = core::ptr::addr_of_mut!(GLOBAL_DISPLAY);
+    unsafe { (*raw_ptr).is_some() }
 }
 
 #[unsafe(no_mangle)]
@@ -109,84 +100,4 @@ pub extern "C" fn display_draw_text_static(
     }
 
     1
-}
-
-// Functions that read display state
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_width() -> u32 {
-    unsafe { get_display().map(|d| d.width()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_height() -> u32 {
-    unsafe { get_display().map(|d| d.height()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_pitch() -> u32 {
-    unsafe { get_display().map(|d| d.pitch()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_bpp() -> u8 {
-    unsafe { get_display().map(|d| d.bpp()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_flags() -> u32 {
-    unsafe { get_display().map(|d| d.flags()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_lfb_addr() -> *mut u32 {
-    unsafe {
-        get_display()
-            .map(|d| d.framebuffer())
-            .unwrap_or(core::ptr::null_mut())
-    }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_get_pixel(x: i32, y: i32, out_color: *mut u32) -> i32 {
-    if out_color.is_null() {
-        return 1;
-    }
-
-    unsafe {
-        if let Some(display) = get_display() {
-            if let Some(color) = display.get_pixel(x, y) {
-                *out_color = color.0;
-                return 0;
-            }
-        }
-
-        1
-    }
-}
-
-// Functions that change display state
-#[unsafe(no_mangle)]
-pub extern "C" fn display_set_lfb_addr(new_lfb: *mut u32) {
-    if new_lfb.is_null() {
-        return;
-    }
-
-    unsafe {
-        if let Some(display) = get_display() {
-            display.set_framebuffer(new_lfb);
-        }
-    }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn display_set_resolution(width: u32, height: u32, pitch: u32) {
-    if width == 0 || height == 0 || pitch == 0 {
-        return;
-    }
-
-    unsafe {
-        if let Some(display) = get_display() {
-            display.set_resolution(width, height, pitch);
-        }
-    }
 }

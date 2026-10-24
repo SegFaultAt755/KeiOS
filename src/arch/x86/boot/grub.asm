@@ -4,8 +4,8 @@
 ; Define constants used by the boot code
 MBALIGN  equ  1 << 0
 MEMINFO  equ  1 << 1
-MBUSEGFX equ  1 << 2
-MBFLAGS  equ  MBALIGN | MEMINFO | MBUSEGFX
+MBFRAMEBUFFER equ  1 << 2
+MBFLAGS       equ  MBALIGN | MEMINFO | MBFRAMEBUFFER
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
 

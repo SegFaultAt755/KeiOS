@@ -2,10 +2,8 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
-#include "drivers/graphics/color.h"
+#include "drivers/display.h"
 
-#include "kernel/framebuffer.h"
-#include "kernel/gfx.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
@@ -76,12 +74,13 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
     execute_init_binary(exec_init, exec_init_size);
 #endif
 
-    if (!gfx_initialized) {
+    if (!display_is_initialized()) {
         shell_init();
     } else {
-        gfx_fill_rect(gen_color32(0xFFFF00FF), 0, 0, 100, 100);
-        gfx_draw_text(gen_color32(0xFFFFFFFF), 10, 10,
-                      " ~!@#$%^&*()<>:\"\'{}\\?/,.-_=+\nqwertyuiopasdfghjklzxcvbnm\nQWERTYUIOPASDFGHJKLZXCVBNM");
+        display_fill_rect(0, 0, 100, 100, 0xFFFF00FF);
+        display_draw_text_static(
+            10, 10, " ~!@#$%^&*()<>:\"\'{}\\?/,.-_=+\nqwertyuiopasdfghjklzxcvbnm\nQWERTYUIOPASDFGHJKLZXCVBNM",
+            0xFFFFFFFF);
     }
 
     while (true) {
