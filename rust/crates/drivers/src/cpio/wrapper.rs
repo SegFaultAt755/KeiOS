@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPLv3
 // Copyright (C) 2026 KeiOS Developers
 
-use super::archive::CpioArchive;
+use super::archive::{CpioArchive, CpioError};
 use super::header::CpioHeader;
 use core::ffi::{c_char, c_void};
 
@@ -46,25 +46,32 @@ pub extern "C" fn cpio_init(info: CpioInfo) -> i32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn cpio_parse(callback: CpioCallback, user_context: *mut c_void) -> i32 {
     unsafe {
-        if let Some(archive) = get_archive() {
-            while let Some(entry) = archive.next_entry() {
-                let mut c_name = entry.name.clone();
-                c_name.push('\0');
+        let Some(archive) = get_archive() else {
+            return 1;
+        };
 
-                callback(
-                    c_name.as_ptr() as *const c_char,
-                    entry.header,
-                    entry.data.as_ptr(),
-                    entry.data.len(),
-                    user_context,
-                );
+        loop {
+            match archive.next_entry() {
+                Ok(Some(entry)) => {
+                    let mut c_name = entry.name.clone();
+                    c_name.push('\0');
+
+                    callback(
+                        c_name.as_ptr() as *const c_char,
+                        entry.header,
+                        entry.data.as_ptr(),
+                        entry.data.len(),
+                        user_context,
+                    );
+                }
+                Ok(None) => return 0,
+                Err(CpioError::TruncatedArchive)
+                | Err(CpioError::InvalidHeader)
+                | Err(CpioError::InvalidName)
+                | Err(CpioError::DataRangeOverflow) => return 1,
             }
-
-            return 0;
         }
     }
-
-    1
 }
 
 // Functions that read archive state

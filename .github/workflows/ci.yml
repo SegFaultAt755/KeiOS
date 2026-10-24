@@ -77,6 +77,12 @@ jobs:
           file keios.iso
           grub-file --is-x86-multiboot keios.elf
 
+      - name: Show failing build context
+        if: ${{ failure() }}
+        run: |
+          echo "::error::The CI job failed. Review the step output above for the fatal error."
+          echo "The previous successful artifacts remain available for debugging if they were produced before the failure."
+
       - name: Upload bootable ISO
         uses: actions/upload-artifact@v5
         with:

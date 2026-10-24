@@ -9,6 +9,14 @@ use alloc::string::String;
 use core::slice;
 use core::str;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CpioError {
+    TruncatedArchive,
+    InvalidHeader,
+    InvalidName,
+    DataRangeOverflow,
+}
+
 pub struct CpioArchive<'a> {
     data: &'a [u8],
     offset: usize,
@@ -61,41 +69,42 @@ impl<'a> CpioArchive<'a> {
         (val + 3) & !3
     }
 
-    #[inline]
-    fn has_remaining_bytes(&self) -> bool {
-        self.offset + HEADER_SIZE <= self.data.len()
-    }
-
-    fn read_filename(&self, offset: usize, namesize: usize) -> Option<String> {
-        let end = offset.checked_add(namesize)?;
+    fn read_filename(&self, offset: usize, namesize: usize) -> Result<String, CpioError> {
+        let end = offset.checked_add(namesize).ok_or(CpioError::InvalidName)?;
         if end > self.data.len() {
-            return None;
+            return Err(CpioError::InvalidName);
         }
 
         let name_bytes = &self.data[offset..end];
         let clean_bytes = name_bytes.strip_suffix(&[0]).unwrap_or(name_bytes);
-        let name_str = str::from_utf8(clean_bytes).ok()?;
+        let name_str = str::from_utf8(clean_bytes).map_err(|_| CpioError::InvalidName)?;
 
-        Some(String::from(name_str))
+        Ok(String::from(name_str))
     }
 
-    pub fn next_entry(&mut self) -> Option<CpioEntry<'a>> {
-        if !self.has_remaining_bytes() {
-            return None;
+    pub fn next_entry(&mut self) -> Result<Option<CpioEntry<'a>>, CpioError> {
+        if self.offset >= self.data.len() {
+            return Ok(None);
+        }
+
+        if self.data.len().saturating_sub(self.offset) < HEADER_SIZE {
+            return Err(CpioError::TruncatedArchive);
         }
 
         let parser = NewcParser;
         let header_slice = &self.data[self.offset..self.offset + HEADER_SIZE];
-        let header = parser.parse(header_slice)?;
+        let header = parser.parse(header_slice).ok_or(CpioError::InvalidHeader)?;
         self.offset += HEADER_SIZE;
 
         let name = self.read_filename(self.offset, header.namesize as usize)?;
         self.offset = self.align_to_4(self.offset + header.namesize as usize);
 
         let data_start = self.offset;
-        let data_end = data_start.checked_add(header.filesize as usize)?;
+        let data_end = data_start
+            .checked_add(header.filesize as usize)
+            .ok_or(CpioError::DataRangeOverflow)?;
         if data_end > self.data.len() {
-            return None;
+            return Err(CpioError::DataRangeOverflow);
         }
 
         let file_data = &self.data[data_start..data_end];
@@ -103,9 +112,9 @@ impl<'a> CpioArchive<'a> {
 
         let entry = CpioEntry::new(header, name, file_data);
         if entry.is_trailer() {
-            return None;
+            return Ok(None);
         }
 
-        Some(entry)
+        Ok(Some(entry))
     }
 }

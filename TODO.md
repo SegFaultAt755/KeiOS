@@ -71,8 +71,3 @@ Before deleting public headers or exported ABI symbols, confirm there are no dow
 - Create a wiki.
 - Create a project video.
 
-## Small tasks
-
-- Make rust to use Result and Option
-- Update README and write AGENTS.md
-- Make CI show the previous result if there is a fatal error.
