@@ -18,8 +18,6 @@
 # Specific files
 /rust/crates/drivers/src/display/text/generated_font.rs
 
-# Documents
+# Local documents
 /.obsidian
-/TODO.md
-/FIXME.md
 /plan
