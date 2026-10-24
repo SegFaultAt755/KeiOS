@@ -16,7 +16,7 @@ in [SYSCALL.md](./SYSCALL.md).
 | Component | Current status |
 | --- | --- |
 | GDT and TSS setup | Present |
-| IDT and exception stubs | Present, but the stub/handler frame ABI needs correction |
+| IDT and exception stubs | Present; the exception frame ABI and page-fault error-code handling were corrected |
 | PIC remapping and IRQ stubs | Present; IRQ privilege attributes need correction |
 | PIT and keyboard IRQ paths | Used by the current kernel |
 | Syscall gate and dispatcher | Present; only a small kernel-side table is implemented |
@@ -24,9 +24,8 @@ in [SYSCALL.md](./SYSCALL.md).
 
 ## Known correctness concerns
 
-The ISR assembly and C handler currently disagree about how the saved register
-frame is passed, and the page-fault stub does not account for the CPU-pushed
-error code. The IDT also grants DPL 3 to exception and IRQ gates, although only
-an intentional syscall gate should be callable from user mode. Correct these
-issues and test the full exception/interrupt frame before relying on diagnostics
-or enabling untrusted Ring 3 code. More detail is recorded in `FIXME.md`.
+The IDT still grants DPL 3 to exception and IRQ gates, although only an
+intentional syscall gate should be callable from user mode. Correct these
+privilege checks and test the full exception/interrupt frame before relying on
+diagnostics or enabling untrusted Ring 3 code. More detail is recorded in
+`FIXME.md`.

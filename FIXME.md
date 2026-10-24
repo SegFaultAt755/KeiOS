@@ -3,7 +3,6 @@
 Concrete correctness and reproducibility issues found during the codebase review.
 
 ## Boot and input path
-- **The exception stubs do not match the C handler ABI.** `src/arch/x86/cpu/isr_stub.asm` calls `isr_handler` without pushing a pointer, while `src/arch/x86/cpu/isr.c` declares `isr_handler(struct registers regs)` by value. In addition, the page-fault stub is generated with `ISR_NOERRCODE`, although the CPU pushes an error code for vector 14; this shifts the saved frame and makes `iret` consume the wrong stack values. Make the frame layout and function signature agree, and classify every error-code exception correctly before relying on exception recovery/diagnostics.
 - **User mode can invoke every exception and IRQ IDT gate.** `idt_init()` installs all exception and remapped IRQ gates with attributes `0xEE` (present, DPL 3), not just the syscall gate at vector 128. Once Ring 3 code runs, software `int` instructions can enter these handlers; many paths panic the whole kernel. Use kernel-only privilege levels for exception/IRQ gates and grant DPL 3 only to intentional syscall gates.
 
 ## Memory mapping and generated inputs
@@ -17,7 +16,6 @@ Concrete correctness and reproducibility issues found during the codebase review
 - **The kernel heap does not provide its advertised 16-byte alignment.** `struct heap_segment` is 12 bytes on i386, and `kmalloc()` returns `segment + sizeof(struct heap_segment)`, so even an aligned segment header yields a payload misaligned by 4 bytes. Fix the header/payload layout and check alignment arithmetic for overflow before exposing the allocator through Rust `GlobalAlloc`.
 
 ## Obsolete framebuffer compatibility API
-
 
 ## Note on the previous memory-mapping note
 

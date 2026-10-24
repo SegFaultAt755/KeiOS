@@ -39,7 +39,8 @@ and try it in QEMU without installing it on your computer.
 - [Getting started](#-getting-started)
   - [Install prerequisites](#1-install-prerequisites)
   - [Build the ISO](#2-build-the-iso)
-  - [Run in QEMU](#3-run-in-qemu)
+  - [Run the regression tests](#3-run-the-regression-tests)
+  - [Run in QEMU](#4-run-in-qemu)
 - [Helper scripts](#-helper-scripts)
 - [Project structure](#-project-structure)
 - [Documentation](#-documentation)
@@ -172,6 +173,23 @@ python3 build.py --make-args -j4
 
 Run `make help` to list the available targets. `make config` creates a local
 `config.mk` for build configuration.
+
+### Run the regression tests
+
+Run the repository's unit tests from the project root:
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+Or use the convenience target:
+
+```sh
+make test
+```
+
+The test suite currently covers the x86 ISR/exception ABI contract and checks
+that the kernel boot log reports successful IDT setup and IRQ initialization.
 
 ### Run in QEMU
 
