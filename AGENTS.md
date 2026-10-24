@@ -33,7 +33,7 @@ a feature works.
    dependency, and contribution requirements.
 2. Keep changes focused and preserve the C23 + Rust approach; do not introduce
    C++.
-3. Update the relevant documentation whenever behavior, architecture,
+3. Update the relevant documentation whenever behavior, architecture, project version,
    interfaces, build steps, or tests change. Keep implementation claims
    consistent with the current code.
 4. Run the focused tests and checks below, plus any checks required by the
