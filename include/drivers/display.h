@@ -8,9 +8,7 @@
 enum display_status {
     DISPLAY_OK = 0,
     DISPLAY_ERR_ALREADY_INITIALIZED = 1,
-    DISPLAY_ERR_INVALID_ARGUMENT = 2,
-    DISPLAY_ERR_NOT_INITIALIZED = 3,
-    DISPLAY_ERR_UNSUPPORTED = 4,
+    DISPLAY_ERR_NOT_INITIALIZED = 2,
 };
 
 typedef enum display_status display_status_t;
@@ -23,7 +21,7 @@ typedef enum display_text_status {
 
 /* Basic display operations */
 display_status_t display_init(void);
-display_status_t display_is_initialized(void);
+bool display_is_initialized(void);
 void display_clear(uint32_t color);
 void display_draw_pixel(int32_t x, int32_t y, uint32_t color);
 void display_scroll_up(uint32_t height, uint32_t color);

@@ -47,14 +47,9 @@ pub extern "C" fn display_init() -> DisplayStatus {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn display_is_initialized() -> DisplayStatus {
+pub extern "C" fn display_is_initialized() -> bool {
     let raw_ptr = core::ptr::addr_of_mut!(GLOBAL_DISPLAY);
-    let initialized = unsafe { (*raw_ptr).is_some() };
-    if initialized {
-        DisplayStatus::Ok
-    } else {
-        DisplayStatus::NotInitialized
-    }
+    unsafe { (*raw_ptr).is_some() }
 }
 
 #[unsafe(no_mangle)]
