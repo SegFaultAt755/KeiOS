@@ -41,7 +41,7 @@ and try it in QEMU without installing it on your computer.
   - [Build the ISO](#2-build-the-iso)
   - [Run the regression tests](#3-run-the-regression-tests)
   - [Run in QEMU](#4-run-in-qemu)
-- [Helper scripts](#-helper-scripts)
+- [Scripts](#-scripts)
 - [Project structure](#-project-structure)
 - [Documentation](#-documentation)
 
@@ -226,7 +226,7 @@ written to `qemu.log` and `debug.log`.
 
 <div align="center">
 
-## 🧰 Helper scripts
+## 🧰 Scripts
 
 </div>
 
@@ -236,14 +236,14 @@ written to `qemu.log` and `debug.log`.
 | [`run.py`](./run.py) | Builds (unless skipped), creates a QCOW2 disk if needed, and starts QEMU. | `python3 run.py --headless` |
 | [`clean.py`](./clean.py) | Removes build outputs and ignored artifacts; disk and logs are included by default. | `python3 clean.py --dry-run` |
 | [`healthcheck.py`](./healthcheck.py) | Runs Rust Clippy and a build, then refreshes the README badges. | `python3 healthcheck.py` |
-| [`helpers/bitmap_to_font.py`](./helpers/bitmap_to_font.py) | Converts a horizontal PNG atlas of ASCII glyphs 32–126 into Rust bitmap-font source. | `python3 helpers/bitmap_to_font.py atlas.png -o rust/crates/drivers/src/display/text/generated_font.rs` |
+| [`scripts/bitmap_to_font.py`](./scripts/bitmap_to_font.py) | Converts a horizontal PNG atlas of ASCII glyphs 32–126 into Rust bitmap-font source. | `python3 scripts/bitmap_to_font.py atlas.png -o rust/crates/drivers/src/display/text/generated_font.rs` |
 
 The font generator needs Pillow. Install its Python dependency and run the
 script like this:
 
 ```sh
-python3 -m pip install -r helpers/requirements.txt
-python3 helpers/bitmap_to_font.py atlas.png
+python3 -m pip install -r scripts/requirements.txt
+python3 scripts/bitmap_to_font.py atlas.png
 ```
 
 The atlas width must be divisible by 95. Font generation is not currently part
@@ -276,7 +276,7 @@ rootfs/                   Files packaged into the initramfs archive
 userspace/                Early userspace sources and stdlib stubs
 resources/                UI/font and asset sources used by the kernel build
 rust/                     Cargo workspace, nightly toolchain pin, and no_std crates
-helpers/                  Python utilities such as the bitmap-to-font converter
+scripts/                  Python utilities such as the bitmap-to-font converter and formatting helpers
 docs/                     Boot, architecture, and subsystem documentation
 
 grub.cfg                  GRUB configuration for the ISO boot image
