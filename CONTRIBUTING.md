@@ -37,16 +37,16 @@ KeiOS leverages both modern C23 and Rust. When bridging the two languages, prior
 
 ## AI Assistant Policy
 
-While we acknowledge the availability of AI coding assistants (e.g., ChatGPT, Gemini, Claude), their use in KeiOS is strictly regulated. Systems programming requires extreme precision, and you remain entirely responsible for the code you submit
+AI coding assistants may be used to help with any part of a contribution, including design, implementation, documentation, and tests. They are tools, not substitutes for engineering judgment: the contributor who submits the work is responsible for the entire contribution, regardless of how it was produced.
 
-If you use AI to assist in writing code, you **must** adhere to the following strict rules:
+When using AI assistance:
 
-1. **Mandatory Disclosure:** You must explicitly declare the use of AI tools in your Pull Request description. Undisclosed AI-generated code will result in immediate rejection of the PR
-2. **Restricted Areas:** AI tools **must not** be used to generate code for critical system components. This includes memory management logic, raw pointers, FFI boundary wrappers, and cryptographic modules
-3. **No Direct Copy-Pasting:** Do not blindly copy-paste AI-generated code. Any AI suggestions must be heavily reviewed, manually refactored, and adapted to perfectly match the project's exact architectural context
-4. **Human-Written Tests:** All test cases must be written manually by a human engineer. You cannot use AI to generate tests for AI-assisted code
-5. **Full Comprehension & Accountability:** You must know exactly how every single line of submitted code works
-6. **Licensing & Copyright:** You are completely responsible for ensuring that any AI-assisted code does not violate copyright laws or introduce code snippets from incompatible licenses
+1. **Review and understand the work.** Verify generated or suggested changes before submitting them. You must be able to explain the code, its assumptions, and its failure modes, and take responsibility for fixing any problems.
+2. **Meet project standards.** AI-assisted work must follow the project's architecture and coding conventions, and be correct, maintainable, and appropriate for KeiOS to build on and scale. Avoid unnecessary complexity and abstractions.
+3. **Verify behavior.** Run relevant tests, formatters, linters, and other checks. Add or update tests where appropriate, whether written with AI assistance or not. Pay particular attention to edge cases and regressions.
+4. **Apply extra scrutiny to sensitive code.** AI may be used for areas such as memory management, unsafe code, FFI, and cryptography, but generated suggestions in these areas require careful review and suitable testing before they are submitted.
+5. **Respect privacy and rights.** Do not provide confidential or sensitive project information to AI services unless you are authorized to do so. Ensure contributions do not infringe copyright, violate licenses, or introduce code with incompatible licensing terms.
+6. **Be transparent when useful.** AI-use disclosure is not required, but note it in the pull request when it is relevant to understanding the contribution, its verification, or its limitations.
 
 ---
 
