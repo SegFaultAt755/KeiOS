@@ -3,12 +3,12 @@
 
 #include "config.h"
 
+#include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "kernel/rsdp.h"
-#include "kernel/halt.h"
 #include "kernel/shell/shell.h"
 
 #if defined(__i386__) || defined(_M_IX86)

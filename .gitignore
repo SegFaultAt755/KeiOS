@@ -13,7 +13,7 @@
 /*.log
 /config.mk
 /*.cpio
-/helpers/__pycache__
+/**/__pycache__
 
 # Local documents
 /.obsidian
