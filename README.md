@@ -9,15 +9,36 @@
 ![Rust nightly](https://img.shields.io/badge/Rust-nightly-d97706?logo=rust&logoColor=white)
 ![GPLv3](https://img.shields.io/badge/License-GPLv3-15803d)
 
+[![GitHub stars](https://img.shields.io/github/stars/SegFaultAt755/KeiOS?style=for-the-badge&logo=github)](https://github.com/SegFaultAt755/KeiOS/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/SegFaultAt755/KeiOS?style=for-the-badge&logo=github)](https://github.com/SegFaultAt755/KeiOS/network/members)
+[![Open issues](https://img.shields.io/github/issues/SegFaultAt755/KeiOS?style=for-the-badge&logo=github)](https://github.com/SegFaultAt755/KeiOS/issues)
+[![Last commit](https://img.shields.io/github/last-commit/SegFaultAt755/KeiOS?style=for-the-badge&logo=github)](https://github.com/SegFaultAt755/KeiOS/commits)
+
 <!-- healthcheck:badges:start -->
 ![Clippy](https://img.shields.io/badge/Clippy-Undefined-black) ![Build](https://img.shields.io/badge/Build-Undefined-black)
 <!-- healthcheck:badges:end -->
 
 ### An experimental 32-bit operating system, built to explore kernel design.
 
-[Getting Started](#-getting-started) · [Current Capabilities](#-current-capabilities) · [Helper Scripts](#-helper-scripts) · [Documentation](#-documentation)
+KeiOS is a small learning project for exploring how an operating system boots
+and how kernel components fit together. You can build it into a bootable ISO
+and try it in QEMU without installing it on your computer.
 
 </div>
+
+---
+
+## 📖 Table of contents
+
+- [Project at a glance](#project-at-a-glance)
+- [Current capabilities](#-current-capabilities)
+- [Getting started](#-getting-started)
+  - [Install prerequisites](#1-install-prerequisites)
+  - [Build the ISO](#2-build-the-iso)
+  - [Run in QEMU](#3-run-in-qemu)
+- [Helper scripts](#-helper-scripts)
+- [Project structure](#-project-structure)
+- [Documentation](#-documentation)
 
 ---
 
@@ -31,6 +52,10 @@ KeiOS is an experimental **i386 operating system** combining a freestanding
 C23 kernel with a Rust `no_std` drivers library. Today, it boots through GRUB,
 initializes core CPU and memory facilities, reads a CPIO initramfs, brings up
 basic hardware, and presents an interactive kernel shell.
+
+If you are new to operating systems, a good first step is to build and run the
+ISO in QEMU, then explore the boot flow and architecture guides below. KeiOS is
+actively experimental: expect incomplete features, rough edges, and ongoing changes.
 
 > [!NOTE]
 > KeiOS is an early-stage research project, not a general-purpose operating
@@ -77,67 +102,79 @@ considered production-ready.
 
 </div>
 
-### Requirements
+The quickest route is to install the build tools, build the ISO, and launch it
+in QEMU. Run the following commands from the KeiOS repository directory.
 
-The supported build and run workflow is Linux or Linux under WSL2. Install:
+### Install prerequisites
 
-- GNU Make, NASM, `i686-elf-gcc` and `i686-elf-ld` (or a compatible
-  32-bit freestanding toolchain).
-- Rust nightly through `rustup`, with the `rust-src` component.
-- `grub-mkrescue`, `xorriso`, `mtools`, and `cpio`.
-- Python 3 and QEMU (`qemu-system-i386`, `qemu-img`).
+The supported build and run environment is Linux or Linux under WSL2. On
+Debian or Ubuntu, install the host tools:
 
-On Debian or Ubuntu, install the common host packages:
-
-```bash
+```sh
 sudo apt update
 sudo apt install build-essential nasm binutils cpio xorriso mtools \
   grub-common grub-pc-bin qemu-system-x86 qemu-utils python3
 ```
 
-Install an i686-elf cross-compiler using your distribution’s packages or build
-the GNU toolchain. Set up the Rust toolchain with:
+KeiOS also needs an **i686-elf cross-compiler** (`i686-elf-gcc` and
+`i686-elf-ld`). The `binutils` package above provides host utilities; it does
+not necessarily include this cross-compiler. Install an i686-elf toolchain
+using your distribution's packages or follow the
+[OSDev cross-compiler guide](https://wiki.osdev.org/GCC_Cross-Compiler), and
+ensure its binaries are available in your `PATH`.
 
-```bash
+Install [Rust using rustup](https://rustup.rs), then install the project's
+nightly toolchain and source component:
+
+```sh
 rustup toolchain install nightly
 rustup component add rust-src --toolchain nightly
 ```
 
-### Build
+The Rust project pins nightly in `rust/rust-toolchain.toml` and builds the
+`core`, `alloc`, and compiler-builtins libraries from source. The `rust-src`
+component is required for that build.
 
-Build the kernel, initramfs, and bootable ISO:
+### Build the ISO
 
-```bash
+Build the kernel, initramfs, and bootable ISO from the repository root:
+
+```sh
 make
 ```
 
-The default target produces `keios.elf`, `initramfs.cpio`, and `keios.iso`.
-Alternatively, use the Python wrapper to pass a Make target or build options:
+The default Make target creates `keios.elf`, `initramfs.cpio`, and
+`keios.iso`. The ISO is the bootable image that QEMU will launch. You can also
+use the Python wrapper for a clean build or to choose a Make target:
 
-```bash
+```sh
 python3 build.py
 python3 build.py --make-target keios.elf
 python3 build.py --clean-build
 python3 build.py D=DEBUG
 ```
 
-For Make command-line options, pass them through `--make-args`:
+Pass Make options through `--make-args`, for example to choose the number of
+parallel jobs:
 
-```bash
+```sh
 python3 build.py --make-args -j4
 ```
 
-Run `make help` to see Make targets. `make config` creates a local `config.mk`
-for build configuration.
+Run `make help` to list the available targets. `make config` creates a local
+`config.mk` for build configuration.
 
 ### Run in QEMU
 
-Build and launch the default virtual machine (i386, N270 CPU, 4 GiB RAM, and an
-8 GiB QCOW2 disk created when needed):
+Build and launch the default virtual machine:
 
-```bash
+```sh
 python3 run.py
 ```
+
+By default, QEMU emulates an i386 machine with an N270 CPU and 4 GiB of RAM.
+The runner creates an 8 GiB QCOW2 virtual disk named `disk.qcow2` when needed;
+this is a file in the project directory, not a disk partition on your host.
 
 | Option | Effect |
 | --- | --- |
@@ -150,12 +187,13 @@ python3 run.py
 
 For example:
 
-```bash
+```sh
 python3 run.py --headless
 python3 run.py --disk-file /path/to/keios.qcow2 --disk-size 2G
 ```
 
-QEMU diagnostic output is written to `qemu.log` and `debug.log`.
+Use `python3 run.py --help` to see all options. QEMU diagnostic output is
+written to `qemu.log` and `debug.log`.
 
 ---
 
@@ -173,9 +211,10 @@ QEMU diagnostic output is written to `qemu.log` and `debug.log`.
 | [`healthcheck.py`](./healthcheck.py) | Runs Rust Clippy and a build, then refreshes the README badges. | `python3 healthcheck.py` |
 | [`helpers/bitmap_to_font.py`](./helpers/bitmap_to_font.py) | Converts a horizontal PNG atlas of ASCII glyphs 32–126 into Rust bitmap-font source. | `python3 helpers/bitmap_to_font.py atlas.png -o rust/crates/drivers/src/display/text/generated_font.rs` |
 
-The font generator needs Pillow:
+The font generator needs Pillow. Install its Python dependency and run the
+script like this:
 
-```bash
+```sh
 python3 -m pip install -r helpers/requirements.txt
 python3 helpers/bitmap_to_font.py atlas.png
 ```
