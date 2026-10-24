@@ -57,27 +57,27 @@ static void page_fault_handler(struct registers *regs) {
                         get_fault_addr(), regs->eip, present, write, user, reserved, id);
 }
 
-void isr_handler(struct registers regs) {
-    switch (regs.intr_num) {
+void isr_handler(struct registers *regs) {
+    switch (regs->intr_num) {
     case 0:
-        divide_by_zero_fault_handler(&regs);
+        divide_by_zero_fault_handler(regs);
         break;
     case 6:
-        invalid_opcode_fault_handler(&regs);
+        invalid_opcode_fault_handler(regs);
         break;
     case 8:
-        double_fault_handler(&regs);
+        double_fault_handler(regs);
         break;
     case 12:
-        stack_segment_fault_handler(&regs);
+        stack_segment_fault_handler(regs);
         break;
     case 13:
-        general_protection_fault_handler(&regs);
+        general_protection_fault_handler(regs);
         break;
     case 14:
-        page_fault_handler(&regs);
+        page_fault_handler(regs);
         break;
     default:
-        KERNEL_PANIC_FORMAT("Unhandled interrupt", "Interrupt number: %d", regs.intr_num);
+        KERNEL_PANIC_FORMAT("Unhandled interrupt", "Interrupt number: %d", regs->intr_num);
     }
 }

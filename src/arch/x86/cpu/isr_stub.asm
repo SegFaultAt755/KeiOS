@@ -32,10 +32,10 @@ ISR_ERRCODE   10
 ISR_ERRCODE   11
 ISR_ERRCODE   12
 ISR_ERRCODE   13
-ISR_NOERRCODE 14
+ISR_ERRCODE   14
 ISR_NOERRCODE 15
 ISR_NOERRCODE 16
-ISR_NOERRCODE 17
+ISR_ERRCODE   17
 ISR_NOERRCODE 18
 ISR_NOERRCODE 19
 ISR_NOERRCODE 20
@@ -63,13 +63,15 @@ isr_common_stub:
     mov fs, ax
     mov gs, ax
 
+    push esp
     call isr_handler
+    add esp, 4
 
-    pop eax
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
+    pop ebx
+    mov ds, bx
+    mov es, bx
+    mov fs, bx
+    mov gs, bx
 
     popa
     add esp, 8
