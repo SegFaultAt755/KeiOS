@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include "kernel/graphics.h"
+#include "kernel/gfx.h"
 
 #include "drivers/display.h"
 #include "drivers/graphics/framebuffer.h"
@@ -27,7 +27,7 @@ struct gfx_request {
     uint32_t width;
     uint32_t height;
     uint32_t color;
-    char text[GRAPHICS_TEXT_MAX_BYTES + 1];
+    char text[GFX_TEXT_MAX_BYTES + 1];
 };
 
 _Static_assert(sizeof(struct gfx_request) <= IPC_MAX_PAYLOAD, "GFX request exceeds IPC payload size");
@@ -137,28 +137,28 @@ int gfx_draw_text(struct color32 color, uint32_t x, uint32_t y, const char *text
     return gfx_send_request(request);
 }
 
-int get_graphics_type(struct multiboot_info *mbi) {
+int gfx_get_type(struct multiboot_info *mbi) {
     if (mbi == nullptr)
-        return GRAPHICS_TYPE_TEXT_MODE;
+        return GFX_TYPE_TEXT_MODE;
 
     if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) {
-        if (mbi->framebuffer_type == GRAPHICS_TYPE_FRAMEBUFFER)
-            return GRAPHICS_TYPE_FRAMEBUFFER;
+        if (mbi->framebuffer_type == GFX_TYPE_FRAMEBUFFER)
+            return GFX_TYPE_FRAMEBUFFER;
 
-        return GRAPHICS_TYPE_TEXT_MODE;
+        return GFX_TYPE_TEXT_MODE;
     }
 
-    return GRAPHICS_TYPE_VGA_PALETTE;
+    return GFX_TYPE_VGA_PALETTE;
 }
 
 int gfx_init(struct multiboot_info *mbi) {
-    auto graphics = get_graphics_type(mbi);
+    auto gfx_type = gfx_get_type(mbi);
     gfx_initialized = false;
-    if (graphics != GRAPHICS_TYPE_FRAMEBUFFER) {
+    if (gfx_type != GFX_TYPE_FRAMEBUFFER) {
         /* Initialize VGA text mode for text and palette boot modes. */
         vga_init_text();
         terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-    } else if (graphics == GRAPHICS_TYPE_FRAMEBUFFER) {
+    } else if (gfx_type == GFX_TYPE_FRAMEBUFFER) {
         struct framebuffer_info framebuffer = {
             .addr = (uint32_t *)(uintptr_t)mbi->framebuffer_addr,
             .flags = mbi->flags,
@@ -190,5 +190,5 @@ int gfx_init(struct multiboot_info *mbi) {
             qemu_printf(QEMU_DRV, QEMU_ERROR, "Failed to initialize framebuffer or GFX IPC");
     }
 
-    return graphics;
+    return gfx_type;
 }

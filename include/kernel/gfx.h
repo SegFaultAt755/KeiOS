@@ -7,14 +7,14 @@
 #include "kernel/ipc.h"
 #include "drivers/graphics/color.h"
 
-#define GRAPHICS_TYPE_VGA_PALETTE 2
-#define GRAPHICS_TYPE_FRAMEBUFFER 1
-#define GRAPHICS_TYPE_TEXT_MODE   0
-#define GRAPHICS_TEXT_MAX_BYTES   (IPC_MAX_PAYLOAD - 29)
+#define GFX_TYPE_VGA_PALETTE 2
+#define GFX_TYPE_FRAMEBUFFER 1
+#define GFX_TYPE_TEXT_MODE   0
+#define GFX_TEXT_MAX_BYTES   (IPC_MAX_PAYLOAD - 29)
 
 extern bool gfx_initialized;
 
-int  get_graphics_type(struct multiboot_info *mbi);
+int  gfx_get_type(struct multiboot_info *mbi);
 int  gfx_init(struct multiboot_info *mbi);
 void gfx_set_ipc_endpoint(uint32_t endpoint);
 int  gfx_clear(struct color32 color);

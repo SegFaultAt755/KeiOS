@@ -5,7 +5,7 @@
 #include "drivers/graphics/color.h"
 
 #include "kernel/framebuffer.h"
-#include "kernel/graphics.h"
+#include "kernel/gfx.h"
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"

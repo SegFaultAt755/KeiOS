@@ -2,7 +2,7 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "drivers/ps2.h"
-#include "kernel/graphics.h"
+#include "kernel/gfx.h"
 #include "kernel/ipc.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"

@@ -6,7 +6,7 @@
 #include "drivers/terminal.h"
 #include "drivers/vga.h"
 
-#include "kernel/graphics.h"
+#include "kernel/gfx.h"
 #include "kernel/halt.h"
 #include "kernel/interrupts.h"
 #include "kernel/qemu.h"
