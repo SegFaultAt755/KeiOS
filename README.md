@@ -15,7 +15,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/SegFaultAt755/KeiOS?style=for-the-badge&logo=github)](https://github.com/SegFaultAt755/KeiOS/commits)
 
 <!-- healthcheck:badges:start -->
-![Clippy](https://img.shields.io/badge/Clippy-Undefined-black) ![Build](https://img.shields.io/badge/Build-Undefined-black)
+![Clippy](https://img.shields.io/badge/Clippy-Passing-brightgreen) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 <!-- healthcheck:badges:end -->
 
 ### An experimental 32-bit operating system, built to explore kernel design.
@@ -97,6 +97,11 @@ general process loader, and the bundled userspace init program is not started
 by the normal boot path. KeiOS does **not** currently run Windows PE or Linux
 executables. Existing low-level facilities are experimental and should not be
 considered production-ready.
+
+> [!WARNING]
+> The current boot flow is still kernel-only. `userspace/`, `rootfs/`, and the
+> associated initramfs logic are build-time scaffolding for future execution
+> paths; the default boot path does not start a user process or scheduler.
 
 ---
 
@@ -240,15 +245,29 @@ of the Make build.
 </div>
 
 ```text
-include/                  C interfaces and configuration
-src/                      C and x86 assembly kernel and drivers
-userspace/                Early userspace sources (not launched at boot)
-rootfs/                   Files packaged into the CPIO initramfs
-rust/crates/drivers/      Rust no_std driver and support library
-helpers/                  Asset-generation helper
+Makefile                  Primary build orchestration for the kernel and ISO
+build.py                  Thin wrapper for invoking make targets
+run.py                    Build + QEMU launch wrapper for local testing
+clean.py                  Safe cleanup of build artifacts, logs, and disk images
+healthcheck.py            README badge refresh and validation helper
+
+src/                      C kernel sources, x86 assembly, and low-level drivers
+include/                  Public headers and project configuration
+bin/                      Generated object files and intermediate build outputs
+rootfs/                   Files packaged into the initramfs archive
+userspace/                Early userspace sources and stdlib stubs
+resources/                UI/font and asset sources used by the kernel build
+rust/                     Cargo workspace, nightly toolchain pin, and no_std crates
+helpers/                  Python utilities such as the bitmap-to-font converter
 docs/                     Boot, architecture, and subsystem documentation
-build.py / run.py         Build and QEMU wrappers
-clean.py                  Build-artifact cleanup
+
+grub.cfg                  GRUB configuration for the ISO boot image
+linker.ld                 ELF32 linker script
+keios.elf                 Kernel binary produced by the build
+initramfs.cpio            Generated initramfs archive
+keios.iso                 Bootable ISO image
+FIXME.md                  Known implementation issues and reproducibility notes
+TODO.md                   Near-term project roadmap and follow-up tasks
 ```
 
 ---
@@ -268,7 +287,9 @@ clean.py                  Build-artifact cleanup
 </div>
 
 Known implementation issues and follow-up work are tracked in
-[`FIXME.md`](./FIXME.md).
+[`FIXME.md`](./FIXME.md) and [`TODO.md`](./TODO.md). The project is still in an
+experimental stage; use the docs below as implementation notes rather than a
+production-ready reference.
 
 ---
 
