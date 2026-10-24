@@ -1,413 +1,202 @@
 <div align="center">
 
-![KEIOS-BANNER](./keios-banner.svg)
+<img src="./keios-banner.svg" alt="KeiOS" width="720">
 
-![Architecture: 32-bit i386](https://img.shields.io/badge/Arch-i386-blue?logo=intel&logoColor=white) ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-green?logo=opensourceinitiative&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-1.95-orange?logo=rust) ![C23](https://img.shields.io/badge/C23-Standard-blue?logo=c)
+<br>
+
+![i386](https://img.shields.io/badge/Architecture-i386-2563eb?logo=intel&logoColor=white)
+![C23](https://img.shields.io/badge/Kernel-C23-0f766e)
+![Rust nightly](https://img.shields.io/badge/Rust-nightly-d97706?logo=rust&logoColor=white)
+![GPLv3](https://img.shields.io/badge/License-GPLv3-15803d)
 
 <!-- healthcheck:badges:start -->
-![Clippy](https://img.shields.io/badge/Clippy-Passing-brightgreen) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+![Clippy](https://img.shields.io/badge/Clippy-Undefined-black) ![Build](https://img.shields.io/badge/Build-Undefined-black)
 <!-- healthcheck:badges:end -->
 
-### 32-bit lab operating system built to experiment with cross-platform executable support via dual syscall tables, powered by a modern C23 and Rust architecture
+### An experimental 32-bit operating system, built to explore kernel design.
 
----
-
-# 🗺️ Table of Contents
-
-</div>
-
-<div align="center">
-
-**Select a section link below to navigate directly to it**
-
-| [🎯 Project Vision](#-project-vision) | [🏃 Build and Run](#-build-and-run) |
-| :--- | :--- |
-| [🚀 Key Features](#-key-features) | [⚙️ Compile](#1-compile-the-os) |
-| [📂 Project Structure](#-project-structure) | [🚀 Launch](#2-launch-in-emulator) |
-| [🖥️ Emulating System Environment](#%EF%B8%8F-emulating-system-environment) | [🔍 Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls) |
-| [🛠️ Prerequisites](#%EF%B8%8F-prerequisites) | [💬 Final Words](#-final-words) |
-| [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian) | [📄 License](#-license) |
-| [🪟 Windows (WSL2 / Docker)](#-windows-wsl2--docker) | |
+[Getting Started](#-getting-started) · [Current Capabilities](#-current-capabilities) · [Helper Scripts](#-helper-scripts) · [Documentation](#-documentation)
 
 </div>
 
 ---
 
-<div align="center">
+## Project at a glance
 
-# 🎯 Project Vision
+KeiOS is an experimental **i386 operating system** combining a freestanding
+C23 kernel with a Rust `no_std` drivers library. Today, it boots through GRUB,
+initializes core CPU and memory facilities, reads a CPIO initramfs, brings up
+basic hardware, and presents an interactive kernel shell.
 
-</div>
-
-The primary goal of KeiOS is to serve as an experimental lab environment. Its standout feature is the planned implementation of **two distinct syscall tables**, allowing the OS to natively handle and execute both **Windows** and **Linux** binaries within a minimal custom kernel and user space
-
----
-
-<div align="center">
-
-# 🚀 Key Features
-
-</div>
-
-* **Hybrid Core Architecture:** Built using modern C23 and Rust (v1.96) with seamless FFI integration for memory-safe driver and kernel component development
-* **Architecture:** 32-bit (`i386`) operating on a microkernel architecture
-* **Dual Syscall Interface:** Purpose-built routing system to process system calls from both Windows and Linux executables natively
-* **Modular Design:** Clean structural separation between the bootloader, kernel, drivers, and user space code
-
----
+> [!NOTE]
+> KeiOS is an early-stage research project, not a general-purpose operating
+> system. Process isolation, general ELF execution, and Windows or Linux binary
+> compatibility are future goals—not current features.
 
 <div align="center">
 
-# 📂 Project Structure
+| **Target** | **Kernel** | **Boot** | **License** |
+|:---:|:---:|:---:|:---:|
+| 32-bit x86 | C23 + Rust | GRUB / Multiboot | GPL-3.0 |
 
 </div>
 
-```txt
-KeiOS/
-├── bin/                                # Compiled binary artifacts
-├── include/                            # Main header directory
-│   ├── arch/                           # Architecture-specific header definitions
-│   │   └── x86/                        # 32-bit control registers, segmentations, and offsets
-│   ├── drivers/                        # Peripheral configurations (network, audio, display)
-│   ├── kernel/                         # Microkernel core system
-│   ├── libkern/                        # Mini C standard library implementations for kernel space
-│   └── config.h                        # Static build configuration toggles
-├── rust/                               # Rust workspace for memory-safe kernel components and drivers
-│   ├── .cargo/                         # Cargo build configuration and target flags
-│   ├── crates/                         # Modular Rust crates (e.g., drivers, kernel, syslibs)
-│   ├── Cargo.toml                      # Workspace root dependency manager
-│   ├── i686-unknown-none.json          # Custom 32-bit bare-metal platform specification
-│   └── rust-toolchain.toml             # Rust toolchain version pinning
-├── src/                                # C source implementation directory
-│   ├── arch/                           # Architecture-specific setup code
-│   │   └── x86/                        # 32-bit initialization sequences
-│   │       ├── boot/                   # Assembly bootstrap logic and multiboot entry points
-│   │       ├── cpu/                    # Descriptor table logic and CPU contexts
-│   │       └── memory/                 # Memory layout managers, page routing, and allocation
-│   ├── drivers/                        # Physical & virtual hardware interface drivers
-│   ├── kernel/                         # Main execution pipelines and dual syscall routing routers
-│   └── libkern/                        # Kernel support libraries and internal utility logic
-├── .clang-format                       # Configuration for automatic C coding style formatting
-├── .gitignore                          # Build artifacts and raw log filters
-├── clean.py                            # Automation script to safely delete build folders and files
-├── grub.cfg                            # GRUB setup template for the live ISO image
-├── CONTRIBUTING.md                     # Guidelines for contributing and architectural rules
-├── LICENSE.md                          # Full legal text for the project's copyleft distribution license
-├── linker.ld                           # Defining memory section offsets and physical loading bounds
-├── Makefile                            # GNU Make build script
-├── README.md                           # Master repository documentation file
-└── run.py                              # Master orchestration script handling builds, assets, and QEMU setups
-```
+## ✨ Current capabilities
 
----
+| Area | Available today |
+| --- | --- |
+| **Boot** | GRUB Multiboot boot into a 32-bit higher-half kernel |
+| **CPU** | Early GDT/IDT setup, PIC remapping, CPU feature checks, and PIT timer |
+| **Memory** | Experimental paging, physical frame bitmap, and kernel heap |
+| **Input & display** | PS/2 keyboard, VGA text mode, and an RGB framebuffer path with VGA fallback |
+| **Initramfs** | CPIO archive parsing from a GRUB-loaded module |
+| **Kernel services** | A syscall dispatcher and bounded in-kernel IPC queues |
+| **Shell** | Ring 0 command shell: `help`, `clear`, `echo`, `ver`, `uptime`, `meminfo`, `color`, `datetime`, `reboot`, `shutdown`, `halt` |
 
-<div align="center">
+The shell currently runs in kernel mode. There is no working scheduler or
+general process loader, and the bundled userspace init program is not started
+by the normal boot path. KeiOS does **not** currently run Windows PE or Linux
+executables. Existing low-level facilities are experimental and should not be
+considered production-ready.
 
-# 🖥️ Emulating System Environment
+## 🚀 Getting started
 
-</div>
+### Requirements
 
-To accurately reproduce the performance, bottlenecks, and hardware constraints of early-2010s netbooks (such as the classic ASUS Eee PC or Acer Aspire One), the virtual machine configuration is intentionally restricted. The profiles below are tailored for **QEMU** and **VirtualBox** to replicate the baseline environment of a first-generation Intel Atom device:
+The supported build and run workflow is Linux or Linux under WSL2. Install:
 
-<div align="center">
+- GNU Make, NASM, `i686-elf-gcc` and `i686-elf-ld` (or a compatible
+  32-bit freestanding toolchain).
+- Rust nightly through `rustup`, with the `rust-src` component.
+- `grub-mkrescue`, `xorriso`, `mtools`, and `cpio`.
+- Python 3 and QEMU (`qemu-system-i386`, `qemu-img`).
 
-| **Component** | **Specification** | **Emulation Target**                  |
-| ------------- | ----------------- | ------------------------------------- |
-| **CPU**       | 1 vCPU            | Mimics a single-core Intel Atom       |
-| **Memory**    | 4GB RAM           | Standard capacity for Windows XP      |
-| **Boot mode** | SeaBios           | Legacy boot environment               |
-| **Storage**   | 8GB HDD           | Replicates early low-capacity storage |
-
-</div>
-
----
-
-<div align="center">
-
-# 🛠️ Prerequisites
-
-</div>
-
-* **C Compiler:** C23 compliant cross-compiler (`i686-elf-gcc` or standard Linux `gcc` with `-m32` support)
-* **Rust Toolchain:** `rustc` and `cargo` v1.96+ (managed via `rustup` with bare-metal target support)
-* **Assembler:** `nasm` (Netwide Assembler, used for low-level assembly routines)
-* **Build System:** `make` (GNU Make)
-* **Toolchain:** `binutils` (for linking and binary manipulation)
-* **ISO Utility:** `xorriso`, `mtools`, and `grub-mkrescue` (essential for generating the `keios.iso` file)
-* **Scripting Language:** `python 3.10+` (Required for running automation, build, and validation scripts)
-* **Emulator:** `qemu` (specifically `qemu-system-i386`) or `VirtualBox`
-
-To build and run KeiOS, select the instructions matching your active development environment below:
-
-<div align="center">
-
-## 🐧 Linux (Ubuntu/Debian)
-
-</div>
-
-Install the required development tools, ISO utilities, Python environment, and emulators via the system package manager, then install Rust via `rustup`:
+On Debian or Ubuntu, install the common host packages:
 
 ```bash
 sudo apt update
-sudo apt install build-essential nasm xorriso mtools qemu-system-x86 grub-common grub2-common grub-pc-bin grub-efi-amd64-bin python3 curl
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+sudo apt install build-essential nasm binutils cpio xorriso mtools \
+  grub-common grub-pc-bin qemu-system-x86 qemu-utils python3
 ```
 
-*(Note: `mtools` and `xorriso` are heavily used by tools like `grub-mkrescue` to build bootable ISO files. Install `grub2-common` if available on your distribution, otherwise, default to `grub-common`)*
-
-<div align="center">
-
-## 🪟 Windows (WSL2 / Docker)
-
-</div>
-
-> [!IMPORTANT]
-> **Why Native Windows Build Support Was Stripped:** Attempting to compile the OS natively on Windows (using Command Prompt, PowerShell, and standard MSYS2/MinGW) introduces severe, deal-breaking friction:
-> * **The Binary Format Clash:** Windows linkers natively output `PE/COFF` formats (`.exe`). An OS kernel requires raw bare-metal `ELF32` binaries. Forcing Windows linkers to emulate Linux targets or relying on custom `objcopy` hacks causes constant build failures
-> * **The Bootloader Nightmare:** Generating a bootable image relies on `grub-mkrescue`, which deeply depends on POSIX paths, Unix shell scripting, and tools like `xorriso` and `mtools` that lack stable native Windows ports
-> * **Shell & Path Incompatibilities:** Supporting Windows `cmd.exe` syntax (`if not exist`, backslashes `\`, null devices `nul`) alongside POSIX Bash syntax makes the `Makefile` unmaintainable and fragile for contributors
-> 
-> 
-> **For a frictionless experience, Windows users MUST use one of the two standard POSIX methods below**
-
-<div align="center">
-
-### Option 1: Windows Subsystem for Linux (WSL2) ⭐ **Recommended**
-
-</div>
-
-WSL2 runs a genuine, lightning-fast Linux kernel directly inside Windows without the overhead of a traditional VM
-
-1. Open **PowerShell** as Administrator and install WSL:
-
-```powershell
-wsl --install
-```
-
-2. Restart your computer if prompted
-3. Open your new Linux terminal (e.g., Ubuntu) from the Start Menu
-4. Run the **Linux (Ubuntu/Debian)** installation commands listed in the section above. You can now build and run QEMU directly inside WSL
-
-<div align="center">
-
-### Option 2: Docker Container (Zero-Install Build)
-
-</div>
-
-If you have Docker Desktop installed on Windows and don't want to install build tools locally, you can compile KeiOS inside an isolated container:
-
-1. Launch a temporary Ubuntu build container mounted to your project folder:
-
-```cmd
-docker run --rm -it -v "%cd%":/root/KeiOS -w /root/KeiOS ubuntu:24.04 bash
-```
-
-2. Inside the container, run the Linux package install command and execute `make`
-
----
-
-<div align="center">
-
-# 🏃 Build and Run
-
-</div>
-
-For **automatically building** and **running** the project, execute the `run.py` Python script:
+Install an i686-elf cross-compiler using your distribution’s packages or build
+the GNU toolchain. Set up the Rust toolchain with:
 
 ```bash
-python run.py
+rustup toolchain install nightly
+rustup component add rust-src --toolchain nightly
 ```
 
-`run.py` delegates compilation to `build.py` before starting QEMU. To build
-without starting QEMU, run:
+### Build
 
-```bash
-python build.py
-```
-
-Make variables can be passed inline to either script, for example:
-
-```bash
-python run.py D=DEBUG
-python build.py D=DEBUG
-```
-
-You can also pass the `--help` flag to view available usage options:
-
-```bash
-python run.py --help
-```
-
-<div align="center">
-
-## 1. Compile the OS
-
-</div>
-
-Build the C kernel, compile the Rust crates, and generate the bootable `.iso` image using the standard GNU Makefile:
+Build the kernel, initramfs, and bootable ISO:
 
 ```bash
 make
 ```
 
-To clean up build artifacts and temporary files:
+The default target produces `keios.elf`, `initramfs.cpio`, and `keios.iso`.
+Alternatively, use the Python wrapper to pass a Make target or build options:
 
 ```bash
-python clean.py
+python3 build.py
+python3 build.py --make-target keios.elf
+python3 build.py --clean-build
+python3 build.py D=DEBUG
 ```
 
-If you need to clean up only build artifacts:
+For Make command-line options, pass them through `--make-args`:
 
 ```bash
-make clean
+python3 build.py --make-args -j4
 ```
+
+Run `make help` to see Make targets. `make config` creates a local `config.mk`
+for build configuration.
+
+### Run in QEMU
+
+Build and launch the default virtual machine (i386, N270 CPU, 4 GiB RAM, and an
+8 GiB QCOW2 disk created when needed):
+
+```bash
+python3 run.py
+```
+
+| Option | Effect |
+| --- | --- |
+| `--headless` | Run QEMU without a graphical display |
+| `--skip-run` | Build only; do not launch QEMU |
+| `--skip-build` | Launch the existing ISO without rebuilding |
+| `--clean-build` | Clean build outputs before compiling |
+| `--disk-file PATH --disk-size SIZE` | Select the virtual disk and its capacity |
+| `--help` | Show all supported options |
+
+For example:
+
+```bash
+python3 run.py --headless
+python3 run.py --disk-file /path/to/keios.qcow2 --disk-size 2G
+```
+
+QEMU diagnostic output is written to `qemu.log` and `debug.log`.
+
+## 🧰 Helper scripts
+
+| Script | What it does | Example |
+| --- | --- | --- |
+| [`build.py`](./build.py) | Runs Make; can clean first and accepts Make arguments. | `python3 build.py --clean-build` |
+| [`run.py`](./run.py) | Builds (unless skipped), creates a QCOW2 disk if needed, and starts QEMU. | `python3 run.py --headless` |
+| [`clean.py`](./clean.py) | Removes build outputs and ignored artifacts; disk and logs are included by default. | `python3 clean.py --dry-run` |
+| [`healthcheck.py`](./healthcheck.py) | Runs Rust Clippy and a build, then refreshes the README badges. | `python3 healthcheck.py` |
+| [`helpers/bitmap_to_font.py`](./helpers/bitmap_to_font.py) | Converts a horizontal PNG atlas of ASCII glyphs 32–126 into Rust bitmap-font source. | `python3 helpers/bitmap_to_font.py atlas.png -o rust/crates/drivers/src/display/text/generated_font.rs` |
+
+The font generator needs Pillow:
+
+```bash
+python3 -m pip install -r helpers/requirements.txt
+python3 helpers/bitmap_to_font.py atlas.png
+```
+
+The atlas width must be divisible by 95. Font generation is not currently part
+of the Make build.
+
+> [!WARNING]
+> `clean.py` removes `disk.qcow2` by default. Use `--skip-disk` to keep it, or
+> `--dry-run` to preview cleanup. `make clean` removes build outputs without
+> deleting the disk image or logs.
+
+## 🗂️ Project structure
+
+```text
+include/                  C interfaces and configuration
+src/                      C and x86 assembly kernel and drivers
+userspace/                Early userspace sources (not launched at boot)
+rootfs/                   Files packaged into the CPIO initramfs
+rust/crates/drivers/       Rust no_std driver and support library
+helpers/                   Asset-generation helper
+docs/                      Boot, architecture, and subsystem documentation
+build.py / run.py          Build and QEMU wrappers
+clean.py                   Build-artifact cleanup
+```
+
+## 📚 Documentation
 
 <div align="center">
 
-## 2. Launch in Emulator
+| [Boot flow](./docs/BOOT.md) | [Architecture](./docs/ARCHITECTURE.md) | [Memory](./docs/subsystem/MEMORY.md) |
+|:---:|:---:|:---:|
+| [Interrupts](./docs/subsystem/INTERRUPTS.md) | [Processes](./docs/subsystem/PROCESS.md) | [System calls](./docs/subsystem/SYSCALL.md) |
 
 </div>
 
-KeiOS can be booted using one of two methods depending on your workflow:
-
-<div align="center">
-
-### Method A: Standard ISO Boot (Recommended)
-
-</div>
-
-If a full bootable CD image (`keios.iso`) has been successfully generated via `make`, launch it directly in QEMU:
-
-```bash
-qemu-system-i386 keios.iso
-```
-
-> **Note:** Executing it via the `run.py` Python script is strongly recommended to automatically configure all hardware flags (4GB memory, 8GB storage disk, RTL8139 network driver, and audio emulation)
-
-If executing the ISO manually with full hardware emulation is preferred, follow these instructions:
-
-<div align="center">
-
-#### 1. Build the virtual storage disk:
-
-</div>
-
-```bash
-qemu-img create -f qcow2 disk.qcow2 8G
-```
-
-<div align="center">
-
-#### 2. Execute the ISO with netbook hardware emulation:
-
-</div>
-
-```bash
-qemu-system-i386 \
-    -cpu n270 \
-    -m 4G \
-    -machine pc \
-    -rtc base=localtime \
-    -vga std \
-    -hda disk.qcow2 \
-    -net nic,model=rtl8139 -net user \
-    -device intel-hda \
-    -device hda-duplex \
-    -d int,cpu_reset -D qemu.log \
-    -cdrom keios.iso \
-    -debugcon file:debug.log
-```
-
-<div align="center">
-
-### Method B: Direct Kernel Boot (No ISO Required)
-
-</div>
-
-If you are debugging kernel internals and want to skip GRUB ISO generation entirely, QEMU can act as a Multiboot bootloader and load the raw kernel binary directly:
-
-```bash
-qemu-system-i386 -kernel bin/keios.elf
-```
-
-*(Note: Some advanced GRUB-dependent features or initial ramdisks will be bypassed in this mode)*
+Known implementation issues and follow-up work are tracked in
+[`FIXME.md`](./FIXME.md).
 
 ---
 
 <div align="center">
 
-# 🔍 Troubleshooting & Common Pitfalls
+**KeiOS** · Experimental systems software · [GPL-3.0](./LICENSE.md)
 
 </div>
-
-OS development is a fragile process. If a build fails or QEMU refuses to launch properly, check these common issues first:
-
-<div align="center">
-
-## QEMU Instantly Reboots or Crashes (Triple Fault)
-
-</div>
-
-* **The Symptom:** QEMU launches, the window flashes or opens to a black screen, and CPU usage loops endlessly
-* **The Cause:** The kernel hit a Triple Fault. This usually happens if the Global Descriptor Table (GDT) is misconfigured, an interrupt handler is missing, or the stack overflows before the kernel fully boots
-* **The Fix:** Check the generated `qemu.log` and `debug.log` files in the project root. Look for the last executed instruction or a `[PANC]` message
-
-*(Note: Send `qemu.log` file to AI and prompt to parse it, it will **'maybe'** give you the right answer what crashed)*
-
-<div align="center">
-
-## `grub-mkrescue: error: xorriso not found` (or `mtools`)
-
-</div>
-
-* **The Symptom:** Running `make` or `run.py` fails while trying to generate `keios.iso`
-* **The Cause:** `grub-mkrescue` acts as a frontend and requires external backends to stitch the ISO filesystem together
-* **The Fix:** Ensure you have installed the filesystem utilities:
-
-```bash
-sudo apt install xorriso mtools
-```
-
-<div align="center">
-
-## "Syntax Error" or "Invalid Command" in Linker/Assembly Scripts
-
-</div>
-
-* **The Symptom:** `nasm` or `ld` throws cryptic syntax errors on clean code paths
-* **The Cause:** **Line Ending Conversions** Git on Windows automatically converts files from LF (`\n`) to CRLF (`\r\n`) during checkouts. This breaks low-level assembly definitions, shell scripts, and linker maps
-* **The Fix:** Force Git to preserve POSIX line endings by running:
-
-```bash
-git config --global core.autocrlf false
-```
-
-Then re-clone the repository or fix individual files using `dos2unix`
-
----
-
-<div align="center">
-
-# 💬 Final Words
-
-## SegFaultAt755
-
-> **"If fighting is sure to result in victory, then you must fight!"**
-> *Sun Tzu said that, and I'd say he knows a little more about fighting than you do, pal, because he invented it, and then he perfected it so that no living man could best him in the ring of honor!*
-
-## Siterfis
-
-> **"With enough desire, you can do anything."**
-> *Even if it takes some time.*
-
-</div>
-
----
-
-<div align="center">
-
-# 📄 License
-
-</div>
-
-This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. See the `LICENSE.md` file for more details

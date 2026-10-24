@@ -1,101 +1,86 @@
-# System Architecture
+# KeiOS Architecture: Current State
 
----
-## Overview & Design Philosophy
+## Scope
 
-This operating system is built on a **true microkernel architecture** targeting the **i386 (32-bit x86)** platform. The core philosophy is strict privilege separation: the kernel executes in Ring 0 and is responsible only for fundamental hardware primitives, while all drivers, file systems, and user interfaces execute as isolated user-space servers in Ring 3
+KeiOS targets 32-bit x86 (i386), boots through GRUB using the Multiboot
+interface, and combines a freestanding C23 kernel with a Rust `no_std` drivers
+crate. The Rust library is statically linked into the kernel; it is not a
+collection of isolated user-space services.
 
-- **Target Architecture:** i386 (x86 32-bit, Intel/AMD)
-- **Kernel Model:** Microkernel
-- **Bootloader:** GRUB2 (Multiboot specification compliant)
-- **Executable Format:** ELF32 (Executable and Linkable Format)
+The current kernel is a single privileged kernel with early subsystem
+boundaries, not yet a functioning microkernel. The Ring 3 process, service, and
+driver model described in earlier designs is a roadmap.
 
----
-## Privilege Ring Separation
+## Implemented boot-time shape
 
-To maximize fault tolerance and security, the system utilizes x86 hardware protection rings to isolate system components:
+```text
+GRUB / Multiboot
+      |
+      v
+x86 entry and higher-half mappings
+      |
+      v
+GDT, IDT, CPU checks, memory initialization
+      |
+      v
+ACPI and Multiboot module / CPIO initialization
+      |
+      v
+PIT, PS/2 keyboard, framebuffer-or-VGA terminal
+      |
+      v
+Kernel-mode polling shell
+```
 
-`````txt
-+-----------------------------------------------------------------+
-| USER SPACE (Ring 3)                                             |
-|                                                                 |
-|  +----------------+   +-----------------+   +----------------+  |
-|  |   TTY Shell    |   |  Display Server |   |  Future VFS /  |  |
-|  |  (Application) |   |  (Framebuffer)  |   |  EXT2 Server   |  |
-|  +--------+-------+   +--------+--------+   +----------------+  |
-|           |                    |                                |
-|           +--- Shared Mem -----+                                |
-|           |    & IPC Messages                                   |
-+-----------|-----------------------------------------------------+
-|           v                                                     |
-| KERNEL SPACE (Ring 0)                                           |
-|                                                                 |
-|  +-----------------------------------------------------------+  |
-|  | Microkernel Core                                          |  |
-|  | - Interrupts & Exceptions (GDT, IDT, PIC/APIC)            |  |
-|  | - Memory Management (PMM, VMM / i386 Paging)              |  |
-|  | - Preemptive Scheduler & Task Management                  |  |
-|  | - Inter-Process Communication (IPC) & Shared Memory       |  |
-|  +-----------------------------------------------------------+  |
-+-----------------------------------------------------------------+
-`````
+The boot path is detailed in [BOOT.md](./BOOT.md). The source entry point is
+`kernel_entry()` in `src/kernel/boot/entry.c`.
 
-### Ring 0: The Microkernel Core
+## Current components
 
-The kernel remains as small as possible. A bug or crash here will panic the entire system, so only minimal hardware abstraction layers exist in this ring:
+- **CPU and interrupts:** GDT/TSS setup, IDT gates, legacy PIC remapping, ISR and
+  IRQ stubs, a PIT timer, and an `int 0x80` syscall entry.
+- **Memory:** Higher-half paging, page mapping helpers, a bitmap physical frame
+  allocator, and a variable-size kernel heap. The allocator currently uses
+  `mem_upper` rather than the full Multiboot memory map; see
+  [MEMORY.md](./subsystem/MEMORY.md).
+- **Drivers and output:** PS/2 keyboard input; VGA text output; an RGB linear
+  framebuffer path backed by Rust display routines; and fallback to VGA.
+- **Storage input:** GRUB loads the CPIO initramfs as a Multiboot module. The
+  kernel invokes the Rust CPIO parser and visits archive entries.
+- **IPC and syscalls:** A fixed-size in-kernel endpoint/message queue and
+  syscall indices 0–5. They do not provide process isolation or a complete
+  userspace service model.
+- **Shell:** A built-in command loop polls keyboard input and runs commands in
+  kernel mode. It is not an executable loaded from the initramfs.
 
-- **Descriptor Tables (GDT / IDT):** Manages segmentation, user/kernel mode switching, hardware interrupts (IRQs), and CPU exception handling
-- **Memory Management:**
-    - **Physical Memory Manager:** Allocates and frees 4KB physical page frames using a bitmap
-    - **Virtual Memory Manager:** Manages two level i386 page directories and page tables
-- **Task Scheduling:** Preemptive round robin scheduler driven by the PIT timer
-- **IPC Engine:** Facilitates synchronous message passing and shared memory setup between Ring 3 processes
+## Not implemented yet
 
-### Ring 3: User-Space & Drivers
+- Independent user address spaces and reliable Ring 3 task startup.
+- A process control block, scheduler, context switching, and service restart.
+- General ELF loading or execution of the bundled init program.
+- User-space drivers, a VFS, and a complete IPC-based display/input stack.
+- Windows PE or Linux executable compatibility, including the planned dual
+  syscall ABI.
 
-All non-essential services run as isolated user mode processes. If a driver crashes, the microkernel can terminate and restart it without bringing down the OS
+The existence of a stub, interface, or design document does not imply the
+feature is complete. `FIXME.md` records known implementation and reproducibility
+issues.
 
-- **Display Server:** Manages the screen, rendering text for TTY and eventually compositing graphical windows
-- **Input Drivers:** PS/2 Keyboard and mouse translation servers
-- **Storage & File Systems:** VFS, EXT2, and AHCI disk controllers (loaded via Multiboot `initrd` during early boot)
+## Directory guide
 
----
-## Virtual Memory Layout
+- `src/arch/x86/`: x86 startup, CPU/interrupt code, and paging/heap primitives.
+- `src/kernel/`: boot orchestration, ACPI, archive integration, shell, and
+  kernel services.
+- `src/drivers/`: C hardware and terminal drivers.
+- `rust/crates/drivers/`: Rust display, CPIO, and IPC code linked through C ABI
+  wrappers.
+- `userspace/` and `rootfs/`: early user program sources and initramfs contents;
+  the current boot flow does not execute those programs.
 
-The system uses a **Higher-Half Kernel** memory model. The 4GB 32-bit virtual address space is split into a 3GB user space and a 1GB kernel space:
+## Planned direction
 
-| **Virtual Address Range**   | **Size** | **Access Level** | **Description**                                                                                            |
-| --------------------------- | -------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| `0x00000000` - `0x00000FFF` | 4 KB     | Unmapped         | **Null Pointer Guard:** Traps null pointer dereferences                                                    |
-| `0x00001000` - `0xBFFFFFFF` | ~3 GB    | Ring 3 (User)    | **User Space:** Application code, heap, stack, and shared memory regions                                   |
-| `0xC0000000` - `0xC03FFFFF` | 4 MB     | Ring 0 (Kernel)  | **Kernel Code & Data:** Mapped to physical memory starting at `0x00100000` (1MB)                           |
-| `0xC0400000` - `0xEF000000` | ~748 MB  | Ring 0 (Kernel)  | **Kernel Heap:** Kernel dynamic memory allocation, IPC message buffers, page tables                        |
-| `0xFD000000` - `0xFFFEFFFF` | Varies   | Ring 0 / Ring 3  | **MMIO / Framebuffer:** Physical video RAM mapped via linear framebuffer, accessible by the Display Server |
-| `0xFFFFF000` - `0xFFFFFFFF` | 4 KB     | Ring 0 (Kernel)  | **Recursive Page Directory:** Used for fast page table manipulation                                        |
-
----
-## Inter-Process Communication (IPC)
-
-Because system services are isolated in Ring 3, fast and reliable IPC is critical for performance. The microkernel provides two distinct communication mechanisms:
-
-### Short IPC Messages (Message Passing)
-
-Used for synchronization, signaling, and small payloads (e.g., keyboard events, VFS commands)
-
-- Transfer small fixed-size kernel message queues via system calls (`int 0x80`)
-- **Example:** The PS/2 driver sends a 4-byte scancode message to the active TTY Shell
-
-### Shared Memory (Zero-Copy Transfer)
-
-Used for high bandwidth data transfers where copying memory across ring boundaries would cause performance bottlenecks
-
-- VMM maps the same physical memory frames into the virtual address spaces of two processes
-- **Example:** The Display Server and an application share a memory mapped double buffer. The application draws UI elements into this shared region and sends a short IPC message: `"Flush Rect(x, y, w, h)"`. The Display Server then blits the updated pixels directly to physical video RAM
-
----
-## Hardware Access for Ring 3 Drivers
-
-To allow user-space drivers (like the Display Driver) to interact with physical hardware without running in Ring 0, the kernel provides controlled access exemptions:
-
-- **Memory Mapped I/O (MMIO):** The kernel maps physical hardware memory addresses (e.g., linear framebuffer) into the virtual address space of the specific driver process
-- **Port I/O Permissions:** For drivers requiring x86 `inb` / `outb` instructions (e.g., legacy VGA or PS/2 controller), the kernel alters the **I/O Permission Bitmap** in the TSS
+The project aims to evolve toward isolated tasks and a small kernel service
+interface, with a longer-term experiment in supporting multiple executable
+ecosystems. Those goals require a reliable interrupt/exception ABI, safe memory
+management, process loading, and a tested userspace transition before the
+design can be described as a microkernel or dual-ABI operating system.

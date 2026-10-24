@@ -1,85 +1,66 @@
-# Boot Process Specification
+# Boot Flow
 
----
+This page describes the path implemented by the current source, followed by
+work that remains before the kernel can start an isolated user process.
 
-## Boot Flow Overview
+## Current boot flow
 
-This document describes the step by step execution path of the operating system from initial hardware power on to user-space execution in Ring 3
+```text
+BIOS / QEMU
+  -> GRUB loads Multiboot kernel and initramfs module
+  -> x86 assembly entry establishes early mappings and calls kernel_entry()
+  -> kernel validates Multiboot inputs
+  -> GDT, IDT, and CPU feature initialization
+  -> higher-half Multiboot pointer and memory initialization
+  -> ACPI initialization
+  -> module scan and CPIO archive parsing
+  -> IPC, PIT, PS/2, and display/terminal initialization
+  -> interrupts enabled; kernel shell polls for input
+```
 
-To keep this documentation easily maintainable as development progresses, steps are marked with status flags:
+The GRUB configuration is in the repository root at `grub.cfg`. It loads
+`/boot/keios.elf` and supplies `/boot/initramfs.cpio` as a module named
+`initramfs`.
 
-- `[DONE]` Fully implemented and tested
-- `[IN PROGRESS]` Currently being refactored or implemented
-- `[PLANNED]` Target architecture for upcoming milestones
+## Stages
 
-`````txt
-[Firmware & Bootloader] ---> Multiboot bootloader [DONE]
-[Early Kernel Entry] ------> Setup temp paging & jump to Higher-Half [DONE]
-[Microkernel Core Setup] --> GDT, IDT, PMM, VMM initialization [IN PROGRESS]
-[Module Loading] ----------> Parse initrd & prepare ELF32 tasks [PLANNED]
-[Ring 3 Transition] -------> Trap frame setup & IRET execution [PLANNED]
-[Early User Space] --------> Display Server & TTY Shell startup [PLANNED]
-`````
+### Firmware and GRUB
 
----
+The build creates a GRUB ISO. GRUB loads the Multiboot kernel and CPIO module
+and passes the Multiboot magic value and information pointer to the kernel
+entry. The kernel checks the magic value before continuing.
 
-## Detailed Boot Stages
+### Early CPU setup
 
-### Firmware & Bootloader `[DONE]`
+`boot_init_early_cpu()` initializes the GDT, IDT, and CPU feature checks. The
+early assembly entry is responsible for setting up the initial higher-half
+execution environment before calling the C entry point.
 
-1. **Power-On Self-Test (POST):** BIOS locates the boot device and executes the GRUB2 bootloader
-2. **GRUB2 Handshake:** GRUB reads `grub.cfg`, switches the CPU to 32-bit Protected Mode, and parses the Multiboot header
-3. **Module Loading:** GRUB loads the kernel executable into physical memory at `0x00100000` (1MB) along with any secondary modules (e.g., initial ramdisk / `initrd`)
-4. **Register State on Entry:**
-   - `EAX`: Multiboot Magic Number
-   - `EBX`: Physical address of the Multiboot Information Structure
+### Memory setup
 
-### Early Kernel Setup `[DONE]`
+The kernel converts the Multiboot information pointer to its higher-half
+address as needed, then initializes paging, the physical allocator, and the
+kernel heap. Current physical-memory discovery uses the Multiboot
+`mem_upper` field rather than the complete memory map; memory initialization is
+therefore experimental. See [the memory notes](./subsystem/MEMORY.md).
 
-1. **Verify Multiboot Header:** Confirm `EAX` contains the correct Multiboot magic number
-2. **Setup Temporary Page Directory:**
-   - Create early page tables mapping virtual `0x00000000 - 0x003FFFFF` and `0xC0000000 - 0xC03FFFFF` to physical `0x00000000`
-   - Enable Paging by setting the `PG` bit in CR0
-3. **Higher-Half Jump:** Jump from the identity-mapped low virtual address to the high virtual address (`0xC0000000+`)
-4. **Stack Pointer Setup:** Point `ESP` to the kernel stack in higher-half memory
-5. **Call C Kernel Entry Point:** Pass the pointer to the Multiboot structure to `kernel_entry()`
+### ACPI and archive setup
 
-### Microkernel Core Initialization `[IN PROGRESS]`
+The boot path searches for ACPI data, enumerates Multiboot modules, and parses
+the CPIO initramfs. The archive callback identifies `bin/init.bin`.
 
-1. **GDT & Interrupt Setup:**
-   - Initialize Global Descriptor Table (GDT) with Kernel/User Code and Data segments.
-   - Load the Task State Segment (TSS) into the GDT (required for handling Ring 3 -> Ring 0 stack switches)
-   - Initialize Interrupt Descriptor Table (IDT) and remap the PIC to handle hardware IRQs (keyboard, timer)
-2. **Memory Subsystems:**
-   - **Physical Memory Manager:** Parse the Multiboot memory map tag to initialize the physical page bitmap
-   - **Virtual Memory Manager:** Unmap early identity page tables and initialize the higher-half kernel heap allocator (`kmalloc` & `kfree`)
-3. **Multiboot Tag Parsing:**
-   - Locate the linear **Framebuffer Info Tag** (resolution, pitch, physical address)
-   - Locate the **`initrd` Module Tag** (physical start and end addresses)
+### Hardware initialization
 
-### User-Space Module Loading `[PLANNED]`
+The kernel initializes in-kernel IPC, starts the PIT, configures the PS/2
+keyboard driver, and selects the RGB framebuffer terminal when supported.
+Otherwise it initializes VGA text output.
 
-1. **Parse Ramdisk (`initrd`):** Extract the ELF32 binaries for the early user-space servers (Display Server & Shell)
-2. **Create Task Memory Space:**
-   - Allocate a new Page Directory for the Display Driver task
-   - Copy kernel higher-half mappings (`0xC0000000+`) into the task's page directory so kernel system calls remain accessible
-   - Map the ELF segments into the user space (`0x00001000 - 0xBFFFFFFF`)
-3. **Hardware Permission Mapping (Display Driver):**
-   - **MMIO Mapping:** Map the physical framebuffer address (from Multiboot tag) into the driver's page directory
-   - **Port Access:** Configure the TSS **I/O Permission Bitmap** to allow the driver access to display ports
+## Not yet part of the boot path
 
-### Transition to User Mode (Ring 3) `[PLANNED]`
+The following steps are architectural goals, not completed boot stages:
 
-1. **Prepare Trap Frame:** Push the initial Ring 3 register frame onto the kernel stack
-2. **Execute `IRET` Instruction:** Pop the trap frame to drop CPU privileges from Ring 0 to Ring 3
-
-### Early User Space Execution `[PLANNED]`
-
-1. **Display Server Init:**
-   - Takes control of the mapped framebuffer
-   - Sets up shared memory regions for rendering
-   - Enters an IPC event loop listening for draw requests
-2. **TTY Shell Startup:**
-   - Bootstraps in user mode
-   - Sends text print requests via IPC to the Display Server
-   - Awaits user keypresses via keyboard IPC messages
+- Validate and load ELF program segments from the initramfs.
+- Create a separate page directory and stack for each task.
+- Set up a reliable Ring 3 entry frame and context-switching path.
+- Start user-space display, input, filesystem, or shell services.
+- Launch the bundled init program automatically.

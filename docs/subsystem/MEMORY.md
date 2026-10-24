@@ -1,97 +1,51 @@
-# Subsystem Deep-Dive into Memory Management
+# Memory Management
 
----
-## Overview & Architecture
+## Current implementation
 
-The memory management subsystem operates on a **Higher-Half Kernel** model for the 32-bit x86 (i386) architecture. It is divided into three distinct abstraction layers:
+The i386 memory code provides higher-half paging helpers, a physical page-frame
+bitmap, and a kernel heap. These facilities are early kernel primitives; they
+do not yet provide isolated per-process address spaces.
 
-1. **Physical Memory Manager:** Manages 4 KB physical memory frames using a low overhead bitmap allocator
-2. **Virtual Memory Manager:** Handles two-level x86 page tables, page mapping, unmapping, and recursive page directory management
-3. **Kernel Dynamic Allocator:** Manages variable-sized kernel heap allocations (`kmalloc` / `kfree`)
+### Virtual memory
 
-`````txt
-+-------------------------------------------------------------------+
-| Kernel Dynamic Allocator (kmalloc / kfree)                        |
-+-------------------------------------------------------------------+
-    |
-    v
-+-------------------------------------------------------------------+
-| Virtual Memory Manager (VMM - 2 Level i386 Page Directories)      |
-+-------------------------------------------------------------------+
-    |
-    v
-+-------------------------------------------------------------------+
-| Physical Memory Manager (PMM - Frame Allocation Bitmap)           |
-+-------------------------------------------------------------------+
-    |
-    v
-+-------------------------------------------------------------------+
-| Hardware Memory (4 KB Physical Page Frames)                       |
-+-------------------------------------------------------------------+
-`````
+The kernel uses 32-bit two-level x86 paging and a higher-half kernel mapping.
+`vmm_map_page()`, `vmm_unmap_page()`, and `vmm_get_phys()` operate on the active
+page directory through the recursive mapping. The early identity mapping is
+removed during `vmm_init()`.
 
----
-## Subsystem Status
+The intended split leaves low virtual memory for user mappings and maps the
+kernel at `KERNEL_VIRTUAL_OFFSET` (`0xC0000000`). A working task manager that
+creates and switches user page directories is not present.
 
-| **Module**                | **Level**             | **Status**     | **Description**                                   |
-| ------------------------- | --------------------- | -------------- | ------------------------------------------------- |
-| **Physical Memory (PMM)** | Kernel Primitive      | 🟢 Completed   | Frame allocation, free list bitmap parsing        |
-| **Virtual Paging (VMM)**  | Hardware Abstractions | 🟢 Completed   | Higher half mapping, recursive page directory     |
-| **Kernel Heap Allocator** | Dynamic Memory        | 🟢 Completed   | Heap expansion, `kmalloc` & `kfree` support       |
-| **User Space Isolation**  | Security              | 🟡 In Progress | Per process page directory creation & Ring 3 flag |
+### Physical memory
 
----
-## Physical Memory Manager (PMM) `[COMPLETED]`
+`pmm_init()` tracks frame allocation in a bitmap and reserves memory below the
+kernel/module allocation boundary. The current limit is derived from
+Multiboot `mem_upper`; it does not use the full Multiboot memory map to mark
+only usable RAM. The interpretation and reservation of this range need review
+before relying on the allocator beyond the current emulator setup.
 
-The PMM treats RAM as an array of 4 KB physical page frames. Frame allocation status is tracked using a single bit per frame inside a dynamic bit array (bitmap)
+### Kernel heap
 
-- **Page Frame Size:** 4096 Bytes (4KB)
-- **Bitmap Scale:** 1 byte of bitmap tracks (8 x 4KB = 32KB) of physical RAM
-- **Initialization:** Parsed directly from the Multiboot `mmap` tag provided by GRUB2
+`heap_init()`, `kmalloc()`, and `kfree()` manage variable-size blocks in a
+kernel heap initialized during `mem_init()`. Rust allocations use this heap via
+the drivers crate's `GlobalAlloc` implementation. The heap alignment and
+allocation arithmetic have known correctness concerns; see `FIXME.md` before
+extending allocator use.
 
-### Bitmap Bit Legend
+## Status
 
-- `0`: Page Frame is **Free** and available for allocation
-- `1`: Page Frame is **Used** (Reserved by BIOS/kernel or allocated)
+| Component | Current status |
+| --- | --- |
+| Higher-half kernel paging and recursive mapping | Implemented; not comprehensively validated |
+| Physical frame bitmap | Implemented; usable-range discovery is incomplete |
+| Kernel heap | Implemented; alignment/overflow concerns remain |
+| Per-task address spaces and user/kernel isolation | Not implemented |
+| Framebuffer/MMIO mapping for an isolated user driver | Not implemented |
 
----
-## Virtual Memory Manager (VMM) `[COMPLETED]`
+## Follow-up
 
-The VMM configures standard x86 32-bit paging using a two tier hierarchy: **Page Directories (PD)** and **Page Tables (PT)**
-
-### Virtual Address Translation
-
-`````txt
- 31                  22 21                  12 11                   0
-+----------------------+----------------------+-----------------------+
-| Directory Index (10) |  Table Index (10)    |  Offset in Frame (12) |
-+----------------------+----------------------+-----------------------+
-          |                      |                        |
-          v                      v                        v
-  +----------------+      +-------------+        +----------------+
-  | Page Directory | ---> | Page Table  | -----> | Physical Frame |
-  +----------------+      +-------------+        +----------------+
-`````
-
-### Recursive Page Directory Mapping
-
-To manipulate page tables without needing to map each page table into continuous virtual memory, the last entry (Index 1023) of the Page Directory points directly to physical address of the Page Directory itself
-
-- **Recursive Virtual Base:** `0xFFFFF000`
-- **Effect:** The Page Directory is accessible at `0xFFFFF000`, and all Page Tables can be modified directly via high virtual addresses in `0xFFC00000` - `0xFFFFFFFF`
-
----
-## Kernel Heap (`kmalloc` / `kfree`) `[COMPLETED]`
-
-The kernel heap resides in higher half virtual memory starting at `0xC014B000`
-
-- **Allocation Strategy:** Block-header implicit list allocator
-- **Header Structure:**
-`````c
-struct heap_segment {
-    uint32_t len_flags; /* Upper 28 bits store the length; lower 4 bits store flags */
-    struct heap_segment *next;
-    struct heap_segment *prev;
-};
-`````
-- **Heap Expansion:** When `kmalloc` exhausts contiguous heap memory, the VMM requests extra frames from the PMM and maps new pages sequentially to grow the heap end pointer
+Use the Multiboot memory map to identify usable ranges, reserve every live
+boot-time structure and module, validate arithmetic and address ranges, and
+make the heap satisfy the alignment contract required by Rust `GlobalAlloc`.
+Only then should process-specific page directories and user mappings be exposed.
