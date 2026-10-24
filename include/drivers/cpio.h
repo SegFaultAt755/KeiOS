@@ -6,6 +6,18 @@
 #include <stdint.h>
 #include <stddef.h>
 
+enum cpio_status {
+    CPIO_OK = 0,
+    CPIO_ERR_INVALID_INFO = 1,
+    CPIO_ERR_INVALID_HEADER = 2,
+    CPIO_ERR_INVALID_NAME = 3,
+    CPIO_ERR_TRUNCATED_ARCHIVE = 4,
+    CPIO_ERR_DATA_RANGE = 5,
+    CPIO_ERR_PARSE_FAILURE = 6,
+};
+
+typedef enum cpio_status cpio_status_t;
+
 struct cpio_info {
     const uint8_t *base_addr;
     size_t size;
@@ -25,8 +37,8 @@ typedef void(*cpio_callback)(
     const uint8_t *data, size_t data_len, void *user_context
 );
 
-int cpio_init(struct cpio_info info);
-int cpio_parse(cpio_callback callback, void *user_context);
+cpio_status_t cpio_init(struct cpio_info info);
+cpio_status_t cpio_parse(cpio_callback callback, void *user_context);
 
 size_t cpio_get_offset(void);
 size_t cpio_get_total_size(void);

@@ -26,7 +26,7 @@ static void boot_init_display(struct multiboot_info *mbi) {
         return;
     }
 
-    bool initialized = framebuffer_init(mbi) == 0 && display_init();
+    bool initialized = framebuffer_init(mbi) == 0 && display_init() == DISPLAY_OK;
 
     if (initialized) {
         qemu_printf(QEMU_DRV, QEMU_OK, "Framebuffer display initialized: (width: %d, height: %d)",

@@ -18,6 +18,17 @@ pub struct IpcMessage {
     pub data: [u8; IPC_MAX_PAYLOAD],
 }
 
+#[repr(i32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IpcStatus {
+    Ok = 0,
+    Invalid = 1,
+    Full = 2,
+    Empty = 3,
+    NotInitialized = 4,
+    InvalidEndpoint = 5,
+}
+
 #[derive(Clone, Copy)]
 struct Endpoint {
     active: bool,
@@ -69,36 +80,47 @@ impl IpcEngine {
         }
     }
 
-    fn endpoint_mut(&mut self, endpoint: u32) -> Option<&mut Endpoint> {
+    fn endpoint_mut(&mut self, endpoint: u32) -> Result<&mut Endpoint, IpcStatus> {
         if endpoint == 0 {
-            return None;
+            return Err(IpcStatus::InvalidEndpoint);
         }
 
         self.endpoints
             .get_mut(endpoint as usize)
             .filter(|endpoint| endpoint.active)
+            .ok_or(IpcStatus::InvalidEndpoint)
     }
 }
 
 static mut ENGINE: IpcEngine = IpcEngine::new();
 
-unsafe fn engine() -> &'static mut IpcEngine {
-    unsafe { &mut *core::ptr::addr_of_mut!(ENGINE) }
+unsafe fn engine() -> Result<&'static mut IpcEngine, IpcStatus> {
+    let engine = unsafe { &mut *core::ptr::addr_of_mut!(ENGINE) };
+    if !engine.initialized {
+        return Err(IpcStatus::NotInitialized);
+    }
+    Ok(engine)
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn ipc_init() -> i32 {
-    unsafe { engine().reset() }
-    IPC_OK
+pub extern "C" fn ipc_init() -> IpcStatus {
+    unsafe {
+        let Ok(engine) = engine() else {
+            let engine = &mut *core::ptr::addr_of_mut!(ENGINE);
+            engine.reset();
+            return IpcStatus::Ok;
+        };
+        engine.reset();
+    }
+    IpcStatus::Ok
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn ipc_endpoint_create() -> u32 {
     unsafe {
-        let ipc = engine();
-        if !ipc.initialized {
+        let Ok(ipc) = engine() else {
             return 0;
-        }
+        };
 
         for (index, endpoint) in ipc.endpoints.iter_mut().enumerate().skip(1) {
             if !endpoint.active {
@@ -117,17 +139,22 @@ pub unsafe extern "C" fn ipc_send(
     sender: u32,
     data: *const u8,
     length: usize,
-) -> i32 {
+) -> IpcStatus {
     if length > IPC_MAX_PAYLOAD || (length != 0 && data.is_null()) {
-        return IPC_INVALID;
+        return IpcStatus::Invalid;
     }
 
     unsafe {
-        let Some(queue) = engine().endpoint_mut(endpoint) else {
-            return IPC_INVALID;
+        let Ok(engine) = engine() else {
+            return IpcStatus::NotInitialized;
         };
+
+        let Ok(queue) = engine.endpoint_mut(endpoint) else {
+            return IpcStatus::InvalidEndpoint;
+        };
+
         if queue.count == IPC_QUEUE_CAPACITY {
-            return IPC_FULL;
+            return IpcStatus::Full;
         }
 
         let message = &mut queue.messages[queue.tail];
@@ -141,21 +168,26 @@ pub unsafe extern "C" fn ipc_send(
         queue.count += 1;
     }
 
-    IPC_OK
+    IpcStatus::Ok
 }
 
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn ipc_receive(endpoint: u32, message: *mut IpcMessage) -> i32 {
+pub unsafe extern "C" fn ipc_receive(endpoint: u32, message: *mut IpcMessage) -> IpcStatus {
     if message.is_null() {
-        return IPC_INVALID;
+        return IpcStatus::Invalid;
     }
 
     unsafe {
-        let Some(queue) = engine().endpoint_mut(endpoint) else {
-            return IPC_INVALID;
+        let Ok(engine) = engine() else {
+            return IpcStatus::NotInitialized;
         };
+
+        let Ok(queue) = engine.endpoint_mut(endpoint) else {
+            return IpcStatus::InvalidEndpoint;
+        };
+
         if queue.count == 0 {
-            return IPC_EMPTY;
+            return IpcStatus::Empty;
         }
 
         *message = queue.messages[queue.head];
@@ -163,5 +195,5 @@ pub unsafe extern "C" fn ipc_receive(endpoint: u32, message: *mut IpcMessage) ->
         queue.count -= 1;
     }
 
-    IPC_OK
+    IpcStatus::Ok
 }
