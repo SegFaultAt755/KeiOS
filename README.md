@@ -28,7 +28,11 @@ and try it in QEMU without installing it on your computer.
 
 ---
 
+<div align="center">
+
 ## 📖 Table of contents
+
+</div>
 
 - [Project at a glance](#project-at-a-glance)
 - [Current capabilities](#-current-capabilities)
@@ -240,11 +244,11 @@ include/                  C interfaces and configuration
 src/                      C and x86 assembly kernel and drivers
 userspace/                Early userspace sources (not launched at boot)
 rootfs/                   Files packaged into the CPIO initramfs
-rust/crates/drivers/       Rust no_std driver and support library
-helpers/                   Asset-generation helper
-docs/                      Boot, architecture, and subsystem documentation
-build.py / run.py          Build and QEMU wrappers
-clean.py                   Build-artifact cleanup
+rust/crates/drivers/      Rust no_std driver and support library
+helpers/                  Asset-generation helper
+docs/                     Boot, architecture, and subsystem documentation
+build.py / run.py         Build and QEMU wrappers
+clean.py                  Build-artifact cleanup
 ```
 
 ---
