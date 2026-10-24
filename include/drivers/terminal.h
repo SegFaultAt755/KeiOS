@@ -11,6 +11,7 @@
 #define TERMINAL_DEFAULT_BG VGA_8B_BLACK
 #define TERMINAL_TAB_SIZE 4
 
+/* Pass a null memory pointer to use the initialized display backend. */
 void terminal_init(uint16_t *mem, uint16_t width, uint16_t height);
 void terminal_clear(void);
 

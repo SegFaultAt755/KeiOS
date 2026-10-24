@@ -5,6 +5,7 @@ unsafe extern "C" {
     fn framebuffer_clear(color: u32);
     fn framebuffer_draw_pixel(color: u32, x: u32, y: u32);
     fn framebuffer_fill_rect(color: u32, x: u32, y: u32, width: u32, height: u32);
+    fn framebuffer_scroll_up(height: u32, color: u32);
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,6 +38,12 @@ impl Display {
     pub fn clear(&mut self, color: Color) {
         unsafe {
             framebuffer_clear(color.0);
+        }
+    }
+
+    pub fn scroll_up(&mut self, height: u32, color: Color) {
+        unsafe {
+            framebuffer_scroll_up(height, color.0);
         }
     }
 

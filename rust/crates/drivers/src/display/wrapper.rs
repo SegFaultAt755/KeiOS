@@ -41,6 +41,15 @@ pub extern "C" fn display_clear(color: u32) {
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn display_scroll_up(height: u32, color: u32) {
+    unsafe {
+        if let Some(display) = get_display() {
+            display.scroll_up(height, Color(color));
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn display_draw_pixel(x: i32, y: i32, color: u32) {
     unsafe {
         if let Some(display) = get_display() {

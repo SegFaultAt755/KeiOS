@@ -10,6 +10,7 @@ bool display_init(void);
 bool display_is_initialized(void);
 void display_clear(uint32_t color);
 void display_draw_pixel(int32_t x, int32_t y, uint32_t color);
+void display_scroll_up(uint32_t height, uint32_t color);
 
 /* Shape drawing operations */
 void display_draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);

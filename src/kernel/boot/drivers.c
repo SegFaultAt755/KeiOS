@@ -29,9 +29,20 @@ static void boot_init_display(struct multiboot_info *mbi) {
     bool initialized = framebuffer_init(mbi) == 0 && display_init();
 
     if (initialized) {
-        display_clear(0);
         qemu_printf(QEMU_DRV, QEMU_OK, "Framebuffer display initialized: (width: %d, height: %d)",
                     mbi->framebuffer_width, mbi->framebuffer_height);
+        auto width = mbi->framebuffer_width / 16;
+        auto height = mbi->framebuffer_height / 16;
+        if (width == 0 || height == 0) {
+            qemu_printf(QEMU_DRV, QEMU_ERROR, "Framebuffer is too small for terminal text; falling back to VGA");
+            boot_init_vga_terminal();
+            return;
+        }
+        if (width > UINT16_MAX)
+            width = UINT16_MAX;
+        if (height > UINT16_MAX)
+            height = UINT16_MAX;
+        terminal_init(nullptr, (uint16_t)width, (uint16_t)height);
         return;
     }
 

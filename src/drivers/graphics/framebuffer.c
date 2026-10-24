@@ -98,3 +98,26 @@ void framebuffer_fill_rect(uint32_t color, uint32_t x, uint32_t y, uint32_t widt
             destination[column] = color;
     }
 }
+
+void framebuffer_scroll_up(uint32_t height, uint32_t color) {
+    if (!framebuffer_ready || height == 0)
+        return;
+
+    if (height >= active_framebuffer.height) {
+        framebuffer_clear(color);
+        return;
+    }
+
+    const uint32_t stride = active_framebuffer.pitch / sizeof(uint32_t);
+    volatile uint32_t *pixels = (volatile uint32_t *)active_framebuffer.addr;
+    const uint32_t copy_height = active_framebuffer.height - height;
+
+    for (uint32_t row = 0; row < copy_height; row++) {
+        volatile uint32_t *destination = pixels + row * stride;
+        volatile uint32_t *source = pixels + (row + height) * stride;
+        for (uint32_t column = 0; column < active_framebuffer.width; column++)
+            destination[column] = source[column];
+    }
+
+    framebuffer_fill_rect(color, 0, copy_height, active_framebuffer.width, height);
+}

@@ -2,13 +2,13 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "config.h"
-#include "drivers/display.h"
 
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
 #include "kernel/rsdp.h"
+#include "kernel/halt.h"
 #include "kernel/shell/shell.h"
 
 #if defined(__i386__) || defined(_M_IX86)
@@ -74,15 +74,10 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
     execute_init_binary(exec_init, exec_init_size);
 #endif
 
-    if (!display_is_initialized()) {
-        shell_init();
-    } else {
-        display_fill_rect(0, 0, 100, 100, 0xFFFF00FF);
-        display_draw_text_static(
-            10, 10, " ~!@#$%^&*()<>:\"\'{}\\?/,.-_=+\nqwertyuiopasdfghjklzxcvbnm\nQWERTYUIOPASDFGHJKLZXCVBNM",
-            0xFFFFFFFF);
-    }
+    shell_init();
 
     while (true) {
+        shell_poll_input();
+        halt();
     }
 }

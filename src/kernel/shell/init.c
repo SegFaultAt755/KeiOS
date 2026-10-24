@@ -3,6 +3,7 @@
 
 #include "config.h"
 
+#include "kernel/interrupts.h"
 #include "kernel/ipc.h"
 #include "kernel/panic.h"
 #include "kernel/shell/cmd.h"
@@ -237,7 +238,9 @@ void shell_poll_input() {
     auto endpoint = ps2_get_ipc_endpoint();
 
     while (true) {
+        disable_interrupts();
         auto result = ipc_receive(endpoint, &message);
+        enable_interrupts();
         if (result == IPC_EMPTY)
             return;
 

@@ -59,23 +59,16 @@ static void display_panic_text(const char *reason, const char *desc, const char 
     }
 }
 
-static void display_panic_screen([[maybe_unused]] const char *reason, [[maybe_unused]] const char *desc,
-                                 [[maybe_unused]] const char *file, [[maybe_unused]] uint32_t line) {
-    display_clear(0x00'00'00'FF);
-}
-
 [[noreturn]] void runtime_panic(const char *reason, const char *desc, const char *file, uint32_t line) {
     disable_interrupts();
     qemu_printf(QEMU_KERN, QEMU_PANIC, "Kernel panic: %s (description: %s, file: %s, line: %d)", reason, desc, file,
                 line);
 
-    if (display_is_initialized()) {
-        display_panic_screen(reason, desc, file, line);
-    } else {
+    if (!display_is_initialized()) {
         vga_init_text();
         terminal_init((uint16_t *)VGA_TEXT_MEMORY, VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
-        display_panic_text(reason, desc, file, line);
     }
+    display_panic_text(reason, desc, file, line);
 
     while (true) {
         disable_interrupts();

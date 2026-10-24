@@ -73,4 +73,5 @@ Before deleting public headers or exported ABI symbols, confirm there are no dow
 
 ## Small tasks
 
+- Update README and write AGENTS.md
 - Make CI show the previous result if there is a fatal error.
