@@ -27,21 +27,17 @@ struct dsdt *parse_dsdt(struct fadt *fadt) {
 
     uintptr_t dsdt_phys_addr = (uintptr_t)fadt->dsdt;
 
-    /* Map just the first page to safely read the header */
-    vmm_map_page((uint32_t)ADD_KERNEL_OFFSET(dsdt_phys_addr), (uint32_t)dsdt_phys_addr, PTE_PRESENT | PTE_RW | PDE_PWT);
+    if (!acpi_map_range((uint32_t)dsdt_phys_addr, sizeof(struct acpi_header))) {
+        KERNEL_PANIC("Could not map DSDT header", "DSDT Initialization Failed");
+    }
 
     struct acpi_header *temp_header = (struct acpi_header *)ADD_KERNEL_OFFSET(dsdt_phys_addr);
+    if (temp_header->length < sizeof(struct acpi_header)) {
+        KERNEL_PANIC("Invalid DSDT length in FADT", "DSDT table is corrupted");
+    }
 
-    /* Calculate how many 4KB pages the entire DSDT requires */
-    uint32_t page_count = (temp_header->length + 0xFFF) / 0x1000;
-
-    /* Reserve and map all required pages for the full AML bytecode */
-    for (uint32_t i = 0; i < page_count; i++) {
-        uint32_t phys = dsdt_phys_addr + (i * 0x1000);
-        uint32_t virt = (uint32_t)ADD_KERNEL_OFFSET(phys);
-
-        pmm_reserve_phys(phys, 0x1000);
-        vmm_map_page(virt, phys, PTE_PRESENT | PTE_RW | PDE_PWT);
+    if (!acpi_map_range((uint32_t)dsdt_phys_addr, temp_header->length)) {
+        KERNEL_PANIC("Could not map complete DSDT", "DSDT Initialization Failed");
     }
 
     struct dsdt *dsdt_table = (struct dsdt *)ADD_KERNEL_OFFSET(dsdt_phys_addr);
