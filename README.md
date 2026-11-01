@@ -28,11 +28,7 @@ and try it in QEMU without installing it on your computer.
 
 ---
 
-<div align="center">
-
 ## 📖 Table of contents
-
-</div>
 
 - [Project at a glance](#project-at-a-glance)
 - [Current capabilities](#-current-capabilities)
@@ -41,7 +37,7 @@ and try it in QEMU without installing it on your computer.
   - [Build the ISO](#2-build-the-iso)
   - [Run the regression tests](#3-run-the-regression-tests)
   - [Run in QEMU](#4-run-in-qemu)
-- [Scripts](#-scripts)
+- [Helper scripts](#-helper-scripts)
 - [Project structure](#-project-structure)
 - [Documentation](#-documentation)
 
@@ -54,9 +50,10 @@ and try it in QEMU without installing it on your computer.
 </div>
 
 KeiOS is an experimental **i386 operating system** combining a freestanding
-C23 kernel with a Rust `no_std` drivers library. Today, it boots through GRUB,
-initializes core CPU and memory facilities, reads a CPIO initramfs, brings up
-basic hardware, and presents an interactive kernel shell.
+C23 kernel with a Rust `no_std` drivers library. It boots through GRUB,
+initializes CPU, memory, and ACPI, parses a CPIO initramfs, brings up basic
+hardware, and launches `bin/init.bin` once in Ring 3 when it is present. When
+that program exits, KeiOS presents an interactive kernel shell.
 
 If you are new to operating systems, a good first step is to build and run the
 ISO in QEMU, then explore the boot flow and architecture guides below. KeiOS is
@@ -64,8 +61,9 @@ actively experimental: expect incomplete features, rough edges, and ongoing chan
 
 > [!NOTE]
 > KeiOS is an early-stage research project, not a general-purpose operating
-> system. Process isolation, general ELF execution, and Windows or Linux binary
-> compatibility are future goals—not current features.
+> system. The one-shot init program shares the kernel's active page directory;
+> scheduling, isolated processes, general ELF execution, and Windows or Linux
+> binary compatibility are future goals—not current features.
 
 <div align="center">
 
@@ -87,22 +85,24 @@ actively experimental: expect incomplete features, rough edges, and ongoing chan
 | --- | --- |
 | **Boot** | GRUB Multiboot boot into a 32-bit higher-half kernel |
 | **CPU** | Early GDT/IDT setup, PIC remapping, CPU feature checks, and PIT timer |
-| **Memory** | Experimental paging, physical frame bitmap, and kernel heap |
+| **Memory** | Higher-half paging, Multiboot memory-map-based frame bitmap, and kernel heap |
+| **ACPI** | ACPI table discovery and parsing, mode enablement, and the S5 shutdown path |
 | **Input & display** | PS/2 keyboard, VGA text mode, and an RGB framebuffer path with VGA fallback |
-| **Initramfs** | CPIO archive parsing from a GRUB-loaded module |
+| **Initramfs** | CPIO archive parsing from a GRUB-loaded module; optional one-shot `bin/init.bin` launch in Ring 3 |
 | **Kernel services** | A syscall dispatcher and bounded in-kernel IPC queues |
 | **Shell** | Ring 0 command shell: `help`, `clear`, `echo`, `ver`, `uptime`, `meminfo`, `color`, `datetime`, `reboot`, `shutdown`, `halt` |
 
-The shell currently runs in kernel mode. There is no working scheduler or
-general process loader, and the bundled userspace init program is not started
-by the normal boot path. KeiOS does **not** currently run Windows PE or Linux
-executables. Existing low-level facilities are experimental and should not be
-considered production-ready.
+The shell runs in kernel mode after the optional init program exits. The init
+launch is a one-shot raw binary entry, not a general process loader: there is
+no scheduler or independent address space, and kernel services are not
+isolated. KeiOS does **not** currently run Windows PE or Linux executables.
+Existing low-level facilities are experimental and should not be considered
+production-ready.
 
 > [!WARNING]
-> The current boot flow is still kernel-only. `userspace/`, `rootfs/`, and the
-> associated initramfs logic are build-time scaffolding for future execution
-> paths; the default boot path does not start a user process or scheduler.
+> `userspace/` programs are included in the initramfs by the build. Only
+> `bin/init.bin` is launched, once, by the current boot path; this does not
+> provide process isolation, scheduling, or general executable loading.
 
 ---
 
@@ -196,8 +196,10 @@ Or use the convenience target:
 make test
 ```
 
-The test suite currently covers the x86 ISR/exception ABI contract and checks
-that the kernel boot log reports successful IDT setup and IRQ initialization.
+The test suite covers ACPI shutdown parsing, CPIO parser regressions, heap
+alignment, invalid frees and coalescing, and the x86 ISR/exception ABI
+contract. It also checks that the kernel boot log reports successful IDT setup
+and IRQ initialization.
 
 ### Run in QEMU
 
@@ -234,7 +236,7 @@ written to `qemu.log` and `debug.log`.
 
 <div align="center">
 
-## 🧰 Scripts
+## 🧰 Helper scripts
 
 </div>
 
@@ -271,28 +273,18 @@ The atlas width must be divisible by 95.
 </div>
 
 ```text
-Makefile                  Primary build orchestration for the kernel and ISO
-build.py                  Thin wrapper for invoking make targets
-run.py                    Build + QEMU launch wrapper for local testing
-clean.py                  Make clean front end with optional disk/log cleanup
-healthcheck.py            README badge refresh and validation helper
-
-src/                      C kernel sources, x86 assembly, and low-level drivers
-include/                  Public headers and project configuration
-bin/                      Generated object files and intermediate build outputs
-rootfs/                   Files packaged into the initramfs archive
-userspace/                Early userspace sources and stdlib stubs
-resources/                UI/font and asset sources used by the kernel build
-rust/                     Cargo workspace, nightly toolchain pin, and no_std crates
-scripts/                  Python utilities such as the bitmap-to-font converter and formatting helpers
-docs/                     Boot, architecture, and subsystem documentation
-
-grub.cfg                  GRUB configuration for the ISO boot image
-linker.ld                 ELF32 linker script
-keios.elf                 Kernel binary produced by the build
-initramfs.cpio            Generated initramfs archive
-keios.iso                 Bootable ISO image
-TODO.md                   Near-term project roadmap and follow-up tasks
+include/                  C interfaces and configuration
+src/                      C and x86 assembly kernel and drivers
+userspace/                Early user programs; init.bin can run once at boot
+rootfs/                   Files packaged into the CPIO initramfs
+rust/crates/drivers/       Rust no_std drivers and support library
+scripts/                  Build helpers, font generation, and formatting
+resources/                Font and other assets used by the kernel build
+docs/                      Boot, architecture, and subsystem documentation
+tests/                     Python regression tests and their harnesses
+build.py / run.py          Build and QEMU wrappers
+clean.py                   Build-artifact cleanup
+Makefile                   Build orchestration for the kernel and ISO
 ```
 
 ---
