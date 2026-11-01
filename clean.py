@@ -6,8 +6,9 @@ import logging
 import platform
 import shutil
 import subprocess
-import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,11 +16,6 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("KeiOS-Cleaner")
-
-# Never delete these files, even when a .gitignore pattern matches them
-PROTECTED_EXTENSIONS = {".md", ".txt", ".cfg", ".py", ".c", ".asm", ".h", ".ld", ".mk"}
-PROTECTED_DIRS = {".obsidian", ".vscode", ".git", "src", "include", "rootfs"}
-
 
 def get_make_command() -> str:
     if platform.system() == "Windows":
@@ -29,59 +25,19 @@ def get_make_command() -> str:
     return "make"
 
 
-def parse_gitignore_patterns(gitignore_path: Path) -> list[str]:
-    if not gitignore_path.is_file():
-        return []
-
-    patterns = []
-    with open(gitignore_path, "r", encoding="utf-8") as f:
-        for line in f:
-            clean_line = line.strip()
-            # Ignore empty lines, comments, and protected directories
-            if (
-                not clean_line
-                or clean_line.startswith("#")
-                or any(prot in clean_line for prot in PROTECTED_DIRS)
-            ):
-                continue
-            patterns.append(clean_line.lstrip("/"))
-    return patterns
-
-
-def safe_delete(path: Path, dry_run: bool) -> None:
-    if path.name in PROTECTED_DIRS or path.suffix in PROTECTED_EXTENSIONS:
-        return
-
+def remove_file(path: Path, dry_run: bool) -> bool:
+    if not path.exists() and not path.is_symlink():
+        return True
     if dry_run:
-        logger.info(f"[DRY-RUN] Would remove: {path}")
-        return
-
+        logger.info("[DRY-RUN] Would remove: %s", path)
+        return True
     try:
-        if path.is_file() or path.is_symlink():
-            path.unlink()
-            logger.info(f"Removed file: {path}")
-        elif path.is_dir():
-            shutil.rmtree(path)
-            logger.info(f"Removed directory: {path}")
-    except PermissionError:
-        logger.error(f"Permission denied: Cannot remove '{path}'. File may be in use.")
+        path.unlink()
+        logger.info("Removed file: %s", path)
+        return True
     except OSError as err:
-        logger.error(f"Error removing '{path}': {err}")
-
-
-def clean_gitignore_artifacts(workspace_root: Path, dry_run: bool) -> None:
-    patterns = parse_gitignore_patterns(workspace_root / ".gitignore")
-    logger.info(
-        f"Scanning workspace using {len(patterns)} pattern rules from .gitignore..."
-    )
-
-    for pattern in patterns:
-        matched_paths = list(workspace_root.glob(pattern)) + list(
-            workspace_root.glob(f"**/{pattern}")
-        )
-        for path in set(matched_paths):
-            if path.exists() and path != workspace_root:
-                safe_delete(path, dry_run)
+        logger.error("Unable to remove '%s': %s", path, err)
+        return False
 
 
 def main() -> None:
@@ -91,7 +47,7 @@ def main() -> None:
     parser.add_argument(
         "--disk-file",
         type=Path,
-        default=Path("disk.qcow2"),
+        default=ROOT / "disk.qcow2",
         help="Path to virtual disk image",
     )
     parser.add_argument(
@@ -108,33 +64,41 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    workspace_root = Path(__file__).parent.resolve()
-
     # Run the Makefile clean rule
     if not args.skip_make:
         make_cmd = get_make_command()
-        logger.info(f"Executing '{make_cmd} clean'...")
-        if not args.dry_run:
-            try:
-                subprocess.run([make_cmd, "clean"], check=True, capture_output=True)
-            except FileNotFoundError:
-                logger.warning(f"Command '{make_cmd}' not found. Skipping make clean.")
-            except subprocess.CalledProcessError as err:
-                logger.error(f"Make clean failed: {err.stderr.decode().strip()}")
-
-    # Remove the artifacts listed in .gitignore
-    clean_gitignore_artifacts(workspace_root, args.dry_run)
+        command = [make_cmd, "clean"]
+        if args.dry_run:
+            command.insert(1, "-n")
+        logger.info("Executing '%s'...", " ".join(command))
+        try:
+            result = subprocess.run(
+                command,
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+            )
+            if args.dry_run and result.stdout:
+                logger.info("Make clean preview:\n%s", result.stdout.rstrip())
+        except FileNotFoundError:
+            logger.error("Command '%s' not found.", make_cmd)
+            raise SystemExit(1)
+        except subprocess.CalledProcessError as err:
+            logger.error("Make clean failed: %s", err.stderr.strip())
+            raise SystemExit(err.returncode)
 
     # Remove disk images and logs explicitly
-    if not args.skip_disk and args.disk_file.exists():
-        safe_delete(args.disk_file, args.dry_run)
+    cleanup_succeeded = True
+    if not args.skip_disk:
+        cleanup_succeeded &= remove_file(args.disk_file, args.dry_run)
 
     if not args.skip_logs:
-        for log_file in ["debug.log", "qemu.log", "config.mk"]:
-            log_path = workspace_root / log_file
-            if log_path.exists():
-                safe_delete(log_path, args.dry_run)
+        for log_file in ["debug.log", "qemu.log"]:
+            cleanup_succeeded &= remove_file(ROOT / log_file, args.dry_run)
 
+    if not cleanup_succeeded:
+        raise SystemExit(1)
     logger.info("Cleanup operation completed.")
 
 

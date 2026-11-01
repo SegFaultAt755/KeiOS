@@ -6,6 +6,7 @@
 #include "kernel/qemu.h"
 
 static struct heap_segment *heap_start = nullptr;
+static uint32_t heap_end;
 
 [[nodiscard]] static inline bool heap_is_free(struct heap_segment *seg) {
     return (seg->len_flags & HEAP_FLAG_FREE) != 0;
@@ -16,6 +17,8 @@ static struct heap_segment *heap_start = nullptr;
 }
 
 static inline void heap_set_len_and_flags(struct heap_segment *seg, uint32_t len, bool is_free) {
+    KERNEL_ASSERT((len & ~HEAP_LEN_MASK) == 0 && (len & (HEAP_ALIGNMENT - 1)) == 0, "Heap corruption detected",
+                  "Heap segment length is invalid or not aligned");
     seg->len_flags = (len & HEAP_LEN_MASK) | (is_free ? HEAP_FLAG_FREE : 0);
 }
 
@@ -24,17 +27,26 @@ void heap_init(void *start_addr, uint32_t total_size) {
 
     KERNEL_ASSERT(total_size > 0, "Heap initialization error", "Heap total size must be greater than zero");
 
-    auto aligned_addr = HEAP_ALIGN_UP((uint32_t)start_addr, HEAP_ALIGNMENT);
-    auto lost_bytes = aligned_addr - (uint32_t)start_addr;
+    uint64_t raw_start = (uint32_t)start_addr;
+    KERNEL_ASSERT((uint64_t)total_size <= UINT32_MAX - raw_start, "Heap initialization error",
+                  "Heap address range overflows the 32-bit address space");
+    KERNEL_ASSERT(raw_start <= UINT32_MAX - (HEAP_ALIGNMENT - 1), "Heap initialization error",
+                  "Heap start alignment overflows the 32-bit address space");
+    uint32_t aligned_addr = HEAP_ALIGN_UP((uint32_t)raw_start, HEAP_ALIGNMENT);
+    uint32_t lost_bytes = aligned_addr - (uint32_t)raw_start;
 
     KERNEL_ASSERT(total_size > (sizeof(struct heap_segment) + lost_bytes), "Heap initialization error",
                   "Total requested size is less than minimum required for heap header and alignment");
 
     heap_start = (struct heap_segment *)aligned_addr;
-    auto usable_len = total_size - lost_bytes - sizeof(struct heap_segment);
+    uint32_t usable_len = (total_size - lost_bytes - sizeof(struct heap_segment)) & HEAP_LEN_MASK;
+    KERNEL_ASSERT(usable_len >= HEAP_ALIGNMENT, "Heap initialization error",
+                  "Heap does not contain a complete aligned allocation payload");
+    heap_end = (uint32_t)(raw_start + total_size);
     heap_set_len_and_flags(heap_start, usable_len, true);
     heap_start->next = nullptr;
     heap_start->prev = nullptr;
+    heap_start->reserved = 0;
 
     qemu_printf(QEMU_MEM, QEMU_OK, "Heap initialized (start point: %p, length: %d)", (uint32_t)heap_start, usable_len);
 }
@@ -56,6 +68,7 @@ static void split_segment(struct heap_segment *segment, uint32_t requested_size)
         heap_set_len_and_flags(new_segment, remaining_memory - sizeof(struct heap_segment), true);
         new_segment->next = segment->next;
         new_segment->prev = segment;
+        new_segment->reserved = 0;
 
         if (segment->next != nullptr)
             segment->next->prev = new_segment;
@@ -72,6 +85,8 @@ static void split_segment(struct heap_segment *segment, uint32_t requested_size)
     KERNEL_ASSERT(size > 0, "Invalid heap allocation request",
                   "kmalloc called with size = 0 - allocation size must be greater than zero");
 
+    KERNEL_ASSERT(size <= HEAP_LEN_MASK - (HEAP_ALIGNMENT - 1), "Invalid heap allocation request",
+                  "kmalloc request is too large to align safely");
     auto aligned_size = HEAP_ALIGN_UP(size, HEAP_ALIGNMENT);
     struct heap_segment *current = heap_start;
 
@@ -96,11 +111,18 @@ void kfree(void *ptr) {
     KERNEL_ASSERT(heap_start != nullptr, "Heap allocator not initialized",
                   "kfree called before heap_init - heap manager is not ready");
 
-    struct heap_segment *segment = (struct heap_segment *)((uint32_t)ptr - sizeof(struct heap_segment));
+    uint32_t payload_addr = (uint32_t)ptr;
+    KERNEL_ASSERT(payload_addr >= (uint32_t)heap_start + sizeof(struct heap_segment) && payload_addr < heap_end &&
+                      (payload_addr & (HEAP_ALIGNMENT - 1)) == 0,
+                  "Invalid pointer to kfree", "kfree called with a pointer outside the aligned heap payload range");
 
-    /* Basic sanity check: verify pointer is within reasonable bounds */
-    KERNEL_ASSERT((uint32_t)segment >= (uint32_t)heap_start, "Invalid pointer to kfree",
-                  "kfree called with pointer before heap start - memory corruption or invalid pointer");
+    struct heap_segment *segment = heap_start;
+    while (segment != nullptr && payload_addr != (uint32_t)segment + sizeof(struct heap_segment)) {
+        segment = segment->next;
+    }
+
+    KERNEL_ASSERT(segment != nullptr, "Invalid pointer to kfree",
+                  "kfree pointer does not match an allocated heap payload");
 
     KERNEL_ASSERT(!heap_is_free(segment), "Double-free detected",
                   "kfree called on already freed memory block - double free or heap corruption");

@@ -193,15 +193,6 @@ void ps2_init() {
     qemu_printf(QEMU_DRV, QEMU_OK, "PS/2 keyboard initialized");
 }
 
-void ps2_disable() {
-    intr_handler(IRQ1, nullptr);
-    outb(PS2_STATUS_PORT, PS2_CMD_DISABLE_KBD);
-}
-
-uint8_t ps2_get_modifiers() {
-    return modifier_state;
-}
-
 void ps2_set_ipc_endpoint(uint32_t endpoint) {
     KERNEL_ASSERT(endpoint != 0, "Invalid PS/2 IPC endpoint", "Cannot configure keyboard IPC with endpoint zero");
     ipc_endpoint = endpoint;

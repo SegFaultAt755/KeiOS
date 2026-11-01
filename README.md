@@ -145,6 +145,14 @@ The Rust project pins nightly in `rust/rust-toolchain.toml` and builds the
 `core`, `alloc`, and compiler-builtins libraries from source. The `rust-src`
 component is required for that build.
 
+Install the Python dependency used to regenerate the font during Make builds:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r scripts/requirements.txt
+```
+
 ### Build the ISO
 
 Build the kernel, initramfs, and bootable ISO from the repository root:
@@ -234,20 +242,20 @@ written to `qemu.log` and `debug.log`.
 | --- | --- | --- |
 | [`build.py`](./build.py) | Runs Make; can clean first and accepts Make arguments. | `python3 build.py --clean-build` |
 | [`run.py`](./run.py) | Builds (unless skipped), creates a QCOW2 disk if needed, and starts QEMU. | `python3 run.py --headless` |
-| [`clean.py`](./clean.py) | Removes build outputs and ignored artifacts; disk and logs are included by default. | `python3 clean.py --dry-run` |
+| [`clean.py`](./clean.py) | Runs `make clean` and optionally removes the disk image and QEMU logs. | `python3 clean.py --dry-run` |
 | [`healthcheck.py`](./healthcheck.py) | Runs Rust Clippy and a build, then refreshes the README badges. | `python3 healthcheck.py` |
 | [`scripts/bitmap_to_font.py`](./scripts/bitmap_to_font.py) | Converts a horizontal PNG atlas of ASCII glyphs 32–126 into Rust bitmap-font source. | `python3 scripts/bitmap_to_font.py atlas.png -o rust/crates/drivers/src/display/text/generated_font.rs` |
 
-The font generator needs Pillow. Install its Python dependency and run the
-script like this:
+The normal Make build regenerates the Rust font source from
+[`resources/ascii_16x16_sprite.png`](./resources/ascii_16x16_sprite.png) when
+the atlas or generator changes. Pillow is required. To generate manually:
 
 ```sh
-python3 -m pip install -r scripts/requirements.txt
-python3 scripts/bitmap_to_font.py atlas.png
+python -m pip install -r scripts/requirements.txt
+python scripts/bitmap_to_font.py atlas.png
 ```
 
-The atlas width must be divisible by 95. Font generation is not currently part
-of the Make build.
+The atlas width must be divisible by 95.
 
 > [!WARNING]
 > `clean.py` removes `disk.qcow2` by default. Use `--skip-disk` to keep it, or
@@ -266,7 +274,7 @@ of the Make build.
 Makefile                  Primary build orchestration for the kernel and ISO
 build.py                  Thin wrapper for invoking make targets
 run.py                    Build + QEMU launch wrapper for local testing
-clean.py                  Safe cleanup of build artifacts, logs, and disk images
+clean.py                  Make clean front end with optional disk/log cleanup
 healthcheck.py            README badge refresh and validation helper
 
 src/                      C kernel sources, x86 assembly, and low-level drivers
@@ -284,7 +292,6 @@ linker.ld                 ELF32 linker script
 keios.elf                 Kernel binary produced by the build
 initramfs.cpio            Generated initramfs archive
 keios.iso                 Bootable ISO image
-FIXME.md                  Known implementation issues and reproducibility notes
 TODO.md                   Near-term project roadmap and follow-up tasks
 ```
 
@@ -304,10 +311,9 @@ TODO.md                   Near-term project roadmap and follow-up tasks
 
 </div>
 
-Known implementation issues and follow-up work are tracked in
-[`FIXME.md`](./FIXME.md) and [`TODO.md`](./TODO.md). The project is still in an
-experimental stage; use the docs below as implementation notes rather than a
-production-ready reference.
+Outstanding follow-up work is tracked in [`TODO.md`](./TODO.md). The project
+is still in an experimental stage; use the docs below as implementation notes
+rather than a production-ready reference.
 
 ---
 

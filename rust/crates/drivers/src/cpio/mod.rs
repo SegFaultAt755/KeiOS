@@ -7,6 +7,6 @@ pub mod header;
 mod wrapper;
 
 pub use archive::CpioArchive;
-pub use entry::{CpioEntry, EntryParser};
-pub use header::{CpioHeader, HeaderParser};
+pub use entry::CpioEntry;
+pub use header::CpioHeader;
 pub use wrapper::CpioInfo;

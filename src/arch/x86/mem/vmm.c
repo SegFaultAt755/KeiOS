@@ -22,7 +22,7 @@ static inline void invalidate(uint32_t addr) {
     return (uint32_t *)(0xFFC0'0000U + ((virt_addr >> 10) & 0x003F'FFFCU));
 }
 
-uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
+void vmm_init(const struct multiboot_info *mbi, uint32_t physical_alloc_start) {
     uint32_t *dir = (uint32_t *)initial_page_dir;
     dir[0] = 0;
     invalidate(0);
@@ -35,14 +35,18 @@ uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
     __asm__ volatile("mov %0, %%cr3" ::"r"(physical_dir_addr) : "memory");
 
     /* Initialize physical frame allocation */
-    pmm_init(mem_high_point, physical_alloc_start);
+    pmm_init(mbi, physical_alloc_start);
 
     qemu_printf(QEMU_MEM, QEMU_OK, "VMM paging enabled (page directory: %p)", physical_dir_addr);
-    return physical_alloc_start;
 }
 
 [[nodiscard]] bool vmm_map_page(uint32_t virt_addr, uint32_t phys_addr, uint32_t flags) {
     uint32_t *pde = get_pde(virt_addr);
+
+    if ((*pde & (PDE_PRESENT | PDE_PS)) == (PDE_PRESENT | PDE_PS)) {
+        uint32_t mapped_phys = (*pde & 0xFFC0'0000U) | (virt_addr & 0x003F'F000U);
+        return mapped_phys == (phys_addr & PTE_FRAME);
+    }
 
     /* If the page table does not exist, allocate a physical frame for it */
     if (!(*pde & PDE_PRESENT)) {
@@ -59,26 +63,4 @@ uint32_t vmm_init(uint32_t mem_high_point, uint32_t physical_alloc_start) {
     *pte = (phys_addr & PTE_FRAME) | (flags & 0x0000'0FFFU) | PTE_PRESENT;
     invalidate(virt_addr);
     return true;
-}
-
-void vmm_unmap_page(uint32_t virt_addr) {
-    uint32_t *pde = get_pde(virt_addr);
-    if (!(*pde & PDE_PRESENT))
-        return;
-
-    uint32_t *pte = get_pte(virt_addr);
-    *pte = 0;
-    invalidate(virt_addr);
-}
-
-[[nodiscard]] uint32_t vmm_get_phys(uint32_t virt_addr) {
-    uint32_t *pde = get_pde(virt_addr);
-    if (!(*pde & PDE_PRESENT))
-        return 0;
-
-    uint32_t *pte = get_pte(virt_addr);
-    if (!(*pte & PTE_PRESENT))
-        return 0;
-
-    return (*pte & PTE_FRAME) + (virt_addr & 0x0000'0FFFU);
 }

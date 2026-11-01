@@ -7,7 +7,6 @@
 #include "kernel/interrupts.h"
 #include "kernel/multiboot.h"
 #include "kernel/panic.h"
-#include "kernel/qemu.h"
 #include "kernel/rsdp.h"
 #include "kernel/shell/shell.h"
 
@@ -17,9 +16,7 @@
 #error "Unsupported architecture! (i386 is available)"
 #endif
 
-#include "kernel/core/cpio.h"
 #include "kernel/core/mem.h"
-#include "kernel/userspace/enter.h"
 
 /* Forward declarations for boot initialization functions */
 extern void boot_init_early_cpu(void);
@@ -63,16 +60,6 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
 
     /* Enable interrupts and start the shell */
     enable_interrupts();
-
-#if 0
-    if (exec_init == nullptr || exec_init_size == 0)
-        KERNEL_PANIC("No initial executable found or valid",
-                     "Initial executable pointer is null or the executable size equals 0");
-
-    qemu_printf(QEMU_KERN, QEMU_INFO, "Handing off initial executable: addr=%p size=%u bytes", exec_init,
-                exec_init_size);
-    execute_init_binary(exec_init, exec_init_size);
-#endif
 
     shell_init();
 

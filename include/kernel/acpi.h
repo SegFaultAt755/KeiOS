@@ -25,20 +25,20 @@ struct [[gnu::packed]] fadt {
     struct acpi_header header;
     uint32_t firmware_ctrl;
     uint32_t dsdt;
-    uint8_t  reserved1;
-    uint8_t  preferred_pm_profile;
-    uint16_t sci_int;            /* System Control Interrupt vector */
-    uint32_t smi_cmd;            /* SMI command port */
-    uint8_t  acpi_enable;        /* Value written to smi_cmd to enable ACPI */
-    uint8_t  acpi_disable;       /* Value written to smi_cmd to disable ACPI */
-    uint8_t  s4bios_req;
-    uint8_t  pstate_cnt;
-    uint32_t pm1a_evt_blk;       /* PM1a event block I/O port */
-    uint32_t pm1b_evt_blk;       /* PM1b event block I/O port */
-    uint32_t pm1a_cnt_blk;       /* PM1a control block I/O port */
-    uint32_t pm1b_cnt_blk;       /* PM1b control block I/O port */
+    uint8_t reserved1;
+    uint8_t preferred_pm_profile;
+    uint16_t sci_int;     /* System Control Interrupt vector */
+    uint32_t smi_cmd;     /* SMI command port */
+    uint8_t acpi_enable;  /* Value written to smi_cmd to enable ACPI */
+    uint8_t acpi_disable; /* Value written to smi_cmd to disable ACPI */
+    uint8_t s4bios_req;
+    uint8_t pstate_cnt;
+    uint32_t pm1a_evt_blk; /* PM1a event block I/O port */
+    uint32_t pm1b_evt_blk; /* PM1b event block I/O port */
+    uint32_t pm1a_cnt_blk; /* PM1a control block I/O port */
+    uint32_t pm1b_cnt_blk; /* PM1b control block I/O port */
     uint32_t pm2_cnt_blk;
-    uint32_t pm_tmr_blk;         /* ACPI power-management timer port */
+    uint32_t pm_tmr_blk; /* ACPI power-management timer port */
 };
 
 struct [[gnu::packed]] dsdt {
@@ -51,35 +51,9 @@ extern struct dsdt *global_dsdt;
 
 #define ACPI_SLP_EN (1 << 13)
 
-#if defined(__i386__) || defined(_M_IX86)
-#include "arch/x86/mem.h"
-#include "arch/x86/pmm.h"
-#include "arch/x86/vmm.h"
-#endif
-
-static inline bool acpi_map_range(uint32_t phys_addr, uint32_t length) {
-    if (phys_addr == 0 || length == 0) {
-        return false;
-    }
-
-    uint32_t end = phys_addr + length;
-    if (end < phys_addr) {
-        return false;
-    }
-
-    uint32_t page = phys_addr & ~PAGE_MASK;
-    uint32_t last_page = (end - 1U) & ~PAGE_MASK;
-
-    for (; page <= last_page; page += PAGE_SIZE) {
-        pmm_reserve_phys(page, PAGE_SIZE);
-        vmm_map_page((uint32_t)ADD_KERNEL_OFFSET(page), page, PTE_PRESENT | PTE_RW | PDE_PWT);
-    }
-
-    return true;
-}
-
 void acpi_shutdown(struct fadt *fadt, struct dsdt *dsdt);
 
+void *acpi_map_range(uint32_t phys_addr, uint32_t length);
 struct dsdt *parse_dsdt(struct fadt *fadt);
 struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt);
 void enable_acpi_mode(struct fadt *fadt);

@@ -3,6 +3,7 @@
 
 use super::archive::{CpioArchive, CpioError};
 use super::header::CpioHeader;
+use alloc::vec::Vec;
 use core::ffi::{c_char, c_void};
 
 #[repr(C)]
@@ -20,11 +21,21 @@ pub type CpioCallback = extern "C" fn(
     user_context: *mut c_void,
 );
 
+#[repr(i32)]
+enum CpioStatus {
+    Ok = 0,
+    InvalidInfo = 1,
+    InvalidHeader = 2,
+    InvalidName = 3,
+    TruncatedArchive = 4,
+    DataRange = 5,
+}
+
 static mut GLOBAL_ARCHIVE: Option<CpioArchive<'static>> = None;
 
 #[inline(always)]
 #[allow(unsafe_op_in_unsafe_fn)]
-pub unsafe fn get_archive() -> Option<&'static mut CpioArchive<'static>> {
+unsafe fn get_archive() -> Option<&'static mut CpioArchive<'static>> {
     let raw_ptr = core::ptr::addr_of_mut!(GLOBAL_ARCHIVE);
     (*raw_ptr).as_mut()
 }
@@ -32,87 +43,48 @@ pub unsafe fn get_archive() -> Option<&'static mut CpioArchive<'static>> {
 // Core functions exported through the C FFI
 #[unsafe(no_mangle)]
 pub extern "C" fn cpio_init(info: CpioInfo) -> i32 {
-    if info.base_addr.is_null() || info.size == 0 {
-        return 1;
+    if info.base_addr.is_null() || info.size == 0 || info.size > isize::MAX as usize {
+        return CpioStatus::InvalidInfo as i32;
     }
 
     unsafe {
         GLOBAL_ARCHIVE = Some(CpioArchive::new(info));
     }
 
-    0
+    CpioStatus::Ok as i32
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn cpio_parse(callback: CpioCallback, user_context: *mut c_void) -> i32 {
     unsafe {
         let Some(archive) = get_archive() else {
-            return 1;
+            return CpioStatus::InvalidInfo as i32;
         };
 
         loop {
             match archive.next_entry() {
                 Ok(Some(entry)) => {
-                    let mut c_name = entry.name.clone();
-                    c_name.push('\0');
+                    let Some(name_capacity) = entry.name.len().checked_add(1) else {
+                        return CpioStatus::DataRange as i32;
+                    };
+                    let mut c_name = Vec::with_capacity(name_capacity);
+                    c_name.extend_from_slice(entry.name.as_bytes());
+                    c_name.push(0);
 
                     callback(
-                        c_name.as_ptr() as *const c_char,
+                        c_name.as_ptr().cast::<c_char>(),
                         entry.header,
                         entry.data.as_ptr(),
                         entry.data.len(),
                         user_context,
                     );
                 }
-                Ok(None) => return 0,
-                Err(CpioError::TruncatedArchive)
-                | Err(CpioError::InvalidHeader)
-                | Err(CpioError::InvalidName)
-                | Err(CpioError::DataRangeOverflow) => return 1,
+                Ok(None) => return CpioStatus::Ok as i32,
+                Err(CpioError::TruncatedArchive) => return CpioStatus::TruncatedArchive as i32,
+                Err(CpioError::InvalidHeader) => return CpioStatus::InvalidHeader as i32,
+                Err(CpioError::InvalidName) => return CpioStatus::InvalidName as i32,
+                Err(CpioError::DataRangeOverflow) => return CpioStatus::DataRange as i32,
             }
-        }
-    }
-}
-
-// Functions that read archive state
-#[unsafe(no_mangle)]
-pub extern "C" fn cpio_get_offset() -> usize {
-    unsafe { get_archive().map(|a| a.offset()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn cpio_get_total_size() -> usize {
-    unsafe { get_archive().map(|a| a.total_size()).unwrap_or(0) }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn cpio_get_base_addr() -> *const u8 {
-    unsafe {
-        get_archive()
-            .map(|a| a.raw_buffer())
-            .unwrap_or(core::ptr::null())
-    }
-}
-
-// Functions that change archive state
-#[unsafe(no_mangle)]
-pub extern "C" fn cpio_set_offset(new_offset: usize) {
-    unsafe {
-        if let Some(archive) = get_archive() {
-            archive.set_offset(new_offset);
-        }
-    }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn cpio_set_buffer(new_addr: *const u8, size: usize) {
-    if new_addr.is_null() || size == 0 {
-        return;
-    }
-
-    unsafe {
-        if let Some(archive) = get_archive() {
-            archive.set_buffer(new_addr, size);
         }
     }
 }

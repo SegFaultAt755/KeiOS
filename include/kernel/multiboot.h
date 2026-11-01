@@ -3,32 +3,34 @@
 /* SPDX-License-Identifier: GPLv3 */
 /* Copyright (C) 2026 KeiOS Developers */
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
-#define MULTIBOOT_INFO_MEMORY           (1 << 0)
-#define MULTIBOOT_INFO_BOOTDEV          (1 << 1)
-#define MULTIBOOT_INFO_CMDLINE          (1 << 2)
-#define MULTIBOOT_INFO_MODS             (1 << 3)
-#define MULTIBOOT_INFO_AOUT_SYMS        (1 << 4)
-#define MULTIBOOT_INFO_ELF_SHDR         (1 << 5)
-#define MULTIBOOT_INFO_MEM_MAP          (1 << 6)
-#define MULTIBOOT_INFO_DRIVE_INFO       (1 << 7)
-#define MULTIBOOT_INFO_CONFIG_TABLE     (1 << 8)
+#define MULTIBOOT_INFO_MEMORY (1 << 0)
+#define MULTIBOOT_INFO_BOOTDEV (1 << 1)
+#define MULTIBOOT_INFO_CMDLINE (1 << 2)
+#define MULTIBOOT_INFO_MODS (1 << 3)
+#define MULTIBOOT_INFO_AOUT_SYMS (1 << 4)
+#define MULTIBOOT_INFO_ELF_SHDR (1 << 5)
+#define MULTIBOOT_INFO_MEM_MAP (1 << 6)
+#define MULTIBOOT_INFO_DRIVE_INFO (1 << 7)
+#define MULTIBOOT_INFO_CONFIG_TABLE (1 << 8)
 #define MULTIBOOT_INFO_BOOT_LOADER_NAME (1 << 9)
-#define MULTIBOOT_INFO_APM_TABLE        (1 << 10)
-#define MULTIBOOT_INFO_VBE_INFO         (1 << 11)
+#define MULTIBOOT_INFO_APM_TABLE (1 << 10)
+#define MULTIBOOT_INFO_VBE_INFO (1 << 11)
 #define MULTIBOOT_INFO_FRAMEBUFFER_INFO (1 << 12)
 
 #define MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED 0
-#define MULTIBOOT_FRAMEBUFFER_TYPE_RGB     1
-#define MULTIBOOT_FRAMEBUFFER_TYPE_TEXT    2
+#define MULTIBOOT_FRAMEBUFFER_TYPE_RGB 1
+#define MULTIBOOT_FRAMEBUFFER_TYPE_TEXT 2
 
-#define MULTIBOOT_MEMORY_AVAILABLE        1
-#define MULTIBOOT_MEMORY_RESERVED         2
+#define MULTIBOOT_MEMORY_AVAILABLE 1
+#define MULTIBOOT_MEMORY_RESERVED 2
 #define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE 3
-#define MULTIBOOT_MEMORY_NVS              4
-#define MULTIBOOT_MEMORY_BADRAM           5
+#define MULTIBOOT_MEMORY_NVS 4
+#define MULTIBOOT_MEMORY_BADRAM 5
+
+#define MULTIBOOT_BOOTSTRAP_MAPPED_BYTES (16U * 1024U * 1024U)
 
 struct [[gnu::packed]] multiboot_aout_symbol_table {
     uint32_t tab_size;
@@ -99,9 +101,9 @@ struct [[gnu::packed]] multiboot_info {
     uint32_t framebuffer_pitch;
     uint32_t framebuffer_width;
     uint32_t framebuffer_height;
-    uint8_t  framebuffer_bpp;
-    uint8_t  framebuffer_type;
-    
+    uint8_t framebuffer_bpp;
+    uint8_t framebuffer_type;
+
     /* Color layout information */
     union {
         struct {

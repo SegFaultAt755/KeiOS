@@ -18,7 +18,7 @@ pub mod ipc;
 unsafe extern "C" {
     fn runtime_panic(reason: *const i8, desc: *const i8, file: *const i8, line: u32);
 
-    fn kmalloc(size: usize) -> *mut u8;
+    fn kmalloc(size: u32) -> *mut u8;
     fn kfree(ptr: *mut u8);
 }
 
@@ -28,7 +28,10 @@ struct KernelAllocator;
 unsafe impl GlobalAlloc for KernelAllocator {
     #![allow(unsafe_op_in_unsafe_fn)]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        kmalloc(layout.size())
+        if layout.size() == 0 || layout.size() > u32::MAX as usize || layout.align() > 16 {
+            return core::ptr::null_mut();
+        }
+        kmalloc(layout.size() as u32)
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {

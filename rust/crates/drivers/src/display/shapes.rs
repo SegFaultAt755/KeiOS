@@ -1,17 +1,8 @@
 use super::display::{Color, Display};
 
-// SPDX-License-Identifier: GPLv3
-// Copyright (C) 2026 KeiOS Developers
-
-pub trait ShapeEngine {
-    fn draw_line(&mut self, x0: i32, y0: i32, x1: i32, y1: i32, color: Color);
-    fn draw_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color);
-    fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color);
-}
-
-impl ShapeEngine for Display {
+impl Display {
     // Draw a line with the Bresenham algorithm
-    fn draw_line(&mut self, mut x0: i32, mut y0: i32, x1: i32, y1: i32, color: Color) {
+    pub fn draw_line(&mut self, mut x0: i32, mut y0: i32, x1: i32, y1: i32, color: Color) {
         let dx = (x1 - x0).abs();
         let dy = -(y1 - y0).abs();
         let sx = if x0 < x1 { 1 } else { -1 };
@@ -37,21 +28,12 @@ impl ShapeEngine for Display {
     }
 
     // Draw the outline of a rectangle
-    fn draw_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color) {
+    pub fn draw_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color) {
         let w = width as i32;
         let h = height as i32;
         self.draw_line(x, y, x + w - 1, y, color);
         self.draw_line(x, y + h - 1, x + w - 1, y + h - 1, color);
         self.draw_line(x, y, x, y + h - 1, color);
         self.draw_line(x + w - 1, y, x + w - 1, y + h - 1, color);
-    }
-
-    // Draw a filled rectangle
-    fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: Color) {
-        for row in 0..height as i32 {
-            for col in 0..width as i32 {
-                self.draw_pixel(x + col, y + row, color);
-            }
-        }
     }
 }

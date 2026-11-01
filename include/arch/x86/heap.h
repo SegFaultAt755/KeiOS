@@ -11,13 +11,16 @@
 
 /* Bit 0 of len_flags says whether the block is free */
 #define HEAP_FLAG_FREE (1U << 0)
-#define HEAP_LEN_MASK  (~(uint32_t)0xFU)
+#define HEAP_LEN_MASK (~(uint32_t)0xFU)
 
 struct heap_segment {
     uint32_t len_flags; /* Upper 28 bits store the length; lower 4 bits store flags */
     struct heap_segment *next;
     struct heap_segment *prev;
+    uint32_t reserved;
 };
+
+static_assert(sizeof(struct heap_segment) == HEAP_ALIGNMENT, "Heap segment headers must preserve payload alignment");
 
 void heap_init(void *start_addr, uint32_t total_size);
 void *kmalloc(uint32_t size);

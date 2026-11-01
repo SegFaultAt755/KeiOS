@@ -2,8 +2,6 @@
 // Copyright (C) 2026 KeiOS Developers
 
 use super::display::{Color, Display};
-use super::shapes::ShapeEngine;
-use super::text::TextEngine;
 use core::ffi::CStr;
 
 #[repr(i32)]

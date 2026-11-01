@@ -9,9 +9,11 @@ do not yet provide isolated per-process address spaces.
 ### Virtual memory
 
 The kernel uses 32-bit two-level x86 paging and a higher-half kernel mapping.
-`vmm_map_page()`, `vmm_unmap_page()`, and `vmm_get_phys()` operate on the active
-page directory through the recursive mapping. The early identity mapping is
-removed during `vmm_init()`.
+`vmm_map_page()` operates on the active page directory through the recursive
+mapping, preserving the bootstrap large-page mappings where they already cover
+the requested physical page. The early identity mapping is removed during
+`vmm_init()`. ACPI tables are mapped on demand in a separate, bounded kernel
+virtual window at `0xD0000000`–`0xE0000000`, outside the heap mapping.
 
 The intended split leaves low virtual memory for user mappings and maps the
 kernel at `KERNEL_VIRTUAL_OFFSET` (`0xC0000000`). A working task manager that
@@ -19,33 +21,34 @@ creates and switches user page directories is not present.
 
 ### Physical memory
 
-`pmm_init()` tracks frame allocation in a bitmap and reserves memory below the
-kernel/module allocation boundary. The current limit is derived from
-Multiboot `mem_upper`; it does not use the full Multiboot memory map to mark
-only usable RAM. The interpretation and reservation of this range need review
-before relying on the allocator beyond the current emulator setup.
+`pmm_init()` uses the variable-length Multiboot memory map as the source of
+usable frames. It frees only complete pages in type-1 available ranges, then
+reserves overlapping non-available ranges, the kernel, Multiboot structures,
+module descriptors and payloads, and the framebuffer. The Multiboot `mem_upper`
+limit is measured above the first MiB and is logged only for comparison; it is
+not used as a substitute for the memory map. The map and boot structures must
+remain inside the 16 MiB bootstrap mapping until paging is initialized.
 
 ### Kernel heap
 
 `heap_init()`, `kmalloc()`, and `kfree()` manage variable-size blocks in a
-kernel heap initialized during `mem_init()`. Rust allocations use this heap via
-the drivers crate's `GlobalAlloc` implementation. The heap alignment and
-allocation arithmetic have known correctness concerns; see `FIXME.md` before
-extending allocator use.
+kernel heap initialized during `mem_init()`. The physical allocator reserves a
+contiguous range for the heap and maps it at `KERNEL_HEAP_VIRTUAL_START`.
+Payload addresses are 16-byte aligned; the Rust `GlobalAlloc` implementation
+rejects layouts requiring stronger alignment.
 
 ## Status
 
 | Component | Current status |
 | --- | --- |
 | Higher-half kernel paging and recursive mapping | Implemented; not comprehensively validated |
-| Physical frame bitmap | Implemented; usable-range discovery is incomplete |
-| Kernel heap | Implemented; alignment/overflow concerns remain |
+| Physical frame bitmap | Implemented; driven by the Multiboot memory map |
+| Kernel heap | Implemented; 16-byte alignment and checked allocation arithmetic |
 | Per-task address spaces and user/kernel isolation | Not implemented |
 | Framebuffer/MMIO mapping for an isolated user driver | Not implemented |
 
 ## Follow-up
 
-Use the Multiboot memory map to identify usable ranges, reserve every live
-boot-time structure and module, validate arithmetic and address ranges, and
-make the heap satisfy the alignment contract required by Rust `GlobalAlloc`.
-Only then should process-specific page directories and user mappings be exposed.
+Memory-map parsing and boot-time reservations are in place, but the allocator
+and paging paths remain experimental and do not yet support process-specific
+page directories or user mappings.

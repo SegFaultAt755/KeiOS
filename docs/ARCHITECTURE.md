@@ -40,8 +40,8 @@ The boot path is detailed in [BOOT.md](./BOOT.md). The source entry point is
 - **CPU and interrupts:** GDT/TSS setup, IDT gates, legacy PIC remapping, ISR and
   IRQ stubs, a PIT timer, and an `int 0x80` syscall entry.
 - **Memory:** Higher-half paging, page mapping helpers, a bitmap physical frame
-  allocator, and a variable-size kernel heap. The allocator currently uses
-  `mem_upper` rather than the full Multiboot memory map; see
+  allocator driven by Multiboot usable-memory ranges, and a variable-size
+  16-byte-aligned kernel heap. See
   [MEMORY.md](./subsystem/MEMORY.md).
 - **Drivers and output:** PS/2 keyboard input; VGA text output; an RGB linear
   framebuffer path backed by Rust display routines; and fallback to VGA.
@@ -63,8 +63,8 @@ The boot path is detailed in [BOOT.md](./BOOT.md). The source entry point is
   syscall ABI.
 
 The existence of a stub, interface, or design document does not imply the
-feature is complete. `FIXME.md` records known implementation and reproducibility
-issues.
+feature is complete. Outstanding implementation and hardening work is tracked
+in [TODO.md](../TODO.md).
 
 ## Directory guide
 

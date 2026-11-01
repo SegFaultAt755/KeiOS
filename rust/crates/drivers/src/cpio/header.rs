@@ -18,25 +18,7 @@ pub struct CpioHeader {
 }
 
 impl CpioHeader {
-    pub const EMPTY: Self = Self {
-        mode: 0,
-        uid: 0,
-        gid: 0,
-        mtime: 0,
-        filesize: 0,
-        namesize: 0,
-    };
-}
-
-pub trait HeaderParser {
-    fn parse_hex_u32(&self, bytes: &[u8]) -> Option<u32>;
-    fn validate_magic(&self, magic: &[u8]) -> bool;
-    fn parse(&self, raw_data: &[u8]) -> Option<CpioHeader>;
-}
-
-pub struct NewcParser;
-impl HeaderParser for NewcParser {
-    fn parse_hex_u32(&self, bytes: &[u8]) -> Option<u32> {
+    fn parse_hex_u32(bytes: &[u8]) -> Option<u32> {
         let mut result: u32 = 0;
         for &byte in bytes {
             let digit = match byte {
@@ -52,27 +34,20 @@ impl HeaderParser for NewcParser {
         Some(result)
     }
 
-    #[inline]
-    fn validate_magic(&self, magic: &[u8]) -> bool {
-        magic == CPIO_NEWC_MAGIC || magic == CPIO_CRC_MAGIC
-    }
-
-    fn parse(&self, raw_data: &[u8]) -> Option<CpioHeader> {
-        if raw_data.len() < HEADER_SIZE {
+    pub(crate) fn parse(raw_data: &[u8]) -> Option<Self> {
+        if raw_data.len() < HEADER_SIZE
+            || (&raw_data[0..6] != CPIO_NEWC_MAGIC && &raw_data[0..6] != CPIO_CRC_MAGIC)
+        {
             return None;
         }
 
-        if !self.validate_magic(&raw_data[0..6]) {
-            return None;
-        }
-
-        Some(CpioHeader {
-            mode: self.parse_hex_u32(&raw_data[14..22])?,
-            uid: self.parse_hex_u32(&raw_data[22..30])?,
-            gid: self.parse_hex_u32(&raw_data[30..38])?,
-            mtime: self.parse_hex_u32(&raw_data[46..54])?,
-            filesize: self.parse_hex_u32(&raw_data[54..62])?,
-            namesize: self.parse_hex_u32(&raw_data[94..102])?,
+        Some(Self {
+            mode: Self::parse_hex_u32(&raw_data[14..22])?,
+            uid: Self::parse_hex_u32(&raw_data[22..30])?,
+            gid: Self::parse_hex_u32(&raw_data[30..38])?,
+            mtime: Self::parse_hex_u32(&raw_data[46..54])?,
+            filesize: Self::parse_hex_u32(&raw_data[54..62])?,
+            namesize: Self::parse_hex_u32(&raw_data[94..102])?,
         })
     }
 }

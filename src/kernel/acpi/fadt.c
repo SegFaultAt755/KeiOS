@@ -4,6 +4,7 @@
 #include "kernel/acpi.h"
 #include "kernel/panic.h"
 #include "kernel/qemu.h"
+#include "libkern/memory.h"
 #include "libkern/string.h"
 
 #if defined(__i386__) || defined(_M_IX86)
@@ -23,38 +24,43 @@ struct acpi_header *find_fadt(struct acpi_header *table, bool is_xsdt) {
         return nullptr;
     }
 
-    int pointer_size = is_xsdt ? 8 : 4;
-    int entries = (table->length - sizeof(struct acpi_header)) / pointer_size;
+    size_t pointer_size = is_xsdt ? sizeof(uint64_t) : sizeof(uint32_t);
+    size_t pointer_bytes = table->length - sizeof(struct acpi_header);
+    if (pointer_bytes % pointer_size != 0) {
+        return nullptr;
+    }
+    size_t entries = pointer_bytes / pointer_size;
 
     uint8_t *pointer_array = (uint8_t *)table + sizeof(struct acpi_header);
-
-    for (int i = 0; i < entries; i++) {
-        uintptr_t phys_addr = 0;
+    for (size_t i = 0; i < entries; i++) {
+        uint64_t phys_addr = 0;
         if (is_xsdt) {
-            phys_addr = *(uint64_t *)(pointer_array + i * 8);
+            memcpy(&phys_addr, pointer_array + i * pointer_size, sizeof(uint64_t));
         } else {
-            phys_addr = *(uint32_t *)(pointer_array + i * 4);
+            uint32_t rsdt_phys_addr;
+            memcpy(&rsdt_phys_addr, pointer_array + i * pointer_size, sizeof(rsdt_phys_addr));
+            phys_addr = rsdt_phys_addr;
         }
 
         if (phys_addr == 0 || phys_addr > UINT32_MAX) {
             continue;
         }
 
-        if (!acpi_map_range((uint32_t)phys_addr, sizeof(struct acpi_header))) {
+        struct acpi_header *entry = acpi_map_range((uint32_t)phys_addr, sizeof(struct acpi_header));
+        if (!entry) {
             continue;
         }
 
-        struct acpi_header *entry = (struct acpi_header *)ADD_KERNEL_OFFSET(phys_addr);
         if (entry->length < sizeof(struct acpi_header)) {
             continue;
         }
 
-        if (!acpi_map_range((uint32_t)phys_addr, entry->length)) {
+        if (strncmp(entry->signature, "FACP", 4) != 0) {
             continue;
         }
 
-        entry = (struct acpi_header *)ADD_KERNEL_OFFSET(phys_addr);
-        if (strncmp(entry->signature, "FACP", 4) == 0) {
+        entry = acpi_map_range((uint32_t)phys_addr, entry->length);
+        if (entry) {
             return entry;
         }
     }

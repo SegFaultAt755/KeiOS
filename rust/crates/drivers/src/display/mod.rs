@@ -7,5 +7,3 @@ pub mod text;
 mod wrapper;
 
 pub use display::{Color, Display};
-pub use shapes::ShapeEngine;
-pub use text::TextEngine;

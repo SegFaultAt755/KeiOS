@@ -51,6 +51,8 @@ RUST_TARGET := i686-unknown-none
 RUST_DIR    := rust
 RUST_CRATES := drivers
 RUST_LIBS   := $(patsubst %, $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a, $(RUST_CRATES))
+FONT_SOURCE := $(RUST_DIR)/crates/drivers/src/display/text/generated_font.rs
+FONT_ATLAS  := resources/ascii_16x16_sprite.png
 
 # Find source files and map them to object files
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
@@ -66,7 +68,7 @@ OBJS := $(C_OBJS) $(ASM_OBJS) $(RUST_LIBS)
 DEPS := $(C_OBJS:.o=.d) $(ASM_OBJS:.o=.d)
 
 # Define build rules
-.PHONY: all clean config help userspace FORCE_RUST test
+.PHONY: all clean config help userspace FORCE_FONT FORCE_RUST test
 
 all: $(ISO_IMAGE)
 
@@ -99,6 +101,14 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.asm
 $(RUST_DIR)/target/$(RUST_TARGET)/release/lib%.a: FORCE_RUST
 	@echo ">>> [RS]  Compiling Rust crate: $*"
 	@cd $(RUST_DIR) && cargo build --release -p $*
+
+$(RUST_LIBS): $(FONT_SOURCE)
+
+$(FONT_SOURCE): FORCE_FONT $(FONT_ATLAS) scripts/bitmap_to_font.py
+	@echo ">>> [FONT] Generating ASCII bitmap font"
+	@python3 scripts/bitmap_to_font.py $(FONT_ATLAS) -o $@
+
+FORCE_FONT:
 
 # Generate a local configuration file
 config:

@@ -1,13 +1,9 @@
 use super::fonts::{ASCII_FONT_DEFAULT, ASCII_FONT_HEIGHT, ASCII_FONT_WIDTH};
 use crate::display::display::{Color, Display};
 
-pub trait TextEngine {
+impl Display {
     // Uses default static font (ASCII 16x16)
-    fn draw_text_static(&mut self, x: i32, y: i32, text: &str, color: Color);
-}
-
-impl TextEngine for Display {
-    fn draw_text_static(&mut self, x: i32, y: i32, text: &str, color: Color) {
+    pub fn draw_text_static(&mut self, x: i32, y: i32, text: &str, color: Color) {
         let mut cursor_x = x;
         let mut cursor_y = y;
 

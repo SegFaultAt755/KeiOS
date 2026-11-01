@@ -2,7 +2,6 @@
 /* Copyright (C) 2026 KeiOS Developers */
 
 #include "libkern/string.h"
-#include "arch/x86/heap.h"
 #include "kernel/panic.h"
 
 size_t strlen(const char *s) {
@@ -133,20 +132,6 @@ char *strtok(char *str, const char *delim) {
     return token;
 }
 
-char *strdup(const char *s) {
-    KERNEL_ASSERT(s != nullptr, "Invalid string pointer",
-                  "strdup called with NULL pointer - cannot duplicate null string");
-
-    auto len = strlen(s) + 1;
-    auto dup = (char *)kmalloc(len);
-
-    KERNEL_ASSERT(dup != nullptr, "Memory allocation failed during strdup",
-                  "kmalloc failed to allocate memory for string duplication");
-
-    strcpy(dup, s);
-    return dup;
-}
-
 int atoi(const char *s) {
     KERNEL_ASSERT(s != nullptr, "Invalid string pointer",
                   "atoi called with NULL pointer - cannot parse integer from null string");
@@ -170,45 +155,6 @@ int atoi(const char *s) {
     }
 
     return result * sign;
-}
-
-void itoa(int val, char *buf, int base) {
-    KERNEL_ASSERT(buf != nullptr, "Invalid buffer pointer",
-                  "itoa called with NULL buffer pointer - cannot write integer to null buffer");
-    KERNEL_ASSERT(base >= 2 && base <= 36, "Invalid base for itoa",
-                  "itoa called with invalid base - base must be between 2 and 36");
-
-    int i = 0;
-    bool is_negative = false;
-
-    if (val == 0) {
-        buf[i++] = '0';
-        buf[i] = '\0';
-        return;
-    }
-
-    if (val < 0 && base == 10) {
-        is_negative = true;
-        val = -val;
-    }
-
-    while (val > 0) {
-        auto rem = val % base;
-        buf[i++] = (rem < 10) ? (rem + '0') : (rem - 10 + 'a');
-        val /= base;
-    }
-
-    if (is_negative)
-        buf[i++] = '-';
-
-    buf[i] = '\0';
-
-    /* Reverse the string */
-    for (int j = 0; j < i / 2; j++) {
-        char tmp = buf[j];
-        buf[j] = buf[i - 1 - j];
-        buf[i - 1 - j] = tmp;
-    }
 }
 
 int uvalue_to_str(char *buf, unsigned long long int val, int base, int min_w, bool zpad) {

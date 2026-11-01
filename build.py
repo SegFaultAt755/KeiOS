@@ -29,13 +29,7 @@ def get_make_command() -> str:
 
 def clean_build() -> int:
     logger.info("Executing clean build pipeline...")
-    clean_script = ROOT / "clean.py"
-    try:
-        subprocess.run([sys.executable, str(clean_script)], cwd=ROOT, check=True)
-    except subprocess.CalledProcessError as error:
-        logger.error("Clean step failed with exit code %s", error.returncode)
-        return error.returncode
-    return 0
+    return build("clean", [])
 
 
 def build(target: str, make_args: list[str]) -> int:

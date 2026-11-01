@@ -27,20 +27,19 @@ struct dsdt *parse_dsdt(struct fadt *fadt) {
 
     uintptr_t dsdt_phys_addr = (uintptr_t)fadt->dsdt;
 
-    if (!acpi_map_range((uint32_t)dsdt_phys_addr, sizeof(struct acpi_header))) {
+    struct acpi_header *temp_header = acpi_map_range((uint32_t)dsdt_phys_addr, sizeof(struct acpi_header));
+    if (!temp_header) {
         KERNEL_PANIC("Could not map DSDT header", "DSDT Initialization Failed");
     }
 
-    struct acpi_header *temp_header = (struct acpi_header *)ADD_KERNEL_OFFSET(dsdt_phys_addr);
     if (temp_header->length < sizeof(struct acpi_header)) {
         KERNEL_PANIC("Invalid DSDT length in FADT", "DSDT table is corrupted");
     }
 
-    if (!acpi_map_range((uint32_t)dsdt_phys_addr, temp_header->length)) {
+    struct dsdt *dsdt_table = acpi_map_range((uint32_t)dsdt_phys_addr, temp_header->length);
+    if (!dsdt_table) {
         KERNEL_PANIC("Could not map complete DSDT", "DSDT Initialization Failed");
     }
-
-    struct dsdt *dsdt_table = (struct dsdt *)ADD_KERNEL_OFFSET(dsdt_phys_addr);
 
     if (strncmp(dsdt_table->header.signature, "DSDT", 4) != 0) {
         KERNEL_PANIC("Failed to find DSDT signature in header", "Invalid DSDT table from FADT");

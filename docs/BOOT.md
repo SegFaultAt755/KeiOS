@@ -39,15 +39,16 @@ execution environment before calling the C entry point.
 ### Memory setup
 
 The kernel converts the Multiboot information pointer to its higher-half
-address as needed, then initializes paging, the physical allocator, and the
-kernel heap. Current physical-memory discovery uses the Multiboot
-`mem_upper` field rather than the complete memory map; memory initialization is
-therefore experimental. See [the memory notes](./subsystem/MEMORY.md).
+address as needed, then initializes paging, the physical allocator from
+Multiboot usable-memory ranges, and a kernel heap mapped from contiguous
+allocated frames. `mem_upper` is reported as a legacy physical limit, not used
+to decide which frames are available. See [the memory notes](./subsystem/MEMORY.md).
 
 ### ACPI and archive setup
 
 The boot path searches for ACPI data, enumerates Multiboot modules, and parses
-the CPIO initramfs. The archive callback identifies `bin/init.bin`.
+the CPIO initramfs. The archive callback reports entries; the current boot
+path does not launch an init program from the archive.
 
 ### Hardware initialization
 

@@ -30,5 +30,7 @@ void boot_init_load_modules(struct multiboot_info *mbi_virt) {
  * Parse and initialize the CPIO archive filesystem.
  */
 void boot_init_cpio_filesystem(void) {
-    cpio_parse(cpio_cb, nullptr);
+    cpio_status_t status = cpio_parse(cpio_cb, nullptr);
+    KERNEL_ASSERT(status == CPIO_OK, "CPIO archive parsing failed",
+                  "The initramfs contains malformed or truncated archive data");
 }
