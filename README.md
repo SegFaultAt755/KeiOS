@@ -150,6 +150,16 @@ also configures the emulated network/audio devices and writes `qemu.log` and
 * **Python:** Python 3 and Pillow (listed in `scripts/requirements.txt`).
 * **Emulator:** QEMU with `qemu-system-i386` and `qemu-img`.
 
+For Linux and other supported environments, create and activate a Python
+virtual environment, then install the project dependencies from the
+requirements file:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r scripts/requirements.txt
+```
+
 The default Makefile toolchain prefix is `i686-elf-`. With a host GCC that
 supports C23 and 32-bit output, override the compiler settings, for example:
 
@@ -168,9 +178,8 @@ To install the remaining build tools and Python dependency on Ubuntu/Debian:
 ```bash
 sudo apt update
 sudo apt install build-essential gcc-multilib nasm binutils make cpio \
-  grub-common grub-pc-bin xorriso mtools python3 python3-pip \
+  grub-common grub-pc-bin xorriso mtools python3 python3-pip python3-venv \
   qemu-system-x86
-python3 -m pip install -r scripts/requirements.txt
 ```
 
 Install Rust nightly and its source component with `rustup`:
