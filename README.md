@@ -58,11 +58,6 @@ C23 kernel with a Rust `no_std` drivers library. Today, it boots through GRUB,
 initializes core CPU and memory facilities, reads a CPIO initramfs, brings up
 basic hardware, and presents an interactive kernel shell.
 
-ACPI is not working correctly and is currently commented out of the boot path
-while the kernel shell is being tested. Do not rely on ACPI power management
-or shutdown. Running custom programs is also unfinished: the initramfs is
-loaded and parsed, but programs in it are not launched.
-
 If you are new to operating systems, a good first step is to build and run the
 ISO in QEMU, then explore the boot flow and architecture guides below. KeiOS is
 actively experimental: expect incomplete features, rough edges, and ongoing changes.
@@ -201,11 +196,8 @@ Or use the convenience target:
 make test
 ```
 
-The test suite covers ACPI AML shutdown parsing, CPIO parser regressions, heap
-alignment and invalid frees, and the x86 ISR/exception ABI contract. It also
-checks that the kernel boot log reports successful IDT setup and IRQ
-initialization. Passing ACPI parser tests does not mean ACPI works in the
-running system; the boot integration is currently disabled as noted above.
+The test suite currently covers the x86 ISR/exception ABI contract and checks
+that the kernel boot log reports successful IDT setup and IRQ initialization.
 
 ### Run in QEMU
 
