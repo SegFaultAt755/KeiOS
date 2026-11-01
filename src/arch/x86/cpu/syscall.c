@@ -15,6 +15,8 @@ static uint32_t parse_codes(struct syscall_registers *regs) {
     return 0xDEADC0DE;
 }
 
-void syscall_handler(struct syscall_registers *regs) {
+uint32_t syscall_handler(struct syscall_registers *regs) {
+    uint32_t syscall_number = regs->eax;
     regs->eax = parse_codes(regs);
+    return syscall_number == SYSCALL_EXIT ? SYSCALL_RETURN_TO_KERNEL : 0;
 }

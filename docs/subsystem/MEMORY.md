@@ -13,7 +13,9 @@ The kernel uses 32-bit two-level x86 paging and a higher-half kernel mapping.
 mapping, preserving the bootstrap large-page mappings where they already cover
 the requested physical page. The early identity mapping is removed during
 `vmm_init()`. ACPI tables are mapped on demand in a separate, bounded kernel
-virtual window at `0xD0000000`–`0xE0000000`, outside the heap mapping.
+virtual window at `0xD0000000`–`0xE0000000`; the heap begins at
+`0xE0000000`, and the framebuffer uses a separate window beginning at
+`0xF0000000`.
 
 The intended split leaves low virtual memory for user mappings and maps the
 kernel at `KERNEL_VIRTUAL_OFFSET` (`0xC0000000`). A working task manager that
@@ -36,6 +38,11 @@ kernel heap initialized during `mem_init()`. The physical allocator reserves a
 contiguous range for the heap and maps it at `KERNEL_HEAP_VIRTUAL_START`.
 Payload addresses are 16-byte aligned; the Rust `GlobalAlloc` implementation
 rejects layouts requiring stronger alignment.
+
+The linker includes compiler-generated section suffixes, including `.bss.*`,
+before defining `_kernel_end`. This keeps statically allocated Rust state
+inside the physical range reserved for the kernel and prevents the frame
+allocator from reusing those pages for page tables or other allocations.
 
 ## Status
 

@@ -8,3 +8,4 @@
 #include <stdint.h>
 
 void cpio_cb(const char *name, struct cpio_header hdr, const uint8_t *data, size_t data_len, void *ctx);
+const uint8_t *cpio_get_init_binary(size_t *size);

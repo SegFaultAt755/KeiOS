@@ -8,6 +8,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class AcpiShutdownTests(unittest.TestCase):
+    def test_linker_keeps_rust_bss_subsections_inside_kernel_bounds(self):
+        linker_script = (REPO_ROOT / "linker.ld").read_text()
+        bss_start = linker_script.index(".bss ALIGN")
+        kernel_end = linker_script.index("_kernel_end = .;", bss_start)
+        self.assertIn("*(.bss .bss.*)", linker_script[bss_start:kernel_end])
+
     def test_aml_bounds_and_sleep_values(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             test_binary = Path(temp_dir) / "acpi-shutdown-tests"

@@ -64,3 +64,16 @@ void vmm_init(const struct multiboot_info *mbi, uint32_t physical_alloc_start) {
     invalidate(virt_addr);
     return true;
 }
+
+bool vmm_is_page_mapped(uint32_t virt_addr) {
+    uint32_t *pde = get_pde(virt_addr);
+    if ((*pde & PDE_PRESENT) == 0) {
+        return false;
+    }
+
+    if (*pde & PDE_PS) {
+        return true;
+    }
+
+    return (*get_pte(virt_addr) & PTE_PRESENT) != 0;
+}

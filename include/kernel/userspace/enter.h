@@ -16,4 +16,4 @@ struct [[gnu::packed]] user_program_regs {
     uint32_t ss;
 };
 
-void execute_init_binary(void *cpio_binary, uint32_t binary_size);
+void execute_init_binary(const void *cpio_binary, uint32_t binary_size);

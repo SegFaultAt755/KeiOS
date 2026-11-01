@@ -26,6 +26,7 @@ extern void boot_init_acpi_system(struct rsdp *rsdp);
 extern void boot_init_load_modules(struct multiboot_info *mbi_virt);
 extern void boot_init_cpio_filesystem(void);
 extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
+extern void boot_init_run_init_program(void);
 
 [[noreturn]] void kernel_entry(uint32_t magic, struct multiboot_info *mbi) {
     if (magic != 0x2BADB002) {
@@ -58,7 +59,9 @@ extern void boot_init_hardware_drivers(struct multiboot_info *mbi_virt);
     /* Hardware driver initialization */
     boot_init_hardware_drivers(mbi_virt);
 
-    /* Enable interrupts and start the shell */
+    /* Run the CPIO init program before returning to the kernel shell. */
+    enable_interrupts();
+    boot_init_run_init_program();
     enable_interrupts();
 
     shell_init();

@@ -6,10 +6,21 @@ section .data
     argc equ ($ - argv) / 4
 
 section .text
+%define SYSCALL_EXIT 6
+
+global _start
+_start:
     push argv
     push argc
 
     extern main
     call main
 
-    jmp $
+    mov ebx, eax
+    mov eax, SYSCALL_EXIT
+    int 0x80
+
+.hang:
+    cli
+    hlt
+    jmp .hang

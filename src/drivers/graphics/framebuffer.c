@@ -40,7 +40,7 @@ int framebuffer_init(const struct multiboot_info *mbi) {
     const uintptr_t physical_page = physical_address & ~(uintptr_t)(PAGE_SIZE - 1);
     const uint32_t page_offset = physical_address - physical_page;
     const uint64_t map_size = framebuffer_size + page_offset;
-    constexpr uintptr_t virtual_base = 0xE0000000;
+    constexpr uintptr_t virtual_base = 0xF0000000;
     constexpr uint64_t virtual_size = 0x10000000;
 
     if (framebuffer_size == 0 || map_size > virtual_size ||

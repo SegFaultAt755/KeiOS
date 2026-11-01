@@ -29,6 +29,9 @@ ACPI and Multiboot module / CPIO initialization
 PIT, PS/2 keyboard, framebuffer-or-VGA terminal
       |
       v
+One-shot Ring 3 init binary (when present)
+      |
+      v
 Kernel-mode polling shell
 ```
 
@@ -46,18 +49,20 @@ The boot path is detailed in [BOOT.md](./BOOT.md). The source entry point is
 - **Drivers and output:** PS/2 keyboard input; VGA text output; an RGB linear
   framebuffer path backed by Rust display routines; and fallback to VGA.
 - **Storage input:** GRUB loads the CPIO initramfs as a Multiboot module. The
-  kernel invokes the Rust CPIO parser and visits archive entries.
+  kernel invokes the Rust CPIO parser, visits archive entries, and can launch
+  `bin/init.bin` as a one-shot raw flat binary.
 - **IPC and syscalls:** A fixed-size in-kernel endpoint/message queue and
-  syscall indices 0–5. They do not provide process isolation or a complete
-  userspace service model.
+  syscall indices 0–6, including the init exit path. They do not provide
+  process isolation or a complete userspace service model.
 - **Shell:** A built-in command loop polls keyboard input and runs commands in
-  kernel mode. It is not an executable loaded from the initramfs.
+  kernel mode after the optional init program exits. It is not an executable
+  loaded from the initramfs.
 
 ## Not implemented yet
 
-- Independent user address spaces and reliable Ring 3 task startup.
+- Independent user address spaces, reliable task isolation, and scheduling.
 - A process control block, scheduler, context switching, and service restart.
-- General ELF loading or execution of the bundled init program.
+- General ELF loading or general-purpose executable loading.
 - User-space drivers, a VFS, and a complete IPC-based display/input stack.
 - Windows PE or Linux executable compatibility, including the planned dual
   syscall ABI.
@@ -75,7 +80,7 @@ in [TODO.md](../TODO.md).
 - `rust/crates/drivers/`: Rust display, CPIO, and IPC code linked through C ABI
   wrappers.
 - `userspace/` and `rootfs/`: early user program sources and initramfs contents;
-  the current boot flow does not execute those programs.
+  the boot path can launch `bin/init.bin` once before returning to the shell.
 
 ## Planned direction
 

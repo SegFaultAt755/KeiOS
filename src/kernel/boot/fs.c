@@ -8,6 +8,7 @@
 
 #include "kernel/core/cpio.h"
 #include "kernel/core/mods.h"
+#include "kernel/userspace/enter.h"
 
 /**
  * Load and parse kernel modules from the multiboot information.
@@ -33,4 +34,17 @@ void boot_init_cpio_filesystem(void) {
     cpio_status_t status = cpio_parse(cpio_cb, nullptr);
     KERNEL_ASSERT(status == CPIO_OK, "CPIO archive parsing failed",
                   "The initramfs contains malformed or truncated archive data");
+}
+
+void boot_init_run_init_program(void) {
+    size_t binary_size;
+    const uint8_t *binary = cpio_get_init_binary(&binary_size);
+    if (!binary) {
+        qemu_printf(QEMU_KERN, QEMU_WARN, "No bin/init.bin found in initramfs; continuing to kernel shell");
+        return;
+    }
+
+    KERNEL_ASSERT(binary_size <= UINT32_MAX, "Init program is too large",
+                  "The initramfs program does not fit in the i386 address space");
+    execute_init_binary(binary, (uint32_t)binary_size);
 }

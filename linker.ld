@@ -24,20 +24,20 @@ SECTIONS
     _kernel_start = .;
 
     .text ALIGN(4K): AT(ADDR(.text) - KERNEL_VIRTUAL_OFFSET) {
-        *(.text)
+        *(.text .text.*)
     }
 
     .data ALIGN(4K): AT(ADDR(.data) - KERNEL_VIRTUAL_OFFSET) {
-        *(.data)
+        *(.data .data.*)
     }
 
     .rodata ALIGN(4K): AT(ADDR(.rodata) - KERNEL_VIRTUAL_OFFSET) {
-        *(.rodata)
+        *(.rodata .rodata.*)
     }
 
     .bss ALIGN(4K): AT(ADDR(.bss) - KERNEL_VIRTUAL_OFFSET) {
         *(COMMON)
-        *(.bss)
+        *(.bss .bss.*)
     }
 
     _kernel_end = .;

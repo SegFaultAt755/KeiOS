@@ -3,10 +3,11 @@
 ## Current state
 
 The kernel installs a software interrupt gate at vector `0x80` and dispatches
-the syscall number in `eax`. The current table contains indices 0–5. The
+the syscall number in `eax`. The current table contains indices 0–6. The
 register interface is a kernel implementation detail under development; it is
-not yet a stable userspace ABI. The presence of an IDT gate does not imply that
-Ring 3 applications are currently started or isolated.
+not yet a stable userspace ABI. The kernel uses it to launch one raw init
+binary in Ring 3, but does not provide isolated address spaces or general task
+support.
 
 ## Current syscall table
 
@@ -18,6 +19,7 @@ Ring 3 applications are currently started or isolated.
 | `3` | Create IPC endpoint | None | Endpoint identifier, or `0` on failure |
 | `4` | Send IPC message | `ebx`: endpoint, `ecx`: data pointer, `edx`: length | IPC status code |
 | `5` | Receive IPC message | `ebx`: endpoint, `ecx`: message pointer | IPC status code |
+| `6` | Exit init program | `ebx`: exit status | Returns to the kernel boot path; this is not a general task-exit mechanism |
 
 Unknown syscall numbers currently return `0xDEADC0DE`. IPC messages are handled
 by a fixed-size in-kernel queue; this is not yet a complete cross-process

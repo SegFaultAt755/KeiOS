@@ -43,7 +43,8 @@ void *acpi_map_range(uint32_t phys_addr, uint32_t length) {
     for (uint64_t offset = 0; offset < mapping_size; offset += PAGE_SIZE) {
         uint32_t page = physical_page + (uint32_t)offset;
         pmm_reserve_phys(page, PAGE_SIZE);
-        if (!vmm_map_page(mapping_start + (uint32_t)offset, page, PTE_RW | PDE_PWT)) {
+        uint32_t virtual_page = mapping_start + (uint32_t)offset;
+        if (!vmm_map_page(virtual_page, page, PTE_RW | PTE_PWT) || !vmm_is_page_mapped(virtual_page)) {
             return nullptr;
         }
     }

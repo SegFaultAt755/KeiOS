@@ -15,7 +15,8 @@ BIOS / QEMU
   -> ACPI initialization
   -> module scan and CPIO archive parsing
   -> IPC, PIT, PS/2, and display/terminal initialization
-  -> interrupts enabled; kernel shell polls for input
+  -> interrupts enabled; run bin/init.bin once in Ring 3 if present
+  -> return to kernel; shell polls for input
 ```
 
 The GRUB configuration is in the repository root at `grub.cfg`. It loads
@@ -47,8 +48,8 @@ to decide which frames are available. See [the memory notes](./subsystem/MEMORY.
 ### ACPI and archive setup
 
 The boot path searches for ACPI data, enumerates Multiboot modules, and parses
-the CPIO initramfs. The archive callback reports entries; the current boot
-path does not launch an init program from the archive.
+the CPIO initramfs. The kernel retains the raw bytes for `bin/init.bin`, if
+present, for the later one-shot launch.
 
 ### Hardware initialization
 
@@ -56,12 +57,21 @@ The kernel initializes in-kernel IPC, starts the PIT, configures the PS/2
 keyboard driver, and selects the RGB framebuffer terminal when supported.
 Otherwise it initializes VGA text output.
 
+### Init and shell
+
+After driver initialization, the kernel enables interrupts and invokes
+`bin/init.bin` if the archive contains it. This is a one-shot launch, not a
+process manager: init shares the active page directory and kernel services are
+not isolated. When init exits, boot continues into the existing kernel-mode
+shell. If the archive has no init binary, the kernel proceeds directly to the
+shell.
+
 ## Not yet part of the boot path
 
 The following steps are architectural goals, not completed boot stages:
 
 - Validate and load ELF program segments from the initramfs.
 - Create a separate page directory and stack for each task.
-- Set up a reliable Ring 3 entry frame and context-switching path.
+- Add per-task Ring 3 entry frames and context switching.
 - Start user-space display, input, filesystem, or shell services.
-- Launch the bundled init program automatically.
+- Load ELF executables or provide isolated address spaces and scheduled tasks.

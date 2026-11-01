@@ -4,7 +4,7 @@
 #include "sys/syscall.h"
 #include <stdint.h>
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] int *argv) {
-    uint32_t result = syscall(2, 0, 0, 0);
-    return result;
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
+    uint32_t version = syscall(0, 0, 0, 0);
+    return version == 0 ? 1 : 0;
 }
