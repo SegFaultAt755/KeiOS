@@ -24,7 +24,8 @@
 | :--- | :--- |
 | [🚀 Key Features](#-key-features) | [⚙️ Compile](#1-compile-the-os) |
 | [📂 Project Structure](#-project-structure) | [🚀 Launch](#2-launch-in-emulator) |
-| [🖥️ Emulating System Environment](#️-emulating-system-environment) | [🔍 Troubleshooting](#-troubleshooting--common-pitfalls) |
+| [📦 Archive and Continuation](./docs/ARCHIVE.md) | [🔍 Troubleshooting](#-troubleshooting--common-pitfalls) |
+| [🖥️ Emulating System Environment](#️-emulating-system-environment) | |
 | [🛠️ Prerequisites](#️-prerequisites) | [📄 License](#-license) |
 | [🐧 Linux (Ubuntu/Debian)](#-linux-ubuntudebian) | |
 | [🪟 Windows (WSL2 / Docker)](#-windows-wsl2--docker) | |
@@ -38,6 +39,12 @@
 # 🎯 Project Vision
 
 </div>
+
+> **Archived experimental project:** KeiOS is an educational kernel experiment,
+> not a production operating system. It has no practical deployment purpose or
+> real-world use case, and should not be used for real workloads. See
+> [the archive and continuation guide](./docs/ARCHIVE.md) for its status and
+> where to resume development.
 
 KeiOS is a 32-bit x86 operating-system project for experimenting with kernel
 and driver design. It boots through GRUB/Multiboot into a freestanding C23
@@ -66,9 +73,9 @@ and [docs/BOOT.md](./docs/BOOT.md).
   memory ranges, and a 16-byte-aligned kernel heap.
 * **Boot and devices:** ACPI discovery, CPIO initramfs parsing, PS/2 keyboard,
   and framebuffer output with VGA text fallback.
-* **Init and shell:** The kernel can launch `bin/init.bin` once in Ring 3 when
-  it is present in the initramfs, then continues to a kernel-mode shell. This
-  is not a process manager or an isolated userspace.
+* **Shell:** A built-in kernel-mode polling shell. The initramfs callback can
+  locate `bin/init.bin`, but its Ring 3 launch is disabled; there is no
+  functioning process manager or isolated userspace.
 * **Regression tests:** Python-driven tests cover the ISR ABI, CPIO parsing,
   heap allocation, and ACPI shutdown behavior.
 
@@ -85,7 +92,8 @@ implement a dual syscall ABI.
 
 ```txt
 KeiOS/
-├── docs/                         # Architecture, boot flow, and subsystem notes
+├── docs/                         # Archive handoff, architecture, boot, subsystem notes
+│   ├── ARCHIVE.md                # Project status and continuation guide
 │   └── subsystem/                # Memory, interrupts, process, and syscall docs
 ├── include/                      # C headers and shared configuration
 │   ├── arch/x86/                 # x86 CPU, memory, interrupt, and syscall headers

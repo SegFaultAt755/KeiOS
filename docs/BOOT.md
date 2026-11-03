@@ -15,8 +15,8 @@ BIOS / QEMU
   -> ACPI initialization
   -> module scan and CPIO archive parsing
   -> IPC, PIT, PS/2, and display/terminal initialization
-  -> interrupts enabled; run bin/init.bin once in Ring 3 if present
-  -> return to kernel; shell polls for input
+  -> interrupts enabled
+  -> kernel-mode shell polls for input
 ```
 
 The GRUB configuration is in the repository root at `grub.cfg`. It loads
@@ -49,7 +49,7 @@ to decide which frames are available. See [the memory notes](./subsystem/MEMORY.
 
 The boot path searches for ACPI data, enumerates Multiboot modules, and parses
 the CPIO initramfs. The kernel retains the raw bytes for `bin/init.bin`, if
-present, for the later one-shot launch.
+present. The current boot path does not launch it.
 
 ### Hardware initialization
 
@@ -57,20 +57,19 @@ The kernel initializes in-kernel IPC, starts the PIT, configures the PS/2
 keyboard driver, and selects the RGB framebuffer terminal when supported.
 Otherwise it initializes VGA text output.
 
-### Init and shell
+### Shell
 
-After driver initialization, the kernel enables interrupts and invokes
-`bin/init.bin` if the archive contains it. This is a one-shot launch, not a
-process manager: init shares the active page directory and kernel services are
-not isolated. When init exits, boot continues into the existing kernel-mode
-shell. If the archive has no init binary, the kernel proceeds directly to the
-shell.
+After driver initialization, the kernel enables interrupts and starts its
+kernel-mode polling shell. The call to run the bundled init program is
+currently disabled; there is no functioning user-process transition,
+isolation, or process manager.
 
 ## Not yet part of the boot path
 
 The following steps are architectural goals, not completed boot stages:
 
-- Validate and load ELF program segments from the initramfs.
+- Safely load an executable from the initramfs; the existing init routine is
+  not a validated ELF loader.
 - Create a separate page directory and stack for each task.
 - Add per-task Ring 3 entry frames and context switching.
 - Start user-space display, input, filesystem, or shell services.

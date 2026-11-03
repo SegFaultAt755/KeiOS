@@ -29,9 +29,6 @@ ACPI and Multiboot module / CPIO initialization
 PIT, PS/2 keyboard, framebuffer-or-VGA terminal
       |
       v
-One-shot Ring 3 init binary (when present)
-      |
-      v
 Kernel-mode polling shell
 ```
 
@@ -49,14 +46,14 @@ The boot path is detailed in [BOOT.md](./BOOT.md). The source entry point is
 - **Drivers and output:** PS/2 keyboard input; VGA text output; an RGB linear
   framebuffer path backed by Rust display routines; and fallback to VGA.
 - **Storage input:** GRUB loads the CPIO initramfs as a Multiboot module. The
-  kernel invokes the Rust CPIO parser, visits archive entries, and can launch
-  `bin/init.bin` as a one-shot raw flat binary.
+  kernel invokes the Rust CPIO parser and visits archive entries. An init
+  binary may be packaged, but its Ring 3 launch is disabled.
 - **IPC and syscalls:** A fixed-size in-kernel endpoint/message queue and
-  syscall indices 0–6, including the init exit path. They do not provide
+  syscall indices 0–6, including an init exit path. They do not provide
   process isolation or a complete userspace service model.
 - **Shell:** A built-in command loop polls keyboard input and runs commands in
-  kernel mode after the optional init program exits. It is not an executable
-  loaded from the initramfs.
+  kernel mode after boot initialization. It is not an executable loaded from
+  the initramfs.
 
 ## Not implemented yet
 
@@ -80,7 +77,8 @@ in [TODO.md](../TODO.md).
 - `rust/crates/drivers/`: Rust display, CPIO, and IPC code linked through C ABI
   wrappers.
 - `userspace/` and `rootfs/`: early user program sources and initramfs contents;
-  the boot path can launch `bin/init.bin` once before returning to the shell.
+  `bin/init.bin` may be packaged, but the boot path does not currently launch
+  it.
 
 ## Planned direction
 
